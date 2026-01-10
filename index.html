@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goat Typing Machine</title>
+    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+<div id="animatedBgContainer"></div>
+
+<canvas id="effectCanvas"></canvas>
+<!-- ===== NEW LIGHT SIDEBAR ===== -->
+<aside class="gt-sidebar">
+
+  <!-- LOGO -->
+  <div class="gt-logo">
+    <div class="gt-logo-icon">⌨️</div>
+    <div>
+      <h1>GoatType</h1>
+      <span class="gt-badge">PRO v2.0</span>
+    </div>
+  </div>
+
+  <!-- LIVE STATS -->
+  <div class="gt-section">
+    <h3>📈 LIVE STATS</h3>
+
+    <div class="gt-stats-grid">
+      <div class="gt-card">
+        <span>WPM</span>
+        <strong id="wpm">0</strong>
+      </div>
+      <div class="gt-card">
+        <span>Accuracy</span>
+        <strong id="accuracy">100%</strong>
+      </div>
+      <div class="gt-card">
+        <span>Errors</span>
+        <strong id="errors" class="red">0</strong>
+      </div>
+      <div class="gt-card">
+        <span>Time</span>
+        <strong id="time" class="orange">60</strong>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+  <!-- MISTAKE PATTERN -->
+  <div class="gt-section">
+    <h3>🧩 MISTAKE PATTERN</h3>
+
+    <div class="gt-info-row">
+      <span>Most Wrong Key:</span>
+      <div id="wrongKey" class="gt-pill">-</div>
+    </div>
+
+    <div class="gt-info-row">
+      <span>Weak Finger:</span>
+      <div id="weakFinger" class="gt-pill">-</div>
+    </div>
+  </div>
+
+  <!-- SESSION PACE -->
+<div class="gt-section">
+  <h3>📊 SESSION PACE</h3>
+
+  <div class="chart-legend">
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#facc15"></span> WPM
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#22d3ee"></span> Accuracy
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#f87171"></span> Errors
+    </div>
+  </div>
+
+  <canvas id="paceChart" width="260" height="120"></canvas>
+</div>
+
+<div id="chartTooltip" class="chart-tooltip"></div>
+
+
+
+</aside>
+<!-- ===== END SIDEBAR ===== -->
+
+
+<button id="exitFsBtn" class="exit-fs-btn" onclick="toggleFullScreen()">
+    <i class="fas fa-times"></i> Exit Focus
+</button>
+
+<button id="guideFab" class="floating-btn" onclick="openModal()" title="গাইড দেখুন">
+    <i class="fas fa-hand-paper"></i>
+</button>
+
+<button id="contactFab" class="floating-contact-btn" onclick="toggleContactPopup()" title="ডেভেলপারের সাথে কথা বলুন">
+    <i class="fab fa-facebook-messenger"></i>
+</button>
+
+<div id="creatorPopup" class="messenger-popup">
+    <div class="popup-header-area">
+        <a href="https://www.facebook.com/muhammad.emon.738798" target="_blank" class="profile-link">
+            <div class="admin-badge">
+                <img src="emon.png" onerror="this.src='https://via.placeholder.com/50'" alt="Admin">
+               
+            </div>
+            <div class="admin-info">
+    <strong class="admin-name">Muhammad Emon</strong>
+    <span class="admin-role">Developer</span>
+</div>
+        </a>
+    </div>
+    <div class="popup-body">
+    <p>🙏 Hi</p>
+
+    <p class="popup-message">
+        আপনি বর্তমানে এই সফটওয়্যারের <b>v1.02 (Demo Version)</b> ব্যবহার করছেন।
+        <br><br>
+        দয়া করে মনে রাখবেন—এটি একটি <b>ডেমো ভার্সন</b>। এখানে কিছু গ্লিচ, বাগ এবং অপ্রত্যাশিত আচরণ থাকা স্বাভাবিক।
+        <br><br>
+        সময় ও সীমাবদ্ধতার কারণে সফটওয়্যারটি <b>লো কনফিগারেশন PC</b> লক্ষ্য করে তৈরি করা হয়েছে,
+        যাতে সবাই অন্তত PC-তে <b>বাংলা টাইপিং (বিজয়)</b> প্র্যাকটিস করতে পারে।
+        <br><br>
+        সফটওয়্যারটি এখনো পুরোপুরি অপ্টিমাইজড নয়, অনেক বাগ এখনো ফিক্স করা হয়নি এবং
+        মূল ভার্সনের অনেক ফিচার ও অপশন এখানে অনুপস্থিত।বিশেষ করে বাংলা বিজয় কিবোর্ডের ফুল লেআউটটা এখানে দেওয়া নাই এবং কিছু কিছু ফাংশনাল কনফ্লিক্ট আছে। ফুল ভার্সনে সব ফিক্সড আছে এবং মাল্টিপল লেআউটের সুবিধা আছে।
+        <br><br>
+
+<div class="popup-message bengali-note">
+    <p>
+        সমস্যাগুলো সাধারণত বাংলা মুডেই দেখা যায়। কারণ, ইংরেজির মতো
+        বাংলায় এখনো এই ধরণের পরিপূর্ণ টাইপিং সিমুলেটর নেই। <br>কারণ 
+        বাংলার ক্ষেত্রে <b>বাংলা ব্যাকরণ</b> এবং <b>কোড নলেজ</b> এই দুইয়ের সমন্বয় অত্যন্ত জরুরি।
+        বাংলা বর্ণ ও বিজয় (ক্লাসিক) কিবোর্ডের সিকুয়েন্স স্বাভাবিকভাবেই
+        জটিল এবং এই বিষয়ে রিসোর্সও সীমিত।
+    </p>
+
+    <p>
+        সহজভাবে বললে—ইংরেজিতে <i>Forgive</i> শব্দটি ৭টি অক্ষর পরপর টাইপ করলেই
+        সুন্দরভাবে তৈরি হয়ে যায়। কিন্তু বাংলায় <b>ক্ষমা</b> লিখতে হলে
+        <code>ক্ + ষ</code> টাইপ করে <b>ক্ষ</b> তৈরি করতে হয়, যেখানে পুরো অক্ষরের
+        চেহারাই বদলে যায়।
+    </p>
+
+    <p>
+        একইভাবে যতি চিহ্ন, যুক্তবর্ণ, কার, ফলা—এই সবকিছু মিলিয়ে বাংলা টাইপিং
+        একটি ব্যাক-এন্ড কমপ্লেক্স প্রসেস। অনেক সময় ২–৩–৪টি, এমনকি কখনও কখনও
+        ৫টি আলাদা বর্ণ/কার/ফলা মিলে একটি মাত্র যুক্তবর্ণ তৈরি হয়,
+        যার প্রতিটির চেহারা ইউনিক।
+    </p>
+
+    <p>
+        এই সব বর্ণকে একটি নির্দিষ্ট সিকুয়েন্স অনুযায়ী প্রোগ্রাম করতে হয়,
+        যা বাস্তবে অত্যন্ত জটিল একটি কাজ।
+    </p>
+
+    <p>
+        তবুও অল্প সময়ের মধ্যে আমি এখানে যতটা সম্ভব
+        <b>বিজয় (ক্লাসিক)</b> লেআউটের আদলে কী-ম্যাপিং ফাংশনিং করার চেষ্টা করেছি।
+        তবে স্বীকার করছি—এখনও ব্যাপক পরিমাণ উন্নতির সুযোগ রয়েছে।
+        উদাহরণস্বরূপ, মাঝে মাঝে টেক্সট কালারিং সংক্রান্ত কিছু সমস্যা দেখা দিতে পারে।
+    </p>
+
+    <p>
+        এগুলো সবই সমাধানযোগ্য, কিন্তু তার জন্য প্রয়োজন
+        <b>আপনাদের সমর্থন</b> এবং <b>আমার সময়</b>।
+        এই দুইয়ের ওপরই মূলত এই প্রোগ্রামের ভবিষ্যৎ নির্ভর করছে।
+    </p>
+
+    <p><b>আশা করি বিষয়টি বুঝতে পেরেছেন।</b></p>
+</div>
+
+        আপনার প্রয়োজন ও কাজের ধরন অনুযায়ী এই সীমাবদ্ধতাগুলোর সাথে মানিয়ে নিন,
+        অথবা <b>মূল ভার্সন</b> ব্যবহার করুন।
+        <br><br>
+        মূল ভার্সন ফ্রি ব্যবহার করতে চাইলে ওয়েবসাইট ভিজিট করুন,
+        অথবা যেকোনো প্রয়োজনে আমাকে সরাসরি নক দিতে পারেন।
+    </p>
+</div>
+
+    <a href="https://www.facebook.com/muhammad.emon.738798" target="_blank" class="chat-now-btn">
+        মেসেজ দিন <i class="fas fa-paper-plane"></i>
+    </a>
+    <a href="https://zubaxit.github.io/Repo/" target="_blank" class="visit-site-btn">
+    🌐 ওয়েবসাইট ভিজিট করুন
+</a>
+
+</div>
+
+<div id="warningModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ffcc00; margin-bottom: 20px;"></i>
+        <h3>খেলা শুরু হয়নি!</h3>
+        <p>টাইপিং প্র্যাকটিস শুরু করতে Start বাটনে ক্লিক করুন অথবা যেকোনো কি চাপুন।</p>
+        <button class="stylish-btn start-btn-stylish" onclick="closeWarningAndStart()" style="margin: 0 auto;">Start Game</button>
+    </div>
+</div>
+
+<div class="app-container">
+    
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('normal')"><i class="fas fa-font"></i> সাধারণ</button>
+        <button class="tab-btn" onclick="switchTab('coding')"><i class="fas fa-code"></i> কোডিং</button>
+        <button class="tab-btn" onclick="switchTab('bengali')"><i class="fas fa-language"></i> বাংলা</button>
+        <button class="tab-btn" onclick="switchTab('custom')"><i class="fas fa-pen"></i> কাস্টম</button>
+    </div>
+
+    <header class="top-bar">
+        <div class="settings-group game-settings" id="gameSettings">
+            <select id="levelSelector" class="stylish-input" onchange="changeLevel()">
+                <option value="easy">লেভেল: সহজ</option>
+                <option value="medium">লেভেল: মাঝারি</option>
+                <option value="hard">লেভেল: কঠিন</option>
+            </select>
+            <select id="timeSelector" class="stylish-input" onchange="changeTime()">
+                <option value="30">৩০ সেকেন্ড</option>
+                <option value="60" selected>৬০ সেকেন্ড</option>
+                <option value="120">২ মিনিট</option>
+            </select>
+        </div>
+
+        <div class="settings-group">
+            <button id="startBtn" class="stylish-btn start-btn-stylish" onclick="startTest()">
+                <i class="fas fa-play"></i> Start
+            </button>
+            <button id="resetBtn" class="stylish-btn btn-reset" onclick="resetTest()" style="display: none;">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+            <div class="settings-group">
+    
+    <div class="reset-dropdown-wrapper" style="position: relative;">
+        <button class="stylish-btn" onclick="toggleResetMenu()" title="রিসেট অপশন">
+            <i class="fas fa-power-off"></i> 
+        </button>
+        <div id="resetDropdown" class="reset-dropdown-content">
+            <a href="#" onclick="softReset()"><i class="fas fa-sync-alt"></i> রিসেট (রিফ্রেশ)</a>
+            <a href="#" onclick="hardReset()" class="danger-option"><i class="fas fa-trash-alt"></i> হার্ড রিসেট</a>
+        </div>
+    </div>
+
+   
+    
+    </div>
+            <button class="stylish-btn theme-btn" onclick="toggleTheme()" title="ডার্ক মোড">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="stylish-btn" onclick="toggleFullScreen()" title="ফোকাস মোড">
+                <i class="fas fa-expand"></i> Focus
+            </button>
+            
+            <button class="stylish-btn" onclick="openProSettings()" title="Pro Settings">
+                <i class="fas fa-cog"></i>
+            </button>
+            <div class="auth-section">
+    <button id="loginBtn" class="stylish-btn" onclick="handleLogin()" style="background: #4285F4; color: white; border: none;">
+        <i class="fab fa-google"></i> Login
+    </button>
+
+    <div id="userProfileArea" style="display: none; align-items: center; gap: 10px; cursor: pointer;" onclick="handleLogout()" title="Click to Logout">
+        <img id="userImgDisplay" src="" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white;">
+        <div style="line-height: 1.2;">
+            <span id="userNameDisplay" style="font-weight: bold; font-size: 0.9rem;">User</span>
+            <span id="proBadgeDisplay" style="display:none; background: gold; color: black; font-size: 0.6rem; padding: 1px 4px; border-radius: 4px;">PRO</span>
+        </div>
+    </div>
+</div>
+        </div>
+        
+    </header>
+
+    <div id="customInputArea" class="custom-area" style="display: none;">
+        <div class="settings-group" style="margin-bottom: 15px; justify-content: center; flex-wrap: wrap;">
+            <select id="customModeSelector" class="stylish-input" onchange="updateCustomKeyboardPreview(this.value)">
+                <option value="normal">মোড: সাধারণ (English)</option>
+                <option value="bengali">মোড: বাংলা (বিজয়)</option>
+                <option value="coding">মোড: কোডিং</option>
+            </select>
+            <select id="customTimeSelector" class="stylish-input">
+                <option value="30">৩০ সেকেন্ড</option>
+                <option value="60" selected>৬০ সেকেন্ড</option>
+                <option value="120">২ মিনিট</option>
+                <option value="300">৫ মিনিট</option>
+            </select>
+        </div>
+        <textarea id="customTextSrc" placeholder="এখানে আপনার টেক্সট পেস্ট করুন..."></textarea>
+        <button class="stylish-btn start-btn-stylish" onclick="startCustomTest()" style="width: 100%; margin-top: 10px; justify-content: center;">
+            <i class="fas fa-play"></i> কাস্টম স্টার্ট
+        </button>
+    </div>
+<div id="insightPanel">
+    <div id="profilePanel" class="insight-box">
+        <h4>Typing Analysis</h4>
+        <div id="typingBadges"></div>
+        <p id="typingSummary">Start typing to see analysis...</p>
+    </div>
+</div>
+
+
+    <div class="typing-section" id="typingSection">
+        <div class="text-display" id="quoteDisplay">লোড হচ্ছে...</div>
+        <input type="text" id="inputField" class="hidden-input" 
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+        data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" disabled>
+        <div id="timerProgressBar"></div>
+    </div>
+
+    <div class="instruction-panel" id="instructionPanel">
+        <div class="mini-hands-container">
+            <svg viewBox="0 0 200 100" class="mini-hands-svg">
+                <g transform="translate(10, 10) scale(0.4)">
+                    <path id="svg-l-pinky" d="M20,100 L20,50 Q20,40 30,40 Q40,40 40,50 L40,100" class="mini-finger"/>
+                    <path id="svg-l-ring" d="M50,100 L50,30 Q50,20 60,20 Q70,20 70,30 L70,100" class="mini-finger"/>
+                    <path id="svg-l-middle" d="M80,100 L80,10 Q80,0 90,0 Q100,0 100,10 L100,100" class="mini-finger"/>
+                    <path id="svg-l-index" d="M110,100 L110,20 Q110,10 120,10 Q130,10 130,20 L130,100" class="mini-finger"/>
+                    <path id="svg-l-thumb" d="M140,120 L160,110 Q170,115 160,130 L140,140" class="mini-finger"/>
+                </g>
+                <g transform="translate(110, 10) scale(0.4)">
+                    <path id="svg-r-pinky" d="M230,100 L230,50 Q230,40 220,40 Q210,40 210,50 L210,100" class="mini-finger"/>
+                    <path id="svg-r-ring" d="M200,100 L200,30 Q200,20 190,20 Q180,20 180,30 L180,100" class="mini-finger"/>
+                    <path id="svg-r-middle" d="M170,100 L170,10 Q170,0 160,0 Q150,0 150,10 L150,100" class="mini-finger"/>
+                    <path id="svg-r-index" d="M140,100 L140,20 Q140,10 130,10 Q120,10 120,20 L120,100" class="mini-finger"/>
+                    <path id="svg-r-thumb" d="M110,120 L90,110 Q80,115 90,130 L110,140" class="mini-finger"/>
+                </g>
+            </svg>
+        </div>
+        <div class="instruction-text-wrapper">
+            <span id="guideText" class="guide-text">লোড হচ্ছে...</span>
+            <div id="capsLockWarning" class="caps-warning" style="display: none;">CAPS LOCK ON</div>
+        </div>
+    </div>
+
+    <div class="keyboard-container">
+        <div class="keyboard" id="virtualKeyboard">
+            <div class="row">
+                <div class="key pinky-zone" data-key="Backquote">`</div>
+                <div class="key pinky-zone" data-key="Digit1">1</div>
+                <div class="key ring-zone" data-key="Digit2">2</div>
+                <div class="key middle-zone" data-key="Digit3">3</div>
+                <div class="key index-zone" data-key="Digit4">4</div>
+                <div class="key index-zone" data-key="Digit5">5</div>
+                <div class="key index-zone" data-key="Digit6">6</div>
+                <div class="key index-zone" data-key="Digit7">7</div>
+                <div class="key middle-zone" data-key="Digit8">8</div>
+                <div class="key ring-zone" data-key="Digit9">9</div>
+                <div class="key pinky-zone" data-key="Digit0">0</div>
+                <div class="key pinky-zone" data-key="Minus">-</div>
+                <div class="key pinky-zone" data-key="Equal">=</div>
+                <div class="key key-backspace pinky-zone" data-key="Backspace">⌫</div>
+            </div>
+            <div class="row">
+                <div class="key key-tab pinky-zone" data-key="Tab">Tab</div>
+                <div class="key pinky-zone" data-key="KeyQ">Q</div>
+                <div class="key ring-zone" data-key="KeyW">W</div>
+                <div class="key middle-zone" data-key="KeyE">E</div>
+                <div class="key index-zone" data-key="KeyR">R</div>
+                <div class="key index-zone" data-key="KeyT">T</div>
+                <div class="key index-zone" data-key="KeyY">Y</div>
+                <div class="key index-zone" data-key="KeyU">U</div>
+                <div class="key middle-zone" data-key="KeyI">I</div>
+                <div class="key ring-zone" data-key="KeyO">O</div>
+                <div class="key pinky-zone" data-key="KeyP">P</div>
+                <div class="key pinky-zone" data-key="BracketLeft">[</div>
+                <div class="key pinky-zone" data-key="BracketRight">]</div>
+                <div class="key pinky-zone" data-key="Backslash">\</div>
+            </div>
+            <div class="row">
+                <div class="key key-caps pinky-zone" data-key="CapsLock">Caps</div>
+                <div class="key pinky-zone" data-key="KeyA">A</div>
+                <div class="key ring-zone" data-key="KeyS">S</div>
+                <div class="key middle-zone" data-key="KeyD">D</div>
+                <div class="key index-zone" data-key="KeyF">F</div>
+                <div class="key index-zone" data-key="KeyG">G</div>
+                <div class="key index-zone" data-key="KeyH">H</div>
+                <div class="key index-zone" data-key="KeyJ">J</div>
+                <div class="key middle-zone" data-key="KeyK">K</div>
+                <div class="key ring-zone" data-key="KeyL">L</div>
+                <div class="key pinky-zone" data-key="Semicolon">;</div>
+                <div class="key pinky-zone" data-key="Quote">'</div>
+                <div class="key key-enter pinky-zone" data-key="Enter">Enter</div>
+            </div>
+            <div class="row">
+                <div class="key key-shift pinky-zone" data-key="ShiftLeft">Shift</div>
+                <div class="key pinky-zone" data-key="KeyZ">Z</div>
+                <div class="key ring-zone" data-key="KeyX">X</div>
+                <div class="key middle-zone" data-key="KeyC">C</div>
+                <div class="key index-zone" data-key="KeyV">V</div>
+                <div class="key index-zone" data-key="KeyB">B</div>
+                <div class="key index-zone" data-key="KeyN">N</div>
+                <div class="key index-zone" data-key="KeyM">M</div>
+                <div class="key middle-zone" data-key="Comma">,</div>
+                <div class="key ring-zone" data-key="Period">.</div>
+                <div class="key pinky-zone" data-key="Slash">/</div>
+                <div class="key key-shift pinky-zone" data-key="ShiftRight">Shift</div>
+            </div>
+            <div class="row">
+                <div class="key key-space thumb-zone" data-key="Space">Space</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align:center; margin-top:20px;">
+        <button class="stylish-btn" onclick="downloadCertificate()" id="certBtn" style="display: none; margin: 0 auto; background: #2ecc71; color: white; border: none;">
+            <i class="fas fa-certificate"></i> সার্টিফিকেট ডাউনলোড
+        </button>
+    </div>
+</div>
+
+<div id="proSettingsModal" class="settings-overlay" style="display: none;">
+    <div class="settings-dashboard">
+        
+        <aside class="settings-sidebar">
+            <div class="settings-brand">
+                <i class="fas fa-sliders-h"></i> Settings
+            </div>
+            <nav class="settings-nav">
+                <button class="nav-item active" onclick="switchSettingsTab('gameplay')">
+                    <i class="fas fa-gamepad"></i> Gameplay
+                </button>
+                <button class="nav-item" onclick="switchSettingsTab('visuals')">
+                    <i class="fas fa-palette"></i> Appearance
+                </button>
+                <button class="nav-item" onclick="switchSettingsTab('sound')">
+                    <i class="fas fa-volume-up"></i> Sound & FX
+                </button>
+                <button class="nav-item" onclick="switchSettingsTab('pro')">
+                    <i class="fas fa-bolt"></i> Pro Tools
+                </button>
+            </nav>
+            <div class="settings-footer">
+                <button class="close-dashboard-btn" onclick="closeProSettings()">Close</button>
+            </div>
+        </aside>
+
+        <main class="settings-content">
+            
+            <div id="tab-gameplay" class="tab-section active">
+                <h2>Gameplay Configuration</h2>
+                <div class="setting-card">
+                    <div class="card-header">
+                        <i class="fas fa-ghost"></i> Ghost & Pace
+                    </div>
+                    <div class="card-body">
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Ghost Racer</label>
+                                <span>Compete against an AI bot</span>
+                            </div>
+                            <div class="control-action">
+                                <input type="number" id="ghostSpeed" value="40" class="mini-input"> WPM
+                                <label class="switch-ios">
+                                    <input type="checkbox" id="toggleGhost" onchange="toggleGhostMode('ghost')">
+                                    <span class="slider-ios"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Pace Caret</label>
+                                <span>A constant speed visual guide</span>
+                            </div>
+                            <div class="control-action">
+                                <input type="number" id="paceSpeed" value="60" class="mini-input"> WPM
+                                <label class="switch-ios">
+                                    <input type="checkbox" id="togglePace" onchange="toggleGhostMode('pace')">
+                                    <span class="slider-ios"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="card-header">
+                        <i class="fas fa-skull"></i> Difficulty
+                    </div>
+                    <div class="card-body">
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Sudden Death</label>
+                                <span>Game over on a single mistake</span>
+                            </div>
+                            <div class="control-action">
+                                <label class="switch-ios">
+                                    <input type="checkbox" id="toggleSuddenDeath" onchange="toggleProFeature('suddenDeath')">
+                                    <span class="slider-ios"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-visuals" class="tab-section" style="display: none;">
+                <h2>Visual Customization</h2>
+                
+                <div class="setting-card">
+                    <div class="card-header">
+                        <i class="fas fa-swatchbook"></i> Quick Presets
+                    </div>
+                    <div class="card-body">
+                        <div class="preset-grid-pro">
+                            <div class="preset-tile" onclick="applyPreset('default')" style="background: linear-gradient(135deg, #f5f7fa, #c3cfe2);">Default</div>
+                            <div class="preset-tile" onclick="applyPreset('midnight')" style="background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white;">Midnight</div>
+                            <div class="preset-tile" onclick="applyPreset('hacker')" style="background: #000; color: #0f0; border: 1px solid #0f0;">Hacker</div>
+                            <div class="preset-tile" onclick="applyPreset('sunset')" style="background: linear-gradient(135deg, #ff512f, #dd2476); color: white;">Sunset</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="card-header">
+                        <i class="fas fa-image"></i> Background
+                    </div>
+                    <div class="card-body">
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Background Type</label>
+                            </div>
+                            <div class="control-action">
+                                <select id="bgTypeSelector" class="stylish-select" onchange="toggleBgControls(this.value)">
+                                    <option value="solid">Solid Color</option>
+                                    <option value="gradient">Gradient</option>
+                                    <option value="image">Custom Image</option>
+                                    <option value="animated">Live Animation</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="bgControl-solid" class="bg-sub-control" style="display:block;">
+                            <div class="control-row">
+                                <label>Pick Color:</label>
+                                <input type="color" id="bgSolidColor" class="color-box" oninput="applyBackground('solid')">
+                            </div>
+                        </div>
+
+                        <div id="bgControl-gradient" class="bg-sub-control" style="display:none;">
+                            <div class="control-row" style="justify-content: flex-start; gap: 10px;">
+                                <label>Color 1:</label> <input type="color" id="bgGrad1" oninput="applyBackground('gradient')">
+                                <label>Color 2:</label> <input type="color" id="bgGrad2" oninput="applyBackground('gradient')">
+                            </div>
+                            <div class="control-row">
+                                <label>Direction:</label>
+                                <input type="range" id="bgGradDeg" min="0" max="360" value="135" oninput="applyBackground('gradient')" style="flex-grow: 1; margin-left: 10px;">
+                            </div>
+                        </div>
+
+                        <div id="bgControl-image" class="bg-sub-control" style="display:none;">
+                            <div class="control-row">
+                                <input type="file" id="bgImageUpload" accept="image/*" onchange="handleImageUpload(this)" class="file-input">
+                            </div>
+                            <p style="font-size: 0.8rem; color: #888;">Note: Large images may not save.</p>
+                        </div>
+
+                     <div id="bgControl-animated" class="bg-sub-control" style="display:none; margin-top:10px;">
+    <div class="control-row">
+        <label>Effect:</label>
+        <select id="animTypeSelector" class="stylish-select" onchange="applyBackground('animated')">
+            <option value="leaves">🍃 Falling Leaves</option>
+            <option value="rain">💻 Matrix Rain</option>
+            <option value="snow">❄️ Snow Storm</option>
+            <option value="fireflies">✨ Golden Fireflies</option>
+            <option value="emojis">😎 Emoji Fun</option>
+            <option value="embers">🔥 Burning Embers</option>
+        </select>
+    </div>
+    <p style="font-size:0.7rem; color:#888; margin-top:5px;">Animation plays over your current background color.</p>
+</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-sound" class="tab-section" style="display: none;">
+                <h2>Audio & Effects</h2>
+                <div class="setting-card">
+                    <div class="card-body">
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Keyboard Sound</label>
+                                <span>Mechanical feedback while typing</span>
+                            </div>
+                            <div class="control-action">
+                                <select id="soundSelect" class="stylish-select" onchange="changeSoundProfile(this.value)">
+                                    <option value="none">Mute</option>
+                                    <option value="mechanical">Cherry MX Blue</option>
+                                    <option value="typewriter">Typewriter</option>
+                                    <option value="clicky">Modern Click</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Particle Blast</label>
+                                <span>Explosive particles on keypress</span>
+                            </div>
+                            <div class="control-action">
+                                <label class="switch-ios">
+                                    <input type="checkbox" id="toggleParticles" onchange="toggleVisualEffect('particles')">
+                                    <span class="slider-ios"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-pro" class="tab-section" style="display: none;">
+                <h2>Professional Tools</h2>
+                <div class="setting-card">
+                    <div class="card-body">
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Heatmap Analysis</label>
+                                <span>Show mistakes visually on keyboard</span>
+                            </div>
+                            <div class="control-action">
+                                <label class="switch-ios">
+                                    <input type="checkbox" id="toggleHeatmap" onchange="toggleProFeature('heatmap')">
+                                    <span class="slider-ios"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-info">
+                                <label>Spotlight Focus</label>
+                                <span>Dim everything except the text</span>
+                            </div>
+                            <div class="control-action">
+                                <label class="switch-ios">
+                                    <input type="checkbox" id="toggleSpotlight" onchange="toggleProFeature('spotlight')">
+                                    <span class="slider-ios"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+
+
+
+<div id="guideModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content guide-content">
+        <div class="carousel-container">
+            <div class="slide fade">
+                <img src="Finger Position Chart.png" alt="Finger Position Chart" onerror="this.src='https://via.placeholder.com/600x300?text=Finger+Chart+Missing'">
+                <div class="slide-caption">১. সঠিক আঙুল পজিশন</div>
+            </div>
+            <div class="slide fade">
+                <img src="https://www.typingclub.com/m/media/typing-chart-hands.png" alt="Hand Position">
+                <div class="slide-caption">২. কিবোর্ড জোন গাইড</div>
+            </div>
+            <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+            <a class="next" onclick="changeSlide(1)">&#10095;</a>
+        </div>
+        <button class="close-btn" onclick="closeModal()" style="position:absolute; top:10px; right:10px; color:white;">&times;</button>
+    </div>
+</div>
+
+<canvas id="certCanvas" width="800" height="600" style="display: none;"></canvas>
+
+
+<div id="iosResultModal" style="display: none;">
+    <div class="ios-card">
+        <div class="ios-header">
+            <h3>Result</h3>
+            <button onclick="closeResultModal()" class="ios-close-btn">&times;</button>
+        </div>
+
+        <div class="ios-score-circle" style="width: 120px; margin: 0 auto;">
+            <svg viewBox="0 0 36 36" class="circular-chart" style="display: block; max-height: 150px;">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#eee" stroke-width="3" />
+                <path class="circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#007AFF" stroke-width="3" />
+                <text x="18" y="20.35" class="percentage" id="resWpm" text-anchor="middle" style="font-size: 0.6em; font-weight: bold; fill: currentColor;">0</text>
+            </svg>
+            <span style="font-size: 0.9rem; font-weight: bold; color: gray;">Overall</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+            <div><strong id="resAcc" style="font-size: 1.2rem;">0%</strong><br><small>Accuracy</small></div>
+            <div><strong id="resErr" style="font-size: 1.2rem; color: #ff4757;">0</strong><br><small>Errors</small></div>
+            <div><strong id="resTime" style="font-size: 1.2rem; color: #f1c40f;">0s</strong><br><small>Time</small></div>
+        </div>
+
+        <div class="ios-graph-container">
+            <h4 style="margin: 0 0 10px 0; opacity: 0.6;">PERFORMANCE HISTORY</h4>
+            <div class="chart-scroll-wrapper">
+                <div class="chart-area" id="chartBars">
+                    </div>
+            </div>
+        </div>
+
+        <div class="ios-actions">
+            <button onclick="closeResultModal()" class="ios-btn primary">
+                <i class="fa-solid fa-rotate-right"></i> Try Again
+            </button>
+            <button onclick="alert('Screenshot taken!')" class="ios-btn secondary">
+                <i class="fa-solid fa-share-nodes"></i> Share
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="result-manager.js"></script>
+<script src="text-db.js"></script>
+<script src="settings-manager.js"></script>
+
+<script src="bengali-utils.js"></script>   <script src="ui-interactions.js"></script>  <script src="script.js"></script>       
+
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="auth-manager.js"></script>
+</body>
+</html>
