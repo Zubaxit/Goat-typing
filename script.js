@@ -643,4 +643,3 @@ function updateTypingProfile() {
 // Start AI Timer
 if (typeof timerProfile !== 'undefined') clearInterval(timerProfile);
 timerProfile = setInterval(updateTypingProfile, 1500);
-console.log("Auto Sync Working!")
