@@ -1,6 +1,6 @@
-// result-manager.js - Final Fixed Version (With Cloud & Lifetime Stats)
+// result-manager.js - Fixed Popup + Cloud Save
 
-// 👇 ১. ইম্পোর্ট সেকশন (নতুন যোগ করা হয়েছে)
+// ১. ইম্পোর্ট (Firebase এর জন্য)
 import { db, auth, doc, updateDoc, arrayUnion, getDoc, increment } from "./firebase-config.js";
 
 const resultState = {
@@ -8,7 +8,7 @@ const resultState = {
     lastSavedTime: 0
 };
 
-// ২. স্কোর ক্যালকুলেশন
+// স্কোর ক্যালকুলেশন
 function calculateOverallScore(wpm, accuracy, errors, time) {
     let baseScore = (wpm * 0.6) + (accuracy * 0.4); 
     let penalty = errors * 2;
@@ -17,10 +17,12 @@ function calculateOverallScore(wpm, accuracy, errors, time) {
     return finalScore > 0 ? finalScore : 0;
 }
 
-// 👇 ৩. ডাটা সেভ ফাংশন (আপডেট করা হয়েছে: Cloud Save + Lifetime Stats)
+// ২. ডাটা সেভ ফাংশন (Cloud + Local)
+// এটাকে async করা হয়েছে যাতে ডাটাবেসে সেভ করতে পারে
 async function saveResult(wpm, accuracy, errors, time, mode, level) {
     const now = Date.now();
-    if (now - resultState.lastSavedTime < 2000) return 0; // ডাবল সেভ আটকাতে
+    // ২ সেকেন্ডের মধ্যে ডাবল সেভ আটকাতে
+    if (now - resultState.lastSavedTime < 2000) return 0; 
     resultState.lastSavedTime = now;
 
     const overallScore = calculateOverallScore(wpm, accuracy, errors, time);
@@ -43,10 +45,10 @@ async function saveResult(wpm, accuracy, errors, time, mode, level) {
         mode: modeShort, 
         lvl: lvlShort,   
         date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-        fullDate: new Date().toLocaleDateString() // গ্রাফের জন্য তারিখ
+        fullDate: new Date().toLocaleDateString() // প্রোফাইলের গ্রাফের জন্য তারিখ
     };
 
-    // --- A. লোকাল স্টোরেজ (আগের মতোই) ---
+    // --- A. লোকাল স্টোরেজ (আপনার আগের কোড) ---
     resultState.history.push(resultData);
     if (resultState.history.length > 20) {
         resultState.history.shift();
@@ -59,13 +61,11 @@ async function saveResult(wpm, accuracy, errors, time, mode, level) {
         try {
             const userRef = doc(db, "users", user.uid);
             
-            // ১. বর্তমান ডাটা নিয়ে আসা (গড় হিসাব করার জন্য)
+            // বর্তমান ডাটা আনা (গড় হিসাব করার জন্য)
             const userSnap = await getDoc(userRef);
-            
             let newAvgWPM = wpm;
             let newAvgAcc = accuracy;
 
-            // যদি আগের ডাটা থাকে, তাহলে নতুন গড় বের করো
             if (userSnap.exists()) {
                 const data = userSnap.data();
                 const currentTests = data.totalTests || 0;
@@ -79,20 +79,16 @@ async function saveResult(wpm, accuracy, errors, time, mode, level) {
                 }
             }
 
-            // ২. ডাটাবেসে সবকিছু আপডেট করে পাঠানো
+            // ডাটাবেসে আপডেট পাঠানো
             await updateDoc(userRef, {
-                history: arrayUnion(resultData), // লিস্টে নতুন গেম যোগ
-                
-                // লাইফটাইম স্ট্যাটাস আপডেট
-                totalTests: increment(1),        // টেস্ট সংখ্যা ১ বাড়াও
-                totalWords: increment(wpm),      // মোট ওয়ার্ড বাড়াও (আনুমানিক)
-                avgWPM: newAvgWPM,               // নতুন গড় WPM বসাও
-                avgAcc: newAvgAcc,               // নতুন গড় Accuracy বসাও
+                history: arrayUnion(resultData),
+                totalTests: increment(1),
+                totalWords: increment(wpm),
+                avgWPM: newAvgWPM,
+                avgAcc: newAvgAcc,
                 lastActive: new Date()
             });
-            
-            console.log("☁️ Stats & History Saved Successfully!");
-
+            console.log("☁️ Saved to Cloud!");
         } catch (err) {
             console.error("Cloud Save Error:", err);
         }
@@ -101,7 +97,7 @@ async function saveResult(wpm, accuracy, errors, time, mode, level) {
     return overallScore;
 }
 
-// ৪. এনিমেশন
+// ৩. এনিমেশন (আপনার আগের কোড)
 function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
@@ -120,13 +116,12 @@ function animateValue(id, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// ৫. মডাল ওপেন (একটু আপডেট করা হয়েছে async হ্যান্ডেল করার জন্য)
+// ৪. মডাল ওপেন (এখানে await যোগ করা হয়েছে)
 async function openResultModal(wpm, accuracy, errors, time, mode, level) {
-    // saveResult এখন async, তাই await ব্যবহার করলে ভালো, তবে UI দ্রুত দেখাতে আমরা variable এ নিচ্ছি
-    // স্কোর ক্যালকুলেশনটা আলাদা করে নিচ্ছি এনিমেশনের জন্য
-    const score = calculateOverallScore(wpm, accuracy, errors, time); 
+    // আগে স্কোর ক্যালকুলেট করে নিচ্ছি এনিমেশনের জন্য
+    const score = calculateOverallScore(wpm, accuracy, errors, time);
     
-    // ব্যাকগ্রাউন্ডে সেভ হোক
+    // ব্যাকগ্রাউন্ডে সেভ প্রসেস শুরু (await দিচ্ছি না যাতে পপআপ আসতে দেরি না হয়)
     saveResult(wpm, accuracy, errors, time, mode, level);
 
     const modal = document.getElementById('iosResultModal');
@@ -161,17 +156,16 @@ async function openResultModal(wpm, accuracy, errors, time, mode, level) {
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
-// ৬. গ্রাফ রেন্ডার (লেবেল আপডেট সহ)
+// ৫. গ্রাফ রেন্ডার (আপনার আগের কোড)
 function renderOfflineGraph() {
     const container = document.getElementById('chartBars');
     if(!container) return;
     container.innerHTML = '';
 
-    const MAX_WPM = 100; // স্কেলিং
+    const MAX_WPM = 100; 
     const MAX_TIME = 60; 
     const MAX_ERR = 10; 
 
-    // লোকাল হিস্ট্রি থেকে গ্রাফ দেখাবে
     resultState.history.forEach((data) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'bar-wrapper';
@@ -209,7 +203,6 @@ function renderOfflineGraph() {
         group.appendChild(timeBar);
         group.appendChild(errBar);
 
-        // 🔥 লেবেল আপডেট: Score • Mode-Lvl
         const label = document.createElement('div');
         label.className = 'bar-label';
         label.innerHTML = `
@@ -228,7 +221,7 @@ function renderOfflineGraph() {
     }, 100);
 }
 
-// ৭. মডাল ক্লোজ
+// ৬. মডাল ক্লোজ (আপনার আগের কোড)
 function closeResultModal() {
     const modal = document.getElementById('iosResultModal');
     if(modal) {
@@ -240,7 +233,7 @@ function closeResultModal() {
     }
 }
 
-// গ্লোবাল ফাংশন হিসেবে এক্সপোর্ট (HTML থেকে এক্সেস করার জন্য)
+// গ্লোবাল এক্সপোর্ট
 window.saveResult = saveResult;
 window.openResultModal = openResultModal;
 window.renderOfflineGraph = renderOfflineGraph;
