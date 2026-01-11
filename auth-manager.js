@@ -1,3 +1,9 @@
+console.log("Auth Script Loaded");
+const checkBtn = document.getElementById('login-btn'); // এখানে আপনার আইডি দিন
+console.log("Button Found?", checkBtn);
+
+
+
 import { auth, provider, signInWithPopup, signOut, onAuthStateChanged, db, doc, getDoc, updateDoc } from "./firebase-config.js";
 
 const loginBtn = document.getElementById('login-btn'); // আপনার লগিন বাটনের সঠিক ID দিন
