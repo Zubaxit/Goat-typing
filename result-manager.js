@@ -1,4 +1,7 @@
-// result-manager.js - Final Fixed Version
+// result-manager.js - Original 183 Lines + Cloud Save
+
+// ১. ইম্পোর্ট (শুধু এই লাইনটা নতুন)
+import { db, auth, doc, setDoc, arrayUnion, getDoc, increment } from "./firebase-config.js";
 
 const resultState = {
     history: JSON.parse(localStorage.getItem('typingHistory')) || [],
@@ -14,7 +17,7 @@ function calculateOverallScore(wpm, accuracy, errors, time) {
     return finalScore > 0 ? finalScore : 0;
 }
 
-// ২. ডাটা সেভ ফাংশন
+// ২. ডাটা সেভ ফাংশন (আপনার অরিজিনাল ফাংশন)
 function saveResult(wpm, accuracy, errors, time, mode, level) {
     const now = Date.now();
     if (now - resultState.lastSavedTime < 2000) return; 
@@ -39,19 +42,70 @@ function saveResult(wpm, accuracy, errors, time, mode, level) {
         time: Math.round(time) || 0,
         mode: modeShort, 
         lvl: lvlShort,   
-        date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        // 🔥 এই লাইনটা নতুন: প্রোফাইলে গ্রাফ সর্টিংয়ের জন্য দরকার
+        timestamp: now,
+        fullDate: new Date().toLocaleDateString()
     };
 
+    // লোকাল স্টোরেজ (আপনার কোড)
     resultState.history.push(result);
     if (resultState.history.length > 20) {
         resultState.history.shift();
     }
     
     localStorage.setItem('typingHistory', JSON.stringify(resultState.history));
+
+    // 🔥 নতুন অংশ: ব্যাকগ্রাউন্ডে ক্লাউডে সেভ (আপনার পপআপ আটকাবে না)
+    saveToFirebase(result, wpm, accuracy);
+
     return overallScore;
 }
 
-// ৩. এনিমেশন
+// 🔥 নতুন ফাংশন: ক্লাউড সেভ (সাইলেন্ট মোড)
+async function saveToFirebase(resultData, wpm, accuracy) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const userRef = doc(db, "users", user.uid);
+        
+        // বর্তমান ডাটা চেক (গড় আপডেট করার জন্য)
+        const userSnap = await getDoc(userRef);
+        let newAvgWPM = wpm;
+        let newAvgAcc = accuracy;
+
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            const currentTests = data.totalTests || 0;
+            const currentAvgWPM = data.avgWPM || 0;
+            const currentAvgAcc = data.avgAcc || 0;
+
+            if (currentTests > 0) {
+                newAvgWPM = Math.round(((currentAvgWPM * currentTests) + wpm) / (currentTests + 1));
+                newAvgAcc = Math.round(((currentAvgAcc * currentTests) + accuracy) / (currentTests + 1));
+            }
+        }
+
+        // ডাটাবেসে পাঠানো (Merge True দিয়ে, যাতে ফোল্ডার না থাকলেও কাজ করে)
+        await setDoc(userRef, {
+            history: arrayUnion(resultData),
+            totalTests: increment(1),
+            totalWords: increment(wpm),
+            avgWPM: newAvgWPM,
+            avgAcc: newAvgAcc,
+            lastActive: new Date(),
+            displayName: user.displayName, // ব্যাকআপ হিসেবে নাম সেভ
+            photoURL: user.photoURL
+        }, { merge: true });
+
+        console.log("☁️ History Saved to Cloud!");
+    } catch (err) {
+        console.error("Cloud Save Error:", err);
+    }
+}
+
+// ৩. এনিমেশন (আপনার অরিজিনাল কোড)
 function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
@@ -70,7 +124,7 @@ function animateValue(id, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// ৪. মডাল ওপেন
+// ৪. মডাল ওপেন (আপনার অরিজিনাল কোড)
 function openResultModal(wpm, accuracy, errors, time, mode, level) {
     const score = saveResult(wpm, accuracy, errors, time, mode, level);
     const modal = document.getElementById('iosResultModal');
@@ -105,7 +159,7 @@ function openResultModal(wpm, accuracy, errors, time, mode, level) {
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
-// ৫. গ্রাফ রেন্ডার (লেবেল আপডেট সহ)
+// ৫. গ্রাফ রেন্ডার (আপনার অরিজিনাল কোড)
 function renderOfflineGraph() {
     const container = document.getElementById('chartBars');
     if(!container) return;
@@ -152,7 +206,7 @@ function renderOfflineGraph() {
         group.appendChild(timeBar);
         group.appendChild(errBar);
 
-        // 🔥 লেবেল আপডেট: Score • Mode-Lvl
+        // লেবেল
         const label = document.createElement('div');
         label.className = 'bar-label';
         label.innerHTML = `
@@ -181,3 +235,9 @@ function closeResultModal() {
         }, 300);
     }
 }
+
+// গ্লোবাল এক্সপোর্ট (যাতে script.js খুঁজে পায়)
+window.saveResult = saveResult;
+window.openResultModal = openResultModal;
+window.renderOfflineGraph = renderOfflineGraph;
+window.closeResultModal = closeResultModal;
