@@ -2711,3 +2711,70 @@ body.focus-mode .exit-fs-btn {
     display: flex;
     align-items: center;
 }
+/* Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.hidden { display: none !important; }
+
+.modal-content {
+    background: #1e1e2e;
+    padding: 25px;
+    border-radius: 15px;
+    width: 350px;
+    border: 1px solid #444;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    background: none; border: none;
+    color: #888; font-size: 24px; cursor: pointer;
+}
+
+.modal-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 3px solid #ffd700;
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.input-group label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #aaa; }
+.input-group input {
+    width: 100%; padding: 8px;
+    background: #2a2a3e; border: 1px solid #444;
+    border-radius: 5px; color: white;
+    margin-bottom: 10px;
+}
+
+.stats-grid { display: flex; gap: 10px; margin: 15px 0; }
+.stat-box {
+    flex: 1; background: #2a2a3e;
+    padding: 10px; border-radius: 8px;
+    text-align: center;
+}
+.stat-box span { font-size: 1.2rem; font-weight: bold; color: #ffd700; }
+.stat-box label { font-size: 0.7rem; color: #888; display: block; }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+.btn-primary { background: #ffd700; color: #000; font-weight: bold; }
+.btn-danger { background: #ff4444; color: white; }
