@@ -721,31 +721,49 @@
         </div>
         
         <div class="profile-body">
-            <div class="profile-info-section">
-                <img id="modalProfilePic" src="" alt="Profile" class="modal-avatar">
-                <div class="input-group">
-                    <label>Nickname</label>
-                    <input type="text" id="nicknameInput" placeholder="Enter name">
+            <div class="profile-top-grid" style="display:flex; gap:20px; align-items:center;">
+                <div style="position:relative; cursor:pointer;" title="Click to change avatar">
+                    <img id="modalProfilePic" src="" alt="Profile" class="modal-avatar">
+                    <span style="position:absolute; bottom:0; right:0; background:gold; color:black; border-radius:50%; padding:2px 5px; font-size:10px;">✏️</span>
                 </div>
-                <div class="badge-section">
+                
+                <div style="flex:1;">
+                    <div class="input-group">
+                        <label>Nickname</label>
+                        <input type="text" id="nicknameInput" placeholder="Enter name">
+                    </div>
                     <span id="memberStatus" class="status-badge free">Free Member</span>
                 </div>
             </div>
 
-            <hr>
+            <hr style="border-color:#333; margin:15px 0;">
 
+            <h4 style="margin-bottom:10px; color:#888; font-size:0.9rem;">LIFETIME STATISTICS</h4>
             <div class="stats-grid">
                 <div class="stat-box">
-                    <span id="totalTests">0</span>
+                    <span id="statTotalTests">0</span>
                     <label>Tests</label>
                 </div>
                 <div class="stat-box">
-                    <span id="bestWPM">0</span>
-                    <label>Best WPM</label>
+                    <span id="statTotalWords">0</span>
+                    <label>Words Typed</label>
+                </div>
+                <div class="stat-box">
+                    <span id="statAvgWPM">0</span>
+                    <label>Avg WPM</label>
+                </div>
+                <div class="stat-box">
+                    <span id="statAccuracy">0%</span>
+                    <label>Avg Accuracy</label>
                 </div>
             </div>
 
-            <hr>
+            <div class="history-section">
+                <h4 style="margin-bottom:10px; color:#888; font-size:0.9rem;">RECENT HISTORY (30 Days)</h4>
+                <div id="profileChart" class="chart-container-profile">
+                    <p style="color:#555; font-size:0.8rem;">No history found.</p>
+                </div>
+            </div>
 
             <div class="modal-actions">
                 <button id="saveProfileBtn" class="btn-primary">Save Changes</button>
@@ -754,7 +772,6 @@
         </div>
     </div>
 </div>
-
 <script src="result-manager.js"></script>
 <script src="text-db.js"></script>
 <script src="settings-manager.js"></script>

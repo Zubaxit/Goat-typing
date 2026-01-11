@@ -2778,3 +2778,46 @@ body.focus-mode .exit-fs-btn {
 .modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
 .btn-primary { background: #ffd700; color: #000; font-weight: bold; }
 .btn-danger { background: #ff4444; color: white; }
+/* Google Login Button Style */
+#login-btn {
+    background-color: #ffffff;
+    color: #333;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+#login-btn:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* প্রোফাইল মডালের নতুন লেআউট (হিস্টোরি গ্রাফের জন্য) */
+.modal-content {
+    width: 600px; /* গ্রাফ দেখানোর জন্য একটু বড় করা হলো */
+    max-width: 90%;
+}
+
+.history-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #111;
+    border-radius: 10px;
+}
+
+.chart-container-profile {
+    height: 150px; /* গ্রাফের হাইট */
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}

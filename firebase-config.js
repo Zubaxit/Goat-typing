@@ -1,10 +1,10 @@
-// firebase-config.js (CLEAN & FINAL VERSION)
+// firebase-config.js (Full & Updated)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+// 👇 এখানে updateProfile যোগ করা হয়েছে
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// তোমার কনফিগারেশন
 const firebaseConfig = {
   apiKey: "AIzaSyDwMK4j6DliUE396Ud1mQ6VzqSx2SvcZOc",
   authDomain: "goat-typing.firebaseapp.com",
@@ -15,14 +15,13 @@ const firebaseConfig = {
   measurementId: "G-GRDNTXQ2K0"
 };
 
-// অ্যাপ এবং সার্ভিসে কানেক্ট করা
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// এক্সপোর্ট (যাতে অন্য ফাইলে ব্যবহার করা যায়)
-export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc, arrayUnion, increment };
+// 👇 এখানেও updateProfile এক্সপোর্ট করা হয়েছে
+export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, updateProfile, doc, setDoc, getDoc, updateDoc, arrayUnion, increment };
 
-console.log("🔥 Firebase Config Loaded Correctly");
+console.log("🔥 Firebase Config Loaded (With Profile Update)");
