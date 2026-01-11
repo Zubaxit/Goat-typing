@@ -1,12 +1,11 @@
-// result-manager.js - Original UI + Silent Cloud Save
-import { db, auth, doc, setDoc, arrayUnion, getDoc, increment } from "./firebase-config.js";
+// result-manager.js - Final Fixed Version
 
 const resultState = {
     history: JSON.parse(localStorage.getItem('typingHistory')) || [],
     lastSavedTime: 0
 };
 
-// ১. স্কোর ক্যালকুলেশন (আপনার অরিজিনাল)
+// ১. স্কোর ক্যালকুলেশন
 function calculateOverallScore(wpm, accuracy, errors, time) {
     let baseScore = (wpm * 0.6) + (accuracy * 0.4); 
     let penalty = errors * 2;
@@ -15,16 +14,15 @@ function calculateOverallScore(wpm, accuracy, errors, time) {
     return finalScore > 0 ? finalScore : 0;
 }
 
-// ২. ডাটা সেভ ফাংশন (আপনার অরিজিনাল লজিক + ক্লাউড কানেকশন)
+// ২. ডাটা সেভ ফাংশন
 function saveResult(wpm, accuracy, errors, time, mode, level) {
     const now = Date.now();
-    // ডাবল সেভ আটকাতে ২ সেকেন্ড চেক
     if (now - resultState.lastSavedTime < 2000) return; 
     resultState.lastSavedTime = now;
 
     const overallScore = calculateOverallScore(wpm, accuracy, errors, time);
 
-    // মোড শর্টকাট
+    // শর্টকাট নাম তৈরি (BN, ENG, Hard, Easy)
     let modeShort = 'ENG';
     if(mode === 'bengali') modeShort = 'BN';
     else if(mode === 'coding') modeShort = 'CODE';
@@ -33,8 +31,7 @@ function saveResult(wpm, accuracy, errors, time, mode, level) {
     if(level === 'medium') lvlShort = 'Med';
     else if(level === 'hard') lvlShort = 'Hard';
 
-    // ডাটা অবজেক্ট
-    const resultData = {
+    const result = {
         score: overallScore,
         wpm: wpm || 0,
         acc: accuracy || 0,
@@ -42,72 +39,19 @@ function saveResult(wpm, accuracy, errors, time, mode, level) {
         time: Math.round(time) || 0,
         mode: modeShort, 
         lvl: lvlShort,   
-        date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-        // 🔥 এই timestamp টা প্রোফাইল গ্রাফের জন্য খুব জরুরি
-        timestamp: now,
-        fullDate: new Date().toLocaleDateString()
+        date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
     };
 
-    // A. লোকাল স্টোরেজ (আপনার অরিজিনাল কোড)
-    resultState.history.push(resultData);
+    resultState.history.push(result);
     if (resultState.history.length > 20) {
         resultState.history.shift();
     }
+    
     localStorage.setItem('typingHistory', JSON.stringify(resultState.history));
-
-    // B. ক্লাউড সেভ (সাইলেন্টলি ব্যাকগ্রাউন্ডে হবে)
-    saveToFirebase(resultData, wpm, accuracy);
-
     return overallScore;
 }
 
-// 🔥 নতুন ফাংশন: এটা ব্যাকগ্রাউন্ডে কাজ করবে, পপআপ আটকাবে না
-async function saveToFirebase(resultData, wpm, accuracy) {
-    const user = auth.currentUser;
-    if (!user) return; // ইউজার না থাকলে কিছু করার দরকার নেই
-
-    try {
-        const userRef = doc(db, "users", user.uid);
-        
-        // ১. আগের ডাটা এনে গড় (Average) আপডেট করা
-        const userSnap = await getDoc(userRef);
-        let newAvgWPM = wpm;
-        let newAvgAcc = accuracy;
-
-        if (userSnap.exists()) {
-            const data = userSnap.data();
-            const currentTests = data.totalTests || 0;
-            const currentAvgWPM = data.avgWPM || 0;
-            const currentAvgAcc = data.avgAcc || 0;
-
-            // নতুন গড়ের সূত্র
-            if (currentTests > 0) {
-                newAvgWPM = Math.round(((currentAvgWPM * currentTests) + wpm) / (currentTests + 1));
-                newAvgAcc = Math.round(((currentAvgAcc * currentTests) + accuracy) / (currentTests + 1));
-            }
-        }
-
-        // ২. ডাটাবেসে সেভ (setDoc ব্যবহার করেছি যাতে ফোল্ডার না থাকলেও কাজ করে)
-        await setDoc(userRef, {
-            history: arrayUnion(resultData), // এইখানে আপনার গেমের হিস্ট্রি ঢুকবে
-            totalTests: increment(1),
-            totalWords: increment(wpm),
-            avgWPM: newAvgWPM,
-            avgAcc: newAvgAcc,
-            lastActive: new Date(),
-            // নাম আর ছবিও আপডেট থাকবে
-            displayName: user.displayName,
-            photoURL: user.photoURL
-        }, { merge: true });
-
-        console.log("✅ Data Saved to Cloud (Background)");
-
-    } catch (err) {
-        console.error("❌ Save Error:", err);
-    }
-}
-
-// ৩. এনিমেশন (আপনার অরিজিনাল কোড - কোনো চেঞ্জ নাই)
+// ৩. এনিমেশন
 function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
@@ -126,11 +70,9 @@ function animateValue(id, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// ৪. মডাল ওপেন (আপনার অরিজিনাল কোড - কোনো চেঞ্জ নাই)
+// ৪. মডাল ওপেন
 function openResultModal(wpm, accuracy, errors, time, mode, level) {
-    // এখানে সেভ কল হচ্ছে, কিন্তু এটা পপআপ আটকাবে না
     const score = saveResult(wpm, accuracy, errors, time, mode, level);
-    
     const modal = document.getElementById('iosResultModal');
     if(!modal) return;
 
@@ -163,13 +105,13 @@ function openResultModal(wpm, accuracy, errors, time, mode, level) {
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
-// ৫. গ্রাফ রেন্ডার (আপনার অরিজিনাল কোড - কোনো চেঞ্জ নাই)
+// ৫. গ্রাফ রেন্ডার (লেবেল আপডেট সহ)
 function renderOfflineGraph() {
     const container = document.getElementById('chartBars');
     if(!container) return;
     container.innerHTML = '';
 
-    const MAX_WPM = 100; 
+    const MAX_WPM = 100; // স্কেলিং
     const MAX_TIME = 60; 
     const MAX_ERR = 10; 
 
@@ -210,6 +152,7 @@ function renderOfflineGraph() {
         group.appendChild(timeBar);
         group.appendChild(errBar);
 
+        // 🔥 লেবেল আপডেট: Score • Mode-Lvl
         const label = document.createElement('div');
         label.className = 'bar-label';
         label.innerHTML = `
@@ -228,7 +171,6 @@ function renderOfflineGraph() {
     }, 100);
 }
 
-// ৬. ক্লোজ ফাংশন (আপনার অরিজিনাল কোড)
 function closeResultModal() {
     const modal = document.getElementById('iosResultModal');
     if(modal) {
@@ -239,9 +181,3 @@ function closeResultModal() {
         }, 300);
     }
 }
-
-// গ্লোবাল এক্সপোর্ট (এটা থাকতেই হবে, নাহলে script.js পাবে না)
-window.saveResult = saveResult;
-window.openResultModal = openResultModal;
-window.renderOfflineGraph = renderOfflineGraph;
-window.closeResultModal = closeResultModal;
