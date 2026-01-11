@@ -1,9 +1,10 @@
-// firebase-config.js (CLEAN & FINAL)
+// firebase-config.js (CLEAN & FINAL VERSION)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// তোমার কনফিগারেশন
 const firebaseConfig = {
   apiKey: "AIzaSyDwMK4j6DliUE396Ud1mQ6VzqSx2SvcZOc",
   authDomain: "goat-typing.firebaseapp.com",
@@ -14,14 +15,14 @@ const firebaseConfig = {
   measurementId: "G-GRDNTXQ2K0"
 };
 
-// অ্যাপ ইনিশিয়ালাইজ করা
+// অ্যাপ এবং সার্ভিসে কানেক্ট করা
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// এক্সপোর্ট করা
+// এক্সপোর্ট (যাতে অন্য ফাইলে ব্যবহার করা যায়)
 export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc, arrayUnion, increment };
 
 console.log("🔥 Firebase Config Loaded Correctly");
