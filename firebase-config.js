@@ -1,14 +1,12 @@
-// firebase-config.js (UPDATED & FIXED)
-
-// 1. CDN থেকে Firebase ইম্পোর্ট (ব্রাউজারের জন্য এটি জরুরি)
+// firebase-config.js (FINAL FIXED VERSION)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 2. তোমার কনফিগারেশন (সঠিক API Key সহ)
+// তোমার কনফিগারেশন
 const firebaseConfig = {
-  apiKey: "AIzaSyDwMK4j6DliUE396Ud1mQ6VzqSx2SvcZOc", // ✅ তোমার দেওয়া সঠিক কি
+  apiKey: "AIzaSyDwMK4j6DliUE396Ud1mQ6VzqSx2SvcZOc",
   authDomain: "goat-typing.firebaseapp.com",
   projectId: "goat-typing",
   storageBucket: "goat-typing.firebasestorage.app",
@@ -17,14 +15,14 @@ const firebaseConfig = {
   measurementId: "G-GRDNTXQ2K0"
 };
 
-// 3. অ্যাপ ইনিশিয়ালাইজ করা
+// অ্যাপ ইনিশিয়ালাইজ করা (একবারই)
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// 4. এক্সপোর্ট (যাতে auth-manager.js এটি ব্যবহার করতে পারে)
-export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc };
+// এক্সপোর্ট
+export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc, arrayUnion, increment };
 
 console.log("🔥 Firebase Config Loaded Correctly");
