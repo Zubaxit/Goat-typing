@@ -2821,3 +2821,36 @@ body.focus-mode .exit-fs-btn {
     overflow-x: auto;
     padding-bottom: 5px;
 }
+/* Profile Chart Specific Styles */
+.chart-container-profile {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px; /* বারগুলোর মাঝখানের গ্যাপ */
+    height: 120px;
+    overflow-x: auto; /* ডাটা বেশি হলে স্ক্রল হবে */
+    padding: 10px 5px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+    
+    /* স্ক্রলবার লুকানোর জন্য (অপশনাল) */
+    scrollbar-width: thin;
+    scrollbar-color: #ffd700 #111;
+}
+
+/* প্রোফাইল গ্রাফের বারগুলো যাতে পপআপের মতোই দেখায় */
+.chart-container-profile .bar-wrapper {
+    min-width: 25px; /* বারগুলো যাতে চ্যাপ্টা না হয়ে যায় */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-container-profile .bar-label {
+    font-size: 8px;
+    color: #888;
+    margin-top: 5px;
+    text-align: center;
+    line-height: 1.2;
+}
