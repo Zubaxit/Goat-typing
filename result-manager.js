@@ -1,11 +1,14 @@
-// result-manager.js - Final Fixed Version
+// result-manager.js - Original UI + Hidden Cloud Save
+
+// ১. শুধু এই লাইনটা নতুন (Firebase ইম্পোর্ট)
+import { db, auth, doc, setDoc, arrayUnion, getDoc, increment } from "./firebase-config.js";
 
 const resultState = {
     history: JSON.parse(localStorage.getItem('typingHistory')) || [],
     lastSavedTime: 0
 };
 
-// ১. স্কোর ক্যালকুলেশন
+// ১. স্কোর ক্যালকুলেশন (আপনার অরিজিনাল)
 function calculateOverallScore(wpm, accuracy, errors, time) {
     let baseScore = (wpm * 0.6) + (accuracy * 0.4); 
     let penalty = errors * 2;
@@ -14,15 +17,16 @@ function calculateOverallScore(wpm, accuracy, errors, time) {
     return finalScore > 0 ? finalScore : 0;
 }
 
-// ২. ডাটা সেভ ফাংশন
+// ২. ডাটা সেভ ফাংশন (আপনার অরিজিনাল + ক্লাউড কানেকশন)
 function saveResult(wpm, accuracy, errors, time, mode, level) {
     const now = Date.now();
+    // ডাবল সেভ আটকাতে
     if (now - resultState.lastSavedTime < 2000) return; 
     resultState.lastSavedTime = now;
 
     const overallScore = calculateOverallScore(wpm, accuracy, errors, time);
 
-    // শর্টকাট নাম তৈরি (BN, ENG, Hard, Easy)
+    // শর্টকাট নাম তৈরি
     let modeShort = 'ENG';
     if(mode === 'bengali') modeShort = 'BN';
     else if(mode === 'coding') modeShort = 'CODE';
@@ -39,19 +43,71 @@ function saveResult(wpm, accuracy, errors, time, mode, level) {
         time: Math.round(time) || 0,
         mode: modeShort, 
         lvl: lvlShort,   
-        date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        date: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        // 🔥 এই timestamp টা প্রোফাইলের জন্য খুব জরুরি (এটা আমি এড করে দিলাম)
+        timestamp: now,
+        fullDate: new Date().toLocaleDateString()
     };
 
+    // লোকাল স্টোরেজ (আপনার কোড)
     resultState.history.push(result);
     if (resultState.history.length > 20) {
         resultState.history.shift();
     }
-    
     localStorage.setItem('typingHistory', JSON.stringify(resultState.history));
+
+    // 🔥 নতুন: ব্যাকগ্রাউন্ডে ক্লাউডে সেভ (পপআপ আটকাবে না)
+    saveToFirebase(result, wpm, accuracy);
+
     return overallScore;
 }
 
-// ৩. এনিমেশন
+// 🔥 নতুন ফাংশন: এটা ব্যাকগ্রাউন্ডে কাজ করবে (সাইলেন্ট মোড)
+async function saveToFirebase(resultData, wpm, accuracy) {
+    const user = auth.currentUser;
+    if (!user) return; // লগিন না থাকলে সেভ হবে না
+
+    try {
+        const userRef = doc(db, "users", user.uid);
+        
+        // ১. আগের ডাটা এনে গড় (Average) আপডেট করা
+        const userSnap = await getDoc(userRef);
+        let newAvgWPM = wpm;
+        let newAvgAcc = accuracy;
+
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            const currentTests = data.totalTests || 0;
+            const currentAvgWPM = data.avgWPM || 0;
+            const currentAvgAcc = data.avgAcc || 0;
+
+            // নতুন গড়ের সূত্র
+            if (currentTests > 0) {
+                newAvgWPM = Math.round(((currentAvgWPM * currentTests) + wpm) / (currentTests + 1));
+                newAvgAcc = Math.round(((currentAvgAcc * currentTests) + accuracy) / (currentTests + 1));
+            }
+        }
+
+        // ২. ডাটাবেসে সেভ (setDoc ব্যবহার করেছি যাতে ফোল্ডার না থাকলেও কাজ করে)
+        await setDoc(userRef, {
+            history: arrayUnion(resultData), // গেমের হিস্ট্রি
+            totalTests: increment(1),        // মোট টেস্ট ১ বাড়ল
+            totalWords: increment(wpm),      // মোট শব্দ বাড়ল
+            avgWPM: newAvgWPM,               // নতুন গড় WPM
+            avgAcc: newAvgAcc,               // নতুন গড় Accuracy
+            lastActive: new Date(),
+            displayName: user.displayName,   
+            photoURL: user.photoURL
+        }, { merge: true });
+
+        console.log("✅ Data & Stats Updated in Cloud!");
+
+    } catch (err) {
+        console.error("❌ Cloud Save Error:", err);
+    }
+}
+
+// ৩. এনিমেশন (আপনার অরিজিনাল কোড)
 function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
@@ -70,9 +126,11 @@ function animateValue(id, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// ৪. মডাল ওপেন
+// ৪. মডাল ওপেন (আপনার অরিজিনাল কোড)
 function openResultModal(wpm, accuracy, errors, time, mode, level) {
+    // এখানে সেভ কল হচ্ছে
     const score = saveResult(wpm, accuracy, errors, time, mode, level);
+    
     const modal = document.getElementById('iosResultModal');
     if(!modal) return;
 
@@ -105,7 +163,7 @@ function openResultModal(wpm, accuracy, errors, time, mode, level) {
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
-// ৫. গ্রাফ রেন্ডার (লেবেল আপডেট সহ)
+// ৫. গ্রাফ রেন্ডার (আপনার অরিজিনাল কোড)
 function renderOfflineGraph() {
     const container = document.getElementById('chartBars');
     if(!container) return;
@@ -152,7 +210,7 @@ function renderOfflineGraph() {
         group.appendChild(timeBar);
         group.appendChild(errBar);
 
-        // 🔥 লেবেল আপডেট: Score • Mode-Lvl
+        // লেবেল
         const label = document.createElement('div');
         label.className = 'bar-label';
         label.innerHTML = `
@@ -181,3 +239,9 @@ function closeResultModal() {
         }, 300);
     }
 }
+
+// গ্লোবাল এক্সপোর্ট
+window.saveResult = saveResult;
+window.openResultModal = openResultModal;
+window.renderOfflineGraph = renderOfflineGraph;
+window.closeResultModal = closeResultModal;
