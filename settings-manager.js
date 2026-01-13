@@ -1,4 +1,15 @@
-// settings-manager.js - Ultimate Theme & Pro Features Controller (Fixed BG & Restored Animations)
+// settings-manager.js - Ultimate Theme & Pro Features Controller (Fixed BG, Restored Animations & New Guard System)
+
+/* ==============================
+   🔰 SAFETY POLYFILL: canUse Helper
+   (যদি main.js এ canUse ডিফাইন না থাকে, তবে এটি IS_PRO_USER চেক করবে)
+   ============================== */
+if (typeof window.canUse === 'undefined') {
+    window.canUse = function(feature) {
+        // Fallback to legacy check if granular permission system is missing
+        return window.IS_PRO_USER === true;
+    };
+}
 
 /* ==============================
    GLOBAL STATE & VARIABLES
@@ -19,6 +30,7 @@ const settingsState = {
         bgType: 'solid',      
         bgValue: '#f0f2f5',   // Stores Color/Gradient
         animType: 'leaves',   // Stores Animation Type separately
+        kbStyle: 'default',   // Stores Keyboard Style ID
         textColor: '#333333',
         mainColor: '#4361ee',
         cardColor: '#ffffff'
@@ -40,7 +52,7 @@ const presets = {
     },
     dark: { 
         bgType: 'solid', 
-        bgValue: '#121212', // 🔥 এখানে আগে কালার মিসিং থাকতে পারে, এটা বসান
+        bgValue: '#121212', 
         text: '#e0e0e0', 
         main: '#bb86fc', 
         card: '#1e1e1e',
@@ -109,7 +121,7 @@ window.applyPreset = function(name) {
 };
 
 /* ==============================
-   2. BACKGROUND SYSTEM (FIXED)
+   2. BACKGROUND SYSTEM
    ============================== */
 window.toggleBgControls = function(type, apply = true) {
     ['solid', 'gradient', 'image', 'animated'].forEach(t => {
@@ -152,7 +164,6 @@ window.applyBackground = function(type) {
         const animSel = document.getElementById('animTypeSelector');
         const animType = animSel ? animSel.value : 'leaves';
         
-        // 🔥 FIX: Background Color Overwrite করবেনা
         startBackgroundAnimation(animType);
         settingsState.theme.animType = animType;
     }
@@ -175,7 +186,7 @@ window.handleImageUpload = function(input) {
 };
 
 /* ==============================
-   3. ANIMATED BACKGROUNDS (RESTORED & NEW)
+   3. ANIMATED BACKGROUNDS
    ============================== */
 function stopBackgroundAnimation() {
     const container = document.getElementById('animatedBgContainer');
@@ -188,7 +199,7 @@ function startBackgroundAnimation(type) {
     if(!container) return;
     stopBackgroundAnimation(); // Clear existing
     
-    // 1. FALLING LEAVES (RESTORED - Lota Pata)
+    // 1. FALLING LEAVES
     if (type === 'leaves') {
         animInterval = setInterval(() => {
             const leaf = document.createElement('div');
@@ -290,7 +301,7 @@ function startBackgroundAnimation(type) {
         }, 100);
     }
     
-    // 5. EMOJI FUN (THEME STYLE)
+    // 5. EMOJI FUN
     else if (type === 'emojis') {
         const emojis = ['😎', '🔥', '💻', '🚀', '🐱', '🍕', '🎮', '💡','😒','😂','🤐','🤷‍♂️','🥶','☠️'];
         animInterval = setInterval(() => {
@@ -314,7 +325,7 @@ function startBackgroundAnimation(type) {
         }, 300);
     }
     
-    // 6. BURNING EMBERS (POWERFUL)
+    // 6. BURNING EMBERS
     else if (type === 'embers') {
         animInterval = setInterval(() => {
             const ember = document.createElement('div');
@@ -333,7 +344,7 @@ function startBackgroundAnimation(type) {
             ember.style.transition = `bottom ${duration}s linear, opacity ${duration}s ease-in, left ${duration}s ease-in-out`;
             container.appendChild(ember);
             requestAnimationFrame(() => {
-                ember.style.bottom = (Math.random() * 50 + 50) + 'vh'; // Goes up halfway
+                ember.style.bottom = (Math.random() * 50 + 50) + 'vh'; 
                 ember.style.opacity = 0;
                 ember.style.left = (Math.random() * 100) + 'vw';
             });
@@ -380,7 +391,128 @@ function adjustColor(col, amt) {
 }
 
 /* ==============================
-   5. SAVE & LOAD SYSTEM (FIXED)
+   🔥 5. KEYBOARD LAYOUT STYLE SYSTEM (GUARDED)
+   ============================== */
+
+// A. Theme Configuration
+const keyboardThemes = [
+    { 
+        id: 'default', name: 'Default', pro: false, 
+        preview: 'background: #ececec; color: #444; border-bottom: 2px solid #a8a8a8;' 
+    },
+    { 
+        id: 'dark-classic', name: 'Dark', pro: false, 
+        preview: 'background: #333; color: #fff; border-bottom: 2px solid #111;' 
+    },
+    { 
+        id: 'minimal-white', name: 'Minimal', pro: false, 
+        preview: 'background: #fff; color: #333; border: 1px solid #ddd;' 
+    },
+    { 
+        id: 'ocean', name: 'Ocean', pro: false, 
+        preview: 'background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); color: #fff;' 
+    },
+    { 
+        id: 'soft-3d', name: 'Soft 3D', pro: true, 
+        preview: 'background: #e0e5ec; color: #555; box-shadow: 2px 2px 5px #a3b1c6, -2px -2px 5px #ffffff;' 
+    }, 
+    { 
+        id: 'glass', name: 'Glassy', pro: true, 
+        preview: 'background: rgba(100, 100, 255, 0.3); border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(2px);' 
+    },      
+    { 
+        id: 'retro', name: 'Retro', pro: true, 
+        preview: 'background: #fdf5e6; color: #333; border: 2px solid #8b4513; border-radius: 50%;' 
+    },
+    { 
+        id: 'rgb-gamer', name: 'RGB', pro: true, anim: true, 
+        preview: 'background: #000; color: #fff; border: 2px solid red; box-shadow: 0 0 5px red;' 
+    },
+    { 
+        id: 'snake', name: 'Snake', pro: true, anim: true, 
+        preview: 'background: #111; color: #0f0; border: 1px solid #0f0;' 
+    },  
+    { 
+        id: 'cyberpunk', name: 'Cyber', pro: true, 
+        preview: 'background: #fcee0a; color: #000; border: 2px solid #000; transform: skew(-5deg);' 
+    },
+    { 
+        id: 'fire', name: 'Magma', pro: true, anim: true, 
+        preview: 'background: #220000; color: #ff4500; border: 1px solid #ff4500;' 
+    }
+];
+
+// B. Apply Logic
+function setKeyboardStyle(styleId) {
+    const theme = keyboardThemes.find(t => t.id === styleId);
+    if (!theme) return;
+
+    // ✅ STEP 3: Guard with canUse
+    if (theme.pro && !canUse('proKeyboard')) {
+        // Silent return if accessed illegally (optional alert here if needed)
+        return;
+    }
+
+    settingsState.theme.kbStyle = styleId;
+    document.body.setAttribute('data-kb-theme', styleId);
+    saveSettings();
+}
+
+
+// C. Render UI Grid
+function initKeyboardStyles() {
+    const grid = document.getElementById('kbStyleGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = ''; 
+
+    keyboardThemes.forEach(theme => {
+        const card = document.createElement('div');
+        card.className = 'kb-theme-card';
+        if (settingsState.theme.kbStyle === theme.id) {
+            card.classList.add('active');
+        }
+
+        // ✅ STEP 4: UI Lock / Badge Logic
+        const isLocked = theme.pro && !canUse('proKeyboard');
+
+        let html = `
+            <div class="kb-preview-box" style="${theme.preview}">A</div>
+            <span class="kb-name">${theme.name}</span>
+        `;
+        
+        if (theme.pro) {
+            html += `<span class="pro-badge">${isLocked ? '🔒' : '👑'}</span>`;
+        }
+
+        card.innerHTML = html;
+
+        card.onclick = () => {
+            // ✅ STEP 3: Guard on Click
+            if (theme.pro && !canUse('proKeyboard')) {
+                if(window.openProSettings) window.openProSettings(); 
+                else alert("Upgrade to PRO to unlock this theme!");
+                return;
+            }
+            
+            setKeyboardStyle(theme.id);
+            
+            // UI Update
+            document.querySelectorAll('.kb-theme-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        };
+
+        grid.appendChild(card);
+    });
+}
+
+// Global Export
+window.setKeyboardStyle = setKeyboardStyle;
+window.initKeyboardStyles = initKeyboardStyles;
+
+
+/* ==============================
+   6. SAVE & LOAD SYSTEM
    ============================== */
 function saveSettings() {
     const data = {
@@ -395,7 +527,7 @@ function saveSettings() {
         ghostEnabled: document.getElementById('toggleGhost')?.checked,
         paceEnabled: document.getElementById('togglePace')?.checked
     };
-    localStorage.setItem('ultimateSettings_v4', JSON.stringify(data)); // New Version Key
+    localStorage.setItem('ultimateSettings_v4', JSON.stringify(data)); 
 }
 
 function loadSettings() {
@@ -426,18 +558,16 @@ function loadSettings() {
             
             toggleBgControls(data.theme.bgType, false);
             
-            // 🔥 FIX: Restore Background Color FIRST
+            // Restore BG Color
             if(data.theme.bgValue && !data.theme.bgValue.includes('rain') && !data.theme.bgValue.includes('leaves')) {
                  if (data.theme.bgType === 'solid' || data.theme.bgType === 'animated') {
-                     document.body.style.background = data.theme.bgValue;
-                     // Set picker value
-                     const bsEl = document.getElementById('bgSolidColor'); 
-                     if(bsEl) bsEl.value = data.theme.bgValue;
+                      document.body.style.background = data.theme.bgValue;
+                      const bsEl = document.getElementById('bgSolidColor'); 
+                      if(bsEl) bsEl.value = data.theme.bgValue;
                  } else if (data.theme.bgType === 'gradient') {
-                     document.body.style.background = data.theme.bgValue;
+                      document.body.style.background = data.theme.bgValue;
                  }
             } else {
-                 // Default fallback if no color set
                  document.body.style.background = '#f0f2f5'; 
             }
 
@@ -447,19 +577,34 @@ function loadSettings() {
                 document.body.style.backgroundSize = 'cover';
             }
 
-            // 🔥 FIX: Restore Animation Layer ON TOP
+            // Restore Animation
             if (data.theme.bgType === 'animated') {
                 const animSel = document.getElementById('animTypeSelector');
                 const animType = data.theme.animType || 'leaves'; 
                 if(animSel) animSel.value = animType;
-                
                 startBackgroundAnimation(animType);
+            }
+            
+            // Restore Keyboard (Safe Load)
+            if (data.theme.kbStyle) {
+                const theme = keyboardThemes.find(t => t.id === data.theme.kbStyle);
+
+                if (typeof window.IS_PRO_USER === 'undefined') {
+                    // Wait for poller
+                }
+                else if (!theme || !theme.pro || canUse('proKeyboard')) {
+                    setKeyboardStyle(data.theme.kbStyle);
+                } else {
+                    setKeyboardStyle('default');
+                }
             }
         }
         
-        // Features & Ghost (Rest of the logic remains same)
+        // Features & Ghost
         if(data.visualParticles) { settingsState.visual.particles = true; setChecked('toggleParticles', true); }
         if(data.visualCombo) { settingsState.visual.combo = true; setChecked('toggleCombo', true); }
+        
+        // These will be re-validated by toggleProFeature/init
         if(data.proHeatmap) { settingsState.pro.heatmap = true; setChecked('toggleHeatmap', true); }
         if(data.proSpotlight) { 
             settingsState.pro.spotlight = true; 
@@ -487,6 +632,15 @@ function loadSettings() {
     } else {
         applyPreset('default');
     }
+    
+    initKeyboardStyles();
+
+    // Init Logic for Pro State
+    if (window.IS_PRO_USER === true) {
+        settingsState.pro.heatmap = true;
+        settingsState.pro.spotlight = true;
+        settingsState.pro.suddenDeath = true;
+    }
 }
 
 function setChecked(id, val) {
@@ -495,7 +649,7 @@ function setChecked(id, val) {
 }
 
 /* ==============================
-   6. SOUND ENGINE
+   7. SOUND ENGINE
    ============================== */
 window.changeSoundProfile = function(val) {
     settingsState.sound.profile = val;
@@ -532,7 +686,7 @@ function playKeySound() {
 }
 
 /* ==============================
-   7. VISUAL EFFECTS
+   8. VISUAL EFFECTS
    ============================== */
 window.toggleVisualEffect = function(type) {
     const el = document.getElementById(type === 'particles' ? 'toggleParticles' : 'toggleCombo');
@@ -599,7 +753,7 @@ function showComboPopup(x, y, count) {
 }
 
 /* ==============================
-   8. GHOST & PACE LOGIC
+   9. GHOST & PACE LOGIC
    ============================== */
 window.toggleGhostMode = function(mode) {
     const isChecked = document.getElementById(mode === 'ghost' ? 'toggleGhost' : 'togglePace').checked;
@@ -704,9 +858,20 @@ function stopGhost() {
 }
 
 /* ==============================
-   9. PRO FEATURES
+   10. PRO FEATURES (GUARDED)
    ============================== */
 window.toggleProFeature = function(feat) {
+    // ✅ STEP 3: Guard All Pro Features
+    if (!canUse(feat) && !canUse('proFeatures')) {
+        // Reset the checkbox immediately
+        const el = document.getElementById('toggle' + feat.charAt(0).toUpperCase() + feat.slice(1));
+        if (el) el.checked = false;
+
+        if(window.openProSettings) window.openProSettings();
+        else alert("Upgrade to PRO to unlock " + feat);
+        return;
+    }
+
     const el = document.getElementById('toggle' + feat.charAt(0).toUpperCase() + feat.slice(1));
     const isChecked = el ? el.checked : false;
     settingsState.pro[feat] = isChecked;
@@ -798,7 +963,7 @@ function getKeyFromCharSimple(char) {
 }
 
 /* ==============================
-   10. NEW UI & EVENTS
+   11. NEW UI & EVENTS
    ============================== */
 
 window.switchSettingsTab = function(tabName) {
@@ -829,37 +994,45 @@ document.addEventListener("visibilitychange", function() {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1️⃣ Basic non-pro settings load
     loadSettings();
     initCanvas();
     switchSettingsTab('gameplay');
-    
+
+    // 2️⃣ Resize handler
     window.addEventListener('resize', () => { 
-        if(canvas) { 
+        if (canvas) { 
             canvas.width = window.innerWidth; 
             canvas.height = window.innerHeight; 
         }
     });
-});
 
-document.addEventListener('input', (e) => {
-    if(e.target.id !== 'inputField') return;
-    
-    if (typeof currentMode === 'undefined' || currentMode !== 'bengali') {
-        const val = e.target.value;
-        const spans = document.querySelectorAll('#quoteDisplay span');
-        const idx = val.length - 1;
-        
-        let isCorrect = false;
-        if (idx >= 0 && spans[idx] && spans[idx].classList.contains('correct')) {
-            isCorrect = true;
+    // 3️⃣ 🔥 WAIT for auth → then re-init pro-dependent UI
+    const waitForPro = setInterval(() => {
+        if (typeof window.IS_PRO_USER !== 'undefined') {
+            clearInterval(waitForPro);
+
+            // 🔥 Auth Ready -> Activate Features internally if PRO
+            if (window.IS_PRO_USER === true) {
+                settingsState.pro.heatmap = true;
+                settingsState.pro.spotlight = true;
+                settingsState.pro.suddenDeath = true;
+            }
+
+            // ✅ Re-render keyboard grid (Badges will update now)
+            if (typeof initKeyboardStyles === 'function') {
+                initKeyboardStyles();
+            }
+
+            // ✅ Restore saved keyboard safely (using new canUse Guard)
+            if (settingsState?.theme?.kbStyle) {
+                const theme = keyboardThemes.find(t => t.id === settingsState.theme.kbStyle);
+                if (!theme || !theme.pro || canUse('proKeyboard')) {
+                    setKeyboardStyle(settingsState.theme.kbStyle);
+                } else {
+                    setKeyboardStyle('default');
+                }
+            }
         }
-        window.triggerGlobalEffects(isCorrect);
-    }
-});
-
-document.addEventListener('click', (e) => {
-    if(e.target.closest('#resetBtn')) {
-        stopGhost();
-        settingsState.visual.comboCount = 0;
-    }
+    }, 50); 
 });

@@ -1,9 +1,35 @@
-// firebase-config.js (Full & Updated)
+// firebase-config.js (FULL & FIXED)
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-// 👇 এখানে updateProfile যোগ করা হয়েছে
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// Auth Imports
+import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    signOut, 
+    onAuthStateChanged, 
+    updateProfile 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// Firestore Imports (🔥 getDocs যোগ করা হয়েছে)
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    getDocs,        // <--- এই লাইনটা মিসিং ছিল
+    updateDoc, 
+    deleteDoc, 
+    addDoc, 
+    collection, 
+    query, 
+    where, 
+    onSnapshot, 
+    arrayUnion, 
+    increment 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDwMK4j6DliUE396Ud1mQ6VzqSx2SvcZOc",
@@ -15,13 +41,34 @@ const firebaseConfig = {
   measurementId: "G-GRDNTXQ2K0"
 };
 
+// Initialize
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// 👇 এখানেও updateProfile এক্সপোর্ট করা হয়েছে
-export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, updateProfile, doc, setDoc, getDoc, updateDoc, arrayUnion, increment };
-
-console.log("🔥 Firebase Config Loaded (With Profile Update)");
+// 🔥 EXPORT EVERYTHING (সহজে ব্যবহারের জন্য)
+export { 
+    auth, 
+    db, 
+    provider, 
+    signInWithPopup, 
+    signOut, 
+    onAuthStateChanged, 
+    updateProfile,
+    // Firestore Functions
+    doc, 
+    setDoc, 
+    getDoc, 
+    getDocs,        // <--- এখানেও এক্সপোর্ট করতে হবে
+    updateDoc, 
+    deleteDoc, 
+    addDoc, 
+    collection, 
+    query, 
+    where, 
+    onSnapshot, 
+    arrayUnion, 
+    increment 
+};

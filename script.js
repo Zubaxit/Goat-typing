@@ -388,6 +388,12 @@ function finishSession() {
     const totalTyped = sessionTotalCorrect + sessionTotalErrors;
     const accuracy = totalTyped > 0 ? Math.round((sessionTotalCorrect / totalTyped) * 100) : 0;
 
+    // 🔥 FIX: এখন WPM এর বদলে Total Characters ডাটাবেসে যাবে
+    if (typeof incrementUsage === 'function') {
+        incrementUsage(totalTyped, currentMode);
+        console.log(`📊 Usage Update Sent: ${totalTyped} characters`);
+    }
+
     if (typeof openResultModal === 'function') {
         openResultModal(finalWPM, accuracy, sessionTotalErrors, sessionTotalTimeElapsed, currentMode, lvl);
     } else {
@@ -450,7 +456,7 @@ function updateStats() {
 }
 
 function resetTest(fullReset = false) {
-    // 🔥 ফিক্স: গাড়ি বা পেস ক্যারেট থামানো
+    // 🔥 ফিক্স: গাড়ি বা পেস ক্যারেট থামানো
     if (typeof stopGhost === 'function') stopGhost(); 
 
     clearInterval(timer); isTyping = false; currentText = ""; 
@@ -643,3 +649,10 @@ function updateTypingProfile() {
 // Start AI Timer
 if (typeof timerProfile !== 'undefined') clearInterval(timerProfile);
 timerProfile = setInterval(updateTypingProfile, 1500);
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (typeof updateSidebarAccess === 'function') {
+            updateSidebarAccess();
+        }
+    }, 300);
+});

@@ -5,96 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goat Typing Machine</title>
     <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-
 <div id="animatedBgContainer"></div>
-
 <canvas id="effectCanvas"></canvas>
-<!-- ===== NEW LIGHT SIDEBAR ===== -->
+
 <aside class="gt-sidebar">
 
-  <!-- LOGO -->
-  <div class="gt-logo">
-    <div class="gt-logo-icon">⌨️</div>
-    <div>
-      <h1>GoatType</h1>
-      <span class="gt-badge">PRO v2.0</span>
-    </div>
-  </div>
-
-  <!-- LIVE STATS -->
-  <div class="gt-section">
-    <h3>📈 LIVE STATS</h3>
-
-    <div class="gt-stats-grid">
-      <div class="gt-card">
-        <span>WPM</span>
-        <strong id="wpm">0</strong>
-      </div>
-      <div class="gt-card">
-        <span>Accuracy</span>
-        <strong id="accuracy">100%</strong>
-      </div>
-      <div class="gt-card">
-        <span>Errors</span>
-        <strong id="errors" class="red">0</strong>
-      </div>
-      <div class="gt-card">
-        <span>Time</span>
-        <strong id="time" class="orange">60</strong>
-      </div>
-    </div>
-  </div>
-
-
-  
-
-  <!-- MISTAKE PATTERN -->
-  <div class="gt-section">
-    <h3>🧩 MISTAKE PATTERN</h3>
-
-    <div class="gt-info-row">
-      <span>Most Wrong Key:</span>
-      <div id="wrongKey" class="gt-pill">-</div>
+    <div id="sidebarLock" class="sidebar-lock hidden">
+        <div class="lock-content">
+            <h3>🔒 Sidebar Locked</h3>
+            <p id="lockMessage">Login to unlock sidebar</p>
+            <button id="lockActionBtn">Login</button>
+        </div>
     </div>
 
-    <div class="gt-info-row">
-      <span>Weak Finger:</span>
-      <div id="weakFinger" class="gt-pill">-</div>
-    </div>
-  </div>
+    <div class="sidebar-inner">
+        
+        <div class="gt-logo">
+            <div class="gt-logo-icon">⌨️</div>
+            <div>
+                <h1>GoatType</h1>
+                <span class="gt-badge">PRO v2.0</span>
+            </div>
+        </div>
 
-  <!-- SESSION PACE -->
-<div class="gt-section">
-  <h3>📊 SESSION PACE</h3>
+        <div class="gt-section">
+            <h3>📈 LIVE STATS</h3>
+            <div class="gt-stats-grid">
+                <div class="gt-card">
+                    <span>WPM</span>
+                    <strong id="wpm">0</strong>
+                </div>
+                <div class="gt-card">
+                    <span>Accuracy</span>
+                    <strong id="accuracy">100%</strong>
+                </div>
+                <div class="gt-card">
+                    <span>Errors</span>
+                    <strong id="errors" class="red">0</strong>
+                </div>
+                <div class="gt-card">
+                    <span>Time</span>
+                    <strong id="time" class="orange">60</strong>
+                </div>
+            </div>
+        </div>
 
-  <div class="chart-legend">
-    <div class="legend-item">
-      <span class="legend-dot" style="background:#facc15"></span> WPM
-    </div>
-    <div class="legend-item">
-      <span class="legend-dot" style="background:#22d3ee"></span> Accuracy
-    </div>
-    <div class="legend-item">
-      <span class="legend-dot" style="background:#f87171"></span> Errors
-    </div>
-  </div>
+        <div class="gt-section">
+            <h3>🧩 MISTAKE PATTERN</h3>
+            <div class="gt-info-row">
+                <span>Most Wrong Key:</span>
+                <div id="wrongKey" class="gt-pill">-</div>
+            </div>
+            <div class="gt-info-row">
+                <span>Weak Finger:</span>
+                <div id="weakFinger" class="gt-pill">-</div>
+            </div>
+        </div>
 
-  <canvas id="paceChart" width="260" height="120"></canvas>
-</div>
-
-<div id="chartTooltip" class="chart-tooltip"></div>
-
-
-
-</aside>
-<!-- ===== END SIDEBAR ===== -->
-
-
+        <div class="gt-section">
+            <h3>📊 SESSION PACE</h3>
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <span class="legend-dot" style="background:#facc15"></span> WPM
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot" style="background:#22d3ee"></span> Accuracy
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot" style="background:#f87171"></span> Errors
+                </div>
+            </div>
+            <canvas id="paceChart" width="260" height="120"></canvas>
+        </div>
+        
+        <div id="chartTooltip" class="chart-tooltip"></div>
+    </div> </aside>
 <button id="exitFsBtn" class="exit-fs-btn" onclick="toggleFullScreen()">
     <i class="fas fa-times"></i> Exit Focus
 </button>
@@ -112,88 +102,76 @@
         <a href="https://www.facebook.com/muhammad.emon.738798" target="_blank" class="profile-link">
             <div class="admin-badge">
                 <img src="emon.png" onerror="this.src='https://via.placeholder.com/50'" alt="Admin">
-               
             </div>
             <div class="admin-info">
-    <strong class="admin-name">Muhammad Emon</strong>
-    <span class="admin-role">Developer</span>
-</div>
+                <strong class="admin-name">Muhammad Emon</strong>
+                <span class="admin-role">Developer</span>
+            </div>
         </a>
     </div>
     <div class="popup-body">
-    <p>🙏 Hi</p>
-
-    <p class="popup-message">
-        আপনি বর্তমানে এই সফটওয়্যারের <b>v1.02 (Demo Version)</b> ব্যবহার করছেন।
-        <br><br>
-        দয়া করে মনে রাখবেন—এটি একটি <b>ডেমো ভার্সন</b>। এখানে কিছু গ্লিচ, বাগ এবং অপ্রত্যাশিত আচরণ থাকা স্বাভাবিক।
-        <br><br>
-        সময় ও সীমাবদ্ধতার কারণে সফটওয়্যারটি <b>লো কনফিগারেশন PC</b> লক্ষ্য করে তৈরি করা হয়েছে,
-        যাতে সবাই অন্তত PC-তে <b>বাংলা টাইপিং (বিজয়)</b> প্র্যাকটিস করতে পারে।
-        <br><br>
-        সফটওয়্যারটি এখনো পুরোপুরি অপ্টিমাইজড নয়, অনেক বাগ এখনো ফিক্স করা হয়নি এবং
-        মূল ভার্সনের অনেক ফিচার ও অপশন এখানে অনুপস্থিত।বিশেষ করে বাংলা বিজয় কিবোর্ডের ফুল লেআউটটা এখানে দেওয়া নাই এবং কিছু কিছু ফাংশনাল কনফ্লিক্ট আছে। ফুল ভার্সনে সব ফিক্সড আছে এবং মাল্টিপল লেআউটের সুবিধা আছে।
-        <br><br>
-
-<div class="popup-message bengali-note">
-    <p>
-        সমস্যাগুলো সাধারণত বাংলা মুডেই দেখা যায়। কারণ, ইংরেজির মতো
-        বাংলায় এখনো এই ধরণের পরিপূর্ণ টাইপিং সিমুলেটর নেই। <br>কারণ 
-        বাংলার ক্ষেত্রে <b>বাংলা ব্যাকরণ</b> এবং <b>কোড নলেজ</b> এই দুইয়ের সমন্বয় অত্যন্ত জরুরি।
-        বাংলা বর্ণ ও বিজয় (ক্লাসিক) কিবোর্ডের সিকুয়েন্স স্বাভাবিকভাবেই
-        জটিল এবং এই বিষয়ে রিসোর্সও সীমিত।
-    </p>
-
-    <p>
-        সহজভাবে বললে—ইংরেজিতে <i>Forgive</i> শব্দটি ৭টি অক্ষর পরপর টাইপ করলেই
-        সুন্দরভাবে তৈরি হয়ে যায়। কিন্তু বাংলায় <b>ক্ষমা</b> লিখতে হলে
-        <code>ক্ + ষ</code> টাইপ করে <b>ক্ষ</b> তৈরি করতে হয়, যেখানে পুরো অক্ষরের
-        চেহারাই বদলে যায়।
-    </p>
-
-    <p>
-        একইভাবে যতি চিহ্ন, যুক্তবর্ণ, কার, ফলা—এই সবকিছু মিলিয়ে বাংলা টাইপিং
-        একটি ব্যাক-এন্ড কমপ্লেক্স প্রসেস। অনেক সময় ২–৩–৪টি, এমনকি কখনও কখনও
-        ৫টি আলাদা বর্ণ/কার/ফলা মিলে একটি মাত্র যুক্তবর্ণ তৈরি হয়,
-        যার প্রতিটির চেহারা ইউনিক।
-    </p>
-
-    <p>
-        এই সব বর্ণকে একটি নির্দিষ্ট সিকুয়েন্স অনুযায়ী প্রোগ্রাম করতে হয়,
-        যা বাস্তবে অত্যন্ত জটিল একটি কাজ।
-    </p>
-
-    <p>
-        তবুও অল্প সময়ের মধ্যে আমি এখানে যতটা সম্ভব
-        <b>বিজয় (ক্লাসিক)</b> লেআউটের আদলে কী-ম্যাপিং ফাংশনিং করার চেষ্টা করেছি।
-        তবে স্বীকার করছি—এখনও ব্যাপক পরিমাণ উন্নতির সুযোগ রয়েছে।
-        উদাহরণস্বরূপ, মাঝে মাঝে টেক্সট কালারিং সংক্রান্ত কিছু সমস্যা দেখা দিতে পারে।
-    </p>
-
-    <p>
-        এগুলো সবই সমাধানযোগ্য, কিন্তু তার জন্য প্রয়োজন
-        <b>আপনাদের সমর্থন</b> এবং <b>আমার সময়</b>।
-        এই দুইয়ের ওপরই মূলত এই প্রোগ্রামের ভবিষ্যৎ নির্ভর করছে।
-    </p>
-
-    <p><b>আশা করি বিষয়টি বুঝতে পেরেছেন।</b></p>
-</div>
-
-        আপনার প্রয়োজন ও কাজের ধরন অনুযায়ী এই সীমাবদ্ধতাগুলোর সাথে মানিয়ে নিন,
-        অথবা <b>মূল ভার্সন</b> ব্যবহার করুন।
-        <br><br>
-        মূল ভার্সন ফ্রি ব্যবহার করতে চাইলে ওয়েবসাইট ভিজিট করুন,
-        অথবা যেকোনো প্রয়োজনে আমাকে সরাসরি নক দিতে পারেন।
-    </p>
-</div>
-
+        <p>🙏 Hi</p>
+        <p class="popup-message">
+            আপনি বর্তমানে এই সফটওয়্যারের <b>v1.02 (Demo Version)</b> ব্যবহার করছেন।
+            <br><br>
+            দয়া করে মনে রাখবেন—এটি একটি <b>ডেমো ভার্সন</b>। এখানে কিছু গ্লিচ, বাগ এবং অপ্রত্যাশিত আচরণ থাকা স্বাভাবিক।
+            <br><br>
+            সময় ও সীমাবদ্ধতার কারণে সফটওয়্যারটি <b>লো কনফিগারেশন PC</b> লক্ষ্য করে তৈরি করা হয়েছে,
+            যাতে সবাই অন্তত PC-তে <b>বাংলা টাইপিং (বিজয়)</b> প্র্যাকটিস করতে পারে।
+            <br><br>
+            সফটওয়্যারটি এখনো পুরোপুরি অপ্টিমাইজড নয়, অনেক বাগ এখনো ফিক্স করা হয়নি এবং
+            মূল ভার্সনের অনেক ফিচার ও অপশন এখানে অনুপস্থিত। বিশেষ করে বাংলা বিজয় কিবোর্ডের ফুল লেআউটটা এখানে দেওয়া নাই এবং কিছু কিছু ফাংশনাল কনফ্লিক্ট আছে। ফুল ভার্সনে সব ফিক্সড আছে এবং মাল্টিপল লেআউটের সুবিধা আছে।
+            <br><br>
+            <div class="popup-message bengali-note">
+                <p>
+                    সমস্যাগুলো সাধারণত বাংলা মুডেই দেখা যায়। কারণ, ইংরেজির মতো
+                    বাংলায় এখনো এই ধরণের পরিপূর্ণ টাইপিং সিমুলেটর নেই। <br>কারণ 
+                    বাংলার ক্ষেত্রে <b>বাংলা ব্যাকরণ</b> এবং <b>কোড নলেজ</b> এই দুইয়ের সমন্বয় অত্যন্ত জরুরি।
+                    বাংলা বর্ণ ও বিজয় (ক্লাসিক) কিবোর্ডের সিকুয়েন্স স্বাভাবিকভাবেই
+                    জটিল এবং এই বিষয়ে রিসোর্সও সীমিত।
+                </p>
+                <p>
+                    সহজভাবে বললে—ইংরেজিতে <i>Forgive</i> শব্দটি ৭টি অক্ষর পরপর টাইপ করলেই
+                    সুন্দরভাবে তৈরি হয়ে যায়। কিন্তু বাংলায় <b>ক্ষমা</b> লিখতে হলে
+                    <code>ক্ + ষ</code> টাইপ করে <b>ক্ষ</b> তৈরি করতে হয়, যেখানে পুরো অক্ষরের
+                    চেহারাই বদলে যায়।
+                </p>
+                <p>
+                    একইভাবে যতি চিহ্ন, যুক্তবর্ণ, কার, ফলা—এই সবকিছু মিলিয়ে বাংলা টাইপিং
+                    একটি ব্যাক-এন্ড কমপ্লেক্স প্রসেস। অনেক সময় ২–৩–৪টি, এমনকি কখনও কখনও
+                    ৫টি আলাদা বর্ণ/কার/ফলা মিলে একটি মাত্র যুক্তবর্ণ তৈরি হয়,
+                    যার প্রতিটির চেহারা ইউনিক।
+                </p>
+                <p>
+                    এই সব বর্ণকে একটি নির্দিষ্ট সিকুয়েন্স অনুযায়ী প্রোগ্রাম করতে হয়,
+                    যা বাস্তবে অত্যন্ত জটিল একটি কাজ।
+                </p>
+                <p>
+                    তবুও অল্প সময়ের মধ্যে আমি এখানে যতটা সম্ভব
+                    <b>বিজয় (ক্লাসিক)</b> লেআউটের আদলে কী-ম্যাপিং ফাংশনিং করার চেষ্টা করেছি।
+                    তবে স্বীকার করছি—এখনও ব্যাপক পরিমাণ উন্নতির সুযোগ রয়েছে।
+                    উদাহরণস্বরূপ, মাঝে মাঝে টেক্সট কালারিং সংক্রান্ত কিছু সমস্যা দেখা দিতে পারে।
+                </p>
+                <p>
+                    এগুলো সবই সমাধানযোগ্য, কিন্তু তার জন্য প্রয়োজন
+                    <b>আপনাদের সমর্থন</b> এবং <b>আমার সময়</b>।
+                    এই দুইয়ের ওপরই মূলত এই প্রোগ্রামের ভবিষ্যৎ নির্ভর করছে।
+                </p>
+                <p><b>আশা করি বিষয়টি বুঝতে পেরেছেন।</b></p>
+            </div>
+            আপনার প্রয়োজন ও কাজের ধরন অনুযায়ী এই সীমাবদ্ধতাগুলোর সাথে মানিয়ে নিন,
+            অথবা <b>মূল ভার্সন</b> ব্যবহার করুন।
+            <br><br>
+            মূল ভার্সন ফ্রি ব্যবহার করতে চাইলে ওয়েবসাইট ভিজিট করুন,
+            অথবা যেকোনো প্রয়োজনে আমাকে সরাসরি নক দিতে পারেন।
+        </p>
+    </div>
     <a href="https://www.facebook.com/muhammad.emon.738798" target="_blank" class="chat-now-btn">
         মেসেজ দিন <i class="fas fa-paper-plane"></i>
     </a>
     <a href="https://zubaxit.github.io/Repo/" target="_blank" class="visit-site-btn">
-    🌐 ওয়েবসাইট ভিজিট করুন
-</a>
-
+        🌐 ওয়েবসাইট ভিজিট করুন
+    </a>
 </div>
 
 <div id="warningModal" class="modal-overlay" style="display: none;">
@@ -236,20 +214,16 @@
                 <i class="fas fa-redo"></i> Reset
             </button>
             <div class="settings-group">
-    
-    <div class="reset-dropdown-wrapper" style="position: relative;">
-        <button class="stylish-btn" onclick="toggleResetMenu()" title="রিসেট অপশন">
-            <i class="fas fa-power-off"></i> 
-        </button>
-        <div id="resetDropdown" class="reset-dropdown-content">
-            <a href="#" onclick="softReset()"><i class="fas fa-sync-alt"></i> রিসেট (রিফ্রেশ)</a>
-            <a href="#" onclick="hardReset()" class="danger-option"><i class="fas fa-trash-alt"></i> হার্ড রিসেট</a>
-        </div>
-    </div>
-
-   
-    
-    </div>
+                <div class="reset-dropdown-wrapper" style="position: relative;">
+                    <button class="stylish-btn" onclick="toggleResetMenu()" title="রিসেট অপশন">
+                        <i class="fas fa-power-off"></i> 
+                    </button>
+                    <div id="resetDropdown" class="reset-dropdown-content">
+                        <a href="#" onclick="softReset()"><i class="fas fa-sync-alt"></i> রিসেট (রিফ্রেশ)</a>
+                        <a href="#" onclick="hardReset()" class="danger-option"><i class="fas fa-trash-alt"></i> হার্ড রিসেট</a>
+                    </div>
+                </div>
+            </div>
             <button class="stylish-btn theme-btn" onclick="toggleTheme()" title="ডার্ক মোড">
                 <i class="fas fa-moon"></i>
             </button>
@@ -260,21 +234,23 @@
             <button class="stylish-btn" onclick="openProSettings()" title="Pro Settings">
                 <i class="fas fa-cog"></i>
             </button>
-            <div class="auth-section">
-  <button id="login-btn" class="btn-login">
-    <i class="fab fa-google"></i> G Login
+           <button onclick="openMultiplayerModal()" class="icon-btn multiplayer-trigger" title="Multiplayer Mode">
+    <i class="fas fa-users"></i>
 </button>
+            <div class="auth-section">
+                <button id="login-btn" class="btn-login">
+                    <i class="fab fa-google"></i> G Login
+                </button>
 
-    <div id="userProfileArea" style="display: none; align-items: center; gap: 10px; cursor: pointer;" onclick="handleLogout()" title="Click to Logout">
-        <img id="userImgDisplay" src="" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white;">
-        <div style="line-height: 1.2;">
-            <span id="userNameDisplay" style="font-weight: bold; font-size: 0.9rem;">User</span>
-            <span id="proBadgeDisplay" style="display:none; background: gold; color: black; font-size: 0.6rem; padding: 1px 4px; border-radius: 4px;">PRO</span>
+                <div id="userProfileArea" style="display: none; align-items: center; gap: 10px; cursor: pointer;" onclick="handleLogout()" title="Click to Logout">
+                    <img id="userImgDisplay" src="" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white;">
+                    <div style="line-height: 1.2;">
+                        <span id="userNameDisplay" style="font-weight: bold; font-size: 0.9rem;">User</span>
+                        <span id="proBadgeDisplay" style="display:none; background: gold; color: black; font-size: 0.6rem; padding: 1px 4px; border-radius: 4px;">PRO</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-        </div>
-        
     </header>
 
     <div id="customInputArea" class="custom-area" style="display: none;">
@@ -296,14 +272,14 @@
             <i class="fas fa-play"></i> কাস্টম স্টার্ট
         </button>
     </div>
-<div id="insightPanel">
-    <div id="profilePanel" class="insight-box">
-        <h4>Typing Analysis</h4>
-        <div id="typingBadges"></div>
-        <p id="typingSummary">Start typing to see analysis...</p>
-    </div>
-</div>
 
+    <div id="insightPanel">
+        <div id="profilePanel" class="insight-box">
+            <h4>Typing Analysis</h4>
+            <div id="typingBadges"></div>
+            <p id="typingSummary">Start typing to see analysis...</p>
+        </div>
+    </div>
 
     <div class="typing-section" id="typingSection">
         <div class="text-display" id="quoteDisplay">লোড হচ্ছে...</div>
@@ -501,7 +477,11 @@
 
             <div id="tab-visuals" class="tab-section" style="display: none;">
                 <h2>Visual Customization</h2>
-                
+                <div class="setting-group">
+                    <h3>⌨️ Keyboard Layout Style</h3>
+                    <div id="kbStyleGrid" class="kb-style-grid">
+                    </div>
+                </div>
                 <div class="setting-card">
                     <div class="card-header">
                         <i class="fas fa-swatchbook"></i> Quick Presets
@@ -560,20 +540,20 @@
                             <p style="font-size: 0.8rem; color: #888;">Note: Large images may not save.</p>
                         </div>
 
-                     <div id="bgControl-animated" class="bg-sub-control" style="display:none; margin-top:10px;">
-    <div class="control-row">
-        <label>Effect:</label>
-        <select id="animTypeSelector" class="stylish-select" onchange="applyBackground('animated')">
-            <option value="leaves">🍃 Falling Leaves</option>
-            <option value="rain">💻 Matrix Rain</option>
-            <option value="snow">❄️ Snow Storm</option>
-            <option value="fireflies">✨ Golden Fireflies</option>
-            <option value="emojis">😎 Emoji Fun</option>
-            <option value="embers">🔥 Burning Embers</option>
-        </select>
-    </div>
-    <p style="font-size:0.7rem; color:#888; margin-top:5px;">Animation plays over your current background color.</p>
-</div>
+                        <div id="bgControl-animated" class="bg-sub-control" style="display:none; margin-top:10px;">
+                            <div class="control-row">
+                                <label>Effect:</label>
+                                <select id="animTypeSelector" class="stylish-select" onchange="applyBackground('animated')">
+                                    <option value="leaves">🍃 Falling Leaves</option>
+                                    <option value="rain">💻 Matrix Rain</option>
+                                    <option value="snow">❄️ Snow Storm</option>
+                                    <option value="fireflies">✨ Golden Fireflies</option>
+                                    <option value="emojis">😎 Emoji Fun</option>
+                                    <option value="embers">🔥 Burning Embers</option>
+                                </select>
+                            </div>
+                            <p style="font-size:0.7rem; color:#888; margin-top:5px;">Animation plays over your current background color.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -648,9 +628,6 @@
     </div>
 </div>
 
-
-
-
 <div id="guideModal" class="modal-overlay" style="display: none;">
     <div class="modal-content guide-content">
         <div class="carousel-container">
@@ -670,7 +647,6 @@
 </div>
 
 <canvas id="certCanvas" width="800" height="600" style="display: none;"></canvas>
-
 
 <div id="iosResultModal" style="display: none;">
     <div class="ios-card">
@@ -698,7 +674,7 @@
             <h4 style="margin: 0 0 10px 0; opacity: 0.6;">PERFORMANCE HISTORY</h4>
             <div class="chart-scroll-wrapper">
                 <div class="chart-area" id="chartBars">
-                    </div>
+                </div>
             </div>
         </div>
 
@@ -714,31 +690,40 @@
 </div>
 
 <div id="profileModal" class="modal-overlay hidden">
-    <div class="modal-content">
+    <div class="modal-content" style="position: relative; overflow: visible;"> 
         <div class="modal-header">
             <h3>User Profile</h3>
             <button id="closeProfileBtn" class="close-btn">&times;</button>
         </div>
         
         <div class="profile-body">
-            <div class="profile-top-grid" style="display:flex; gap:20px; align-items:center;">
-                <div style="position:relative; cursor:pointer;" title="Click to change avatar">
+            
+            <div class="profile-top-grid">
+                
+                <div class="avatar-container" title="Click to change avatar">
                     <img id="modalProfilePic" src="" alt="Profile" class="modal-avatar">
-                    <span style="position:absolute; bottom:0; right:0; background:gold; color:black; border-radius:50%; padding:2px 5px; font-size:10px;">✏️</span>
+                    <div class="edit-icon-badge">
+                        <i class="fas fa-pen"></i>
+                    </div>
                 </div>
                 
-                <div style="flex:1;">
-                    <div class="input-group">
-                        <label>Nickname</label>
-                        <input type="text" id="nicknameInput" placeholder="Enter name">
+                <div class="user-info-area">
+                    <div class="profile-name-group">
+                        <label>Display Name</label>
+                        <input type="text" id="nicknameInput" placeholder="User Name" autocomplete="off">
                     </div>
-                    <span id="memberStatus" class="status-badge free">Free Member</span>
+                    
+                    <span id="modalUsernameDisplay" class="username-tag">@loading...</span>
+                    
+                    <div>
+                        <span id="memberStatus" class="status-badge free">Free Member</span>
+                    </div>
                 </div>
             </div>
 
-            <hr style="border-color:#333; margin:15px 0;">
+            <hr style="border-color:rgba(255,255,255,0.1); margin: 20px 0;">
 
-            <h4 style="margin-bottom:10px; color:#888; font-size:0.9rem;">LIFETIME STATISTICS</h4>
+            <h4 style="margin-bottom:15px; color:#ddd; font-size:0.9rem; letter-spacing:1px;">LIFETIME STATISTICS</h4>
             <div class="stats-grid">
                 <div class="stat-box">
                     <span id="statTotalTests">0</span>
@@ -759,7 +744,7 @@
             </div>
 
             <div class="history-section">
-                <h4 style="margin-bottom:10px; color:#888; font-size:0.9rem;">RECENT HISTORY (30 Days)</h4>
+                <h4 style="margin-bottom:15px; color:#ddd; font-size:0.9rem; letter-spacing:1px;">RECENT HISTORY (30 Days)</h4>
                 <div id="profileChart" class="chart-container-profile">
                     <p style="color:#555; font-size:0.8rem;">No history found.</p>
                 </div>
@@ -767,18 +752,90 @@
 
             <div class="modal-actions">
                 <button id="saveProfileBtn" class="btn-primary">Save Changes</button>
-                <button id="modalLogoutBtn" class="btn-danger">Logout</button>
+                <button id="modalLogoutBtn" class="btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
+
+        </div> 
+        
+        <div class="scroll-indicator-arrow">
+            <i class="fas fa-angle-double-down"></i>
+        </div>
+
+    </div>
+</div>
+<div id="multiplayerModal" class="modal-overlay hidden">
+    <div class="modal-content mp-modal">
+        <div class="modal-header">
+            <h2>⚔️ Multiplayer Challenge</h2>
+            <button class="close-btn" onclick="closeMultiplayerModal()">×</button>
+        </div>
+        
+        <div class="mp-body">
+            <div class="my-uid-box">
+                <span>My UID:</span>
+                <code id="myUidDisplay">Loading...</code>
+                <button onclick="copyMyUid()" class="icon-btn" title="Copy UID"><i class="far fa-copy"></i></button>
+            </div>
+
+            <div class="mp-search-box">
+                <input type="text" id="opponentUidInput" placeholder="Paste friend's UID here...">
+                <button onclick="searchOpponent()" class="btn-primary">Search</button>
+            </div>
+
+            <div id="mpSearchResult" class="mp-user-card hidden">
+                <img src="" id="mpUserImg" class="mp-avatar" alt="User">
+                <div class="mp-user-info">
+                    <h4 id="mpUserName">User Name</h4>
+                    <span id="mpUserStatus" class="status-badge offline">Offline</span>
+                </div>
+                <button id="sendChallengeBtn" class="btn-success">Send Request</button>
+            </div>
+
+            <div id="mpFeedbackMsg" class="mp-msg"></div>
         </div>
     </div>
 </div>
-<script src="result-manager.js"></script>
+
+<div id="challengeToast" class="challenge-toast hidden">
+    <div class="toast-content">
+        <img id="challengerImg" src="" alt="">
+        <div>
+            <h4 id="challengerName">Unknown</h4>
+            <p>wants to race with you!</p>
+        </div>
+    </div>
+    <div class="toast-actions">
+        <button onclick="acceptChallenge()" class="btn-accept">Accept</button>
+        <button onclick="rejectChallenge()" class="btn-reject">Decline</button>
+    </div>
+</div>
+
 <script src="text-db.js"></script>
+<script src="bengali-utils.js"></script>
 <script src="settings-manager.js"></script>
 
-<script src="bengali-utils.js"></script>   <script src="ui-interactions.js"></script>  <script src="script.js"></script>       
+<script src="ui-interactions.js"></script>
 
 <script type="module" src="firebase-config.js"></script>
 <script type="module" src="auth-manager.js"></script>
+<script type="module" src="result-manager.js"></script>
+
+<script type="module" src="multiplayer-manager.js"></script>
+
+<script src="script.js"></script>
+
+<script type="module">
+    import { initMultiplayerListener } from "./multiplayer-manager.js";
+    import { onAuthStateChanged, auth } from "./firebase-config.js";
+
+    // ইউজার লগিন থাকলে চ্যালেঞ্জ শোনার জন্য লিসেনার চালু হবে
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("🟢 Multiplayer Service Started for: " + user.displayName);
+            initMultiplayerListener();
+        }
+    });
+</script>
+
 </body>
 </html>

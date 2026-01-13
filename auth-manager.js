@@ -1,6 +1,8 @@
 import { auth, provider, signInWithPopup, signOut, onAuthStateChanged, db, doc, getDoc, updateDoc, updateProfile } from "./firebase-config.js";
 
-// DOM Elements
+/* ==============================
+   GLOBAL VARIABLES & DOM ELEMENTS
+   ============================== */
 const loginBtn = document.getElementById('login-btn');
 const modal = document.getElementById('profileModal');
 const modalNameInput = document.getElementById('nicknameInput');
@@ -10,7 +12,6 @@ const closeBtn = document.getElementById('closeProfileBtn');
 const saveBtn = document.getElementById('saveProfileBtn');
 const logoutBtn = document.getElementById('modalLogoutBtn');
 
-// অবতার কালেকশন
 const avatars = [
     "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
     "https://cdn-icons-png.flaticon.com/512/4140/4140047.png",
@@ -20,7 +21,157 @@ const avatars = [
 ];
 let currentAvatarIndex = 0;
 
-// ১. লগিন বাটন হ্যান্ডলার
+// 🔥 Smart Save: অরিজিনাল ডাটা স্টোর করার ভেরিয়েবল
+let originalName = "";
+let originalPhoto = "";
+
+/* ==============================
+   🌍 GLOBAL STATE INITIALIZATION
+   ============================== */
+window.SITE_CONFIG = null;
+window.USER_USAGE = { banglaWords: 0, englishWords: 0 };
+window.IS_PRO_USER = false;
+window.IS_ADMIN = false;
+window.USER_ROLE = 'guest'; // Default role
+
+/* ==============================
+   🛠️ CONFIG & USAGE LOADERS
+   ============================== */
+
+// A. Load Site Config (Feature Flags)
+async function loadSiteConfig() {
+    try {
+        const ref = doc(db, "siteConfig", "main");
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+            window.SITE_CONFIG = snap.data();
+            console.log("✅ Site config loaded:", window.SITE_CONFIG);
+        } else {
+            console.warn("⚠ siteConfig/main not found, using defaults.");
+            // Default Fallback
+            window.SITE_CONFIG = { features: { proKeyboard: { free: true }, proFeatures: { free: false } } };
+        }
+    } catch (err) {
+        console.error("❌ Failed to load site config:", err);
+    }
+}
+// Load immediately
+loadSiteConfig();
+
+/// auth-manager.js - loadUserUsage UPDATE
+
+async function loadUserUsage(uid) {
+    try {
+        const ref = doc(db, "users", uid);
+        const snap = await getDoc(ref);
+        
+        // ডিফল্ট ভ্যালু
+        window.USER_USAGE = { banglaWords: 0, englishWords: 0 };
+        window.USER_LOCKS = { banglaUntil: 0, englishUntil: 0 }; // নতুন ভ্যারিয়েবল
+
+        if (snap.exists()) {
+            const data = snap.data();
+            
+            // Usage লোড
+            if (data.usage) {
+                window.USER_USAGE = data.usage;
+            }
+
+            // Lock Time লোড (যদি থাকে)
+            if (data.lockUntil) {
+                window.USER_LOCKS = {
+                    banglaUntil: data.lockUntil.bangla || 0,
+                    englishUntil: data.lockUntil.english || 0
+                };
+            }
+
+            // 🔥 অটো রিসেট চেক: যদি লকের সময় শেষ হয়ে যায়, তাহলে Usage ০ করে দাও
+            const now = Date.now();
+            let needUpdate = false;
+
+            // ইংরেজির সময় শেষ হলে রিসেট
+            if (window.USER_LOCKS.englishUntil > 0 && now > window.USER_LOCKS.englishUntil) {
+                window.USER_USAGE.englishWords = 0;
+                window.USER_LOCKS.englishUntil = 0;
+                needUpdate = true;
+            }
+
+            // বাংলার সময় শেষ হলে রিসেট
+            if (window.USER_LOCKS.banglaUntil > 0 && now > window.USER_LOCKS.banglaUntil) {
+                window.USER_USAGE.banglaWords = 0;
+                window.USER_LOCKS.banglaUntil = 0;
+                needUpdate = true;
+            }
+
+            // যদি রিসেট হয়, তাহলে ডাটাবেসেও আপডেট করে দাও
+            if (needUpdate) {
+                await updateDoc(ref, {
+                    usage: window.USER_USAGE,
+                    lockUntil: window.USER_LOCKS
+                });
+                console.log("♻️ Limit expired! Usage reset successfully.");
+            }
+        }
+    } catch (e) {
+        console.error("Error loading usage/locks:", e);
+    }
+}
+
+/* ==============================
+   🔐 PERMISSION GATES & LIMITS
+   ============================== */
+
+// ✅ CENTRAL PERMISSION CHECK
+window.canUse = function (featureKey) {
+    // 1. If config not loaded yet, default block unless simple check
+    if (!window.SITE_CONFIG || !window.SITE_CONFIG.features) {
+        // Fallback: If just checking pro status
+        if (featureKey === 'isPro') return window.IS_PRO_USER;
+        return false;
+    }
+
+    const rules = window.SITE_CONFIG.features[featureKey];
+    if (!rules) return false; // Unknown feature = block
+
+    // 2. Admin Bypass
+    if (window.IS_ADMIN) return true;
+
+    // 3. Guest Check
+    if (!auth.currentUser) {
+        return rules.guest === true;
+    }
+
+    // 4. Pro User Check
+    if (window.IS_PRO_USER) {
+        return rules.pro === true;
+    }
+
+    // 5. Free User Check
+    return rules.free === true;
+};
+
+// ✅ LIMIT CHECKER FUNCTION
+window.hasExceededLimit = function (mode) {
+    // Pro & Admin have no limits
+    if (window.IS_PRO_USER || window.IS_ADMIN) return false;
+  
+    if (mode === "bengali") {
+        return window.USER_USAGE.banglaWords >= 200;
+    }
+  
+    if (mode === "english" || mode === "coding") {
+        // Coding counts as English limit for now
+        return window.USER_USAGE.englishWords >= 300;
+    }
+  
+    return false;
+};
+
+/* ==============================
+   1. AUTHENTICATION & UI EVENTS
+   ============================== */
+
 if(loginBtn) {
     loginBtn.addEventListener('click', () => {
         const user = auth.currentUser;
@@ -32,153 +183,27 @@ if(loginBtn) {
     });
 }
 
-// ২. প্রোফাইল ওপেন এবং ডাটা লোড
-async function openProfileModal(user) {
-    modal.classList.remove('hidden');
-    
-    // বেসিক ইনফো সেট করা
-    modalImg.src = user.photoURL || avatars[0];
-    modalNameInput.value = user.displayName;
-    
-    // ডাটাবেস থেকে লেটেস্ট স্ট্যাটাস আনা
-    try {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            // লাইফটাইম স্ট্যাটাস আপডেট
-            document.getElementById('statTotalTests').innerText = data.totalTests || 0;
-            document.getElementById('statTotalWords').innerText = data.totalWords || 0;
-            document.getElementById('statAvgWPM').innerText = Math.round(data.avgWPM || 0);
-            document.getElementById('statAccuracy').innerText = (data.avgAcc || 0) + "%";
+// চেক করে বাটন দেখাবে কি না
+function checkChanges() {
+    const currentName = modalNameInput.value.trim();
+    const currentPhoto = modalImg.src;
 
-            // প্রো স্ট্যাটাস চেক
-            if(data.isPro) {
-                modalStatus.innerText = "PRO MEMBER 👑";
-                modalStatus.style.background = "gold";
-                modalStatus.style.color = "black";
-            }
-
-            // 🔥 গ্রাফ রেন্ডার করা (হিস্টোরি থেকে)
-            if(data.history && Array.isArray(data.history)) {
-                renderProfileHistory(data.history);
-            } else {
-                document.getElementById('profileChart').innerHTML = '<p style="color:#555; font-size:12px; margin:auto;">No history found yet.</p>';
-            }
-        }
-    } catch (err) {
-        console.error("Profile Load Error:", err);
+    if (currentName !== originalName || currentPhoto !== originalPhoto) {
+        saveBtn.classList.add('show-save'); // বাটন দেখাও
+    } else {
+        saveBtn.classList.remove('show-save'); // বাটন লুকাও
     }
 }
 
-// ৩. প্রোফাইল চার্ট রেন্ডার ফাংশন (রেজাল্ট পপআপের হুবহু কপি)
-function renderProfileHistory(fullHistory) {
-    const container = document.getElementById('profileChart');
-    if(!container) return;
-    container.innerHTML = '';
-
-    // ৩০ দিনের ফিল্টার এবং সর্টিং
-    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-    
-    // ডাটা ফিল্টার করা (যাতে শুধু লাস্ট ৩০ দিনের ডাটা থাকে)
-    const recentData = fullHistory.filter(item => {
-        // পুরনো ডাটাতে timestamp নাও থাকতে পারে, তাই date চেক
-        const itemTime = item.timestamp || new Date().getTime(); 
-        return itemTime >= thirtyDaysAgo;
-    });
-
-    // রিভার্স করা যাতে লেটেস্ট ডানে থাকে (অপশনাল)
-    // recentData.reverse(); 
-
-    if(recentData.length === 0) {
-        container.innerHTML = '<p style="color:#555; margin:auto;">No recent activity (30 Days)</p>';
-        return;
-    }
-
-    // স্কেলিং ভ্যালু (Result Manager এর মতোই)
-    const MAX_WPM = 100;
-    const MAX_TIME = 60;
-    const MAX_ERR = 10;
-
-    recentData.forEach(data => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'bar-wrapper';
-
-        const group = document.createElement('div');
-        group.className = 'bar-group';
-        // স্টাইল ফিক্স (যেহেতু CSS ক্লাসগুলো result-manager এ আছে)
-        group.style.display = 'flex';
-        group.style.gap = '2px';
-        group.style.alignItems = 'flex-end';
-        group.style.height = '80px'; // গ্রাফের হাইট
-
-        // --- WPM Bar ---
-        const wpmBar = document.createElement('div');
-        let wpmH = (data.wpm / MAX_WPM) * 100;
-        if(wpmH > 100) wpmH = 100; if(wpmH < 5) wpmH = 5;
-        
-        wpmBar.style.height = `${wpmH}%`;
-        wpmBar.style.width = '6px';
-        wpmBar.style.background = data.wpm > 50 ? '#ffd700' : '#007AFF'; // গোল্ড বা ব্লু
-        wpmBar.style.borderRadius = '2px';
-        wpmBar.title = `${data.wpm} WPM`;
-
-        // --- Time Bar ---
-        const timeBar = document.createElement('div');
-        let tVal = data.time || 0;
-        let timeH = (tVal / MAX_TIME) * 100;
-        if(timeH > 100) timeH = 100; if(timeH < 5 && tVal > 0) timeH = 5;
-
-        timeBar.style.height = `${timeH}%`;
-        timeBar.style.width = '6px';
-        timeBar.style.background = '#444';
-        timeBar.style.borderRadius = '2px';
-        timeBar.title = `${tVal}s`;
-
-        // --- Error Bar ---
-        const errBar = document.createElement('div');
-        let errH = (data.err / MAX_ERR) * 100;
-        if(errH > 100) errH = 100; 
-        if(data.err === 0) errH = 0; else if(errH < 5) errH = 5;
-
-        errBar.style.height = `${errH}%`;
-        errBar.style.width = '6px';
-        errBar.style.background = '#ff4444';
-        errBar.style.borderRadius = '2px';
-        errBar.title = `${data.err} Errors`;
-
-        // গ্রাফে বার যোগ করা
-        group.appendChild(wpmBar);
-        group.appendChild(timeBar);
-        group.appendChild(errBar);
-
-        // লেবেল (তারিখ বা স্কোর)
-        const label = document.createElement('div');
-        label.className = 'bar-label';
-        // শুধু ছোট তারিখ দেখাবো জায়গার অভাবে
-        const shortDate = data.date ? data.date.split(',')[0] : ''; 
-        label.innerHTML = `<span style="font-weight:bold;">${data.wpm}</span><br><span style="font-size:7px; opacity:0.6;">${data.mode}</span>`;
-
-        wrapper.appendChild(group);
-        wrapper.appendChild(label);
-        container.appendChild(wrapper);
-    });
-
-    // অটোমেটিক স্ক্রল করে শেষে নিয়ে যাওয়া
-    setTimeout(() => {
-        container.scrollLeft = container.scrollWidth;
-    }, 100);
-}
-
-// ৪. ছবি চেঞ্জ
+// ইভেন্ট লিসেনার ফর স্মার্ট সেভ বাটন
 modalImg.addEventListener('click', () => {
     currentAvatarIndex = (currentAvatarIndex + 1) % avatars.length;
     modalImg.src = avatars[currentAvatarIndex];
+    checkChanges(); // 🔥 চেক চেঞ্জ
 });
 
-// ৫. প্রোফাইল সেভ
+modalNameInput.addEventListener('input', checkChanges); // 🔥 চেক চেঞ্জ
+
 saveBtn.addEventListener('click', async () => {
     const user = auth.currentUser;
     const newName = modalNameInput.value;
@@ -190,7 +215,12 @@ saveBtn.addEventListener('click', async () => {
         await updateDoc(userRef, { displayName: newName, photoURL: newPhoto });
 
         alert("Profile Updated Successfully!");
-        modal.classList.add('hidden');
+        
+        // আপডেট হওয়ার পর নতুন ভ্যালু অরিজিনাল হয়ে যাবে
+        originalName = newName;
+        originalPhoto = newPhoto;
+        checkChanges(); // বাটন আবার হাইড হবে
+
         loginBtn.innerHTML = `<img src="${newPhoto}" style="width:25px;border-radius:50%;margin-right:5px;"> ${newName}`;
 
     } catch (error) {
@@ -199,15 +229,334 @@ saveBtn.addEventListener('click', async () => {
     }
 });
 
-// ৬. ক্লোজ এবং লগআউট
 closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
 logoutBtn.addEventListener('click', () => {
     signOut(auth).then(() => location.reload());
 });
 
-// ৭. অথ স্টেট
-onAuthStateChanged(auth, (user) => {
-    if (user && loginBtn) {
-        loginBtn.innerHTML = `<img src="${user.photoURL}" style="width:25px;border-radius:50%;margin-right:5px;"> ${user.displayName}`;
+/* ==============================
+   2. PROFILE MODAL LOGIC
+   ============================== */
+
+async function openProfileModal(user) {
+    modal.classList.remove('hidden');
+    saveBtn.classList.remove('show-save'); // শুরুতে বাটন হাইড
+    
+    // লোডিং স্টেট
+    const container = document.getElementById('profileChart');
+    if(container) container.innerHTML = '<p style="color:#888;font-size:12px;text-align:center;">Loading Data...</p>';
+
+    // ডাটা সেট এবং অরিজিনাল ভ্যালু স্টোর
+    modalImg.src = user.photoURL || avatars[0];
+    modalNameInput.value = user.displayName;
+    
+    originalName = user.displayName;
+    originalPhoto = user.photoURL || avatars[0];
+
+    try {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            
+            // Stats
+            document.getElementById('statTotalTests').innerText = data.totalTests || 0;
+            document.getElementById('statTotalWords').innerText = data.totalWords || 0;
+            document.getElementById('statAvgWPM').innerText = Math.round(data.avgWPM || 0);
+            document.getElementById('statAccuracy').innerText = Math.round(data.avgAcc || 0) + "%";
+
+            // Username Tag
+            let usernameTag = document.getElementById('modalUsernameDisplay');
+            if(!usernameTag) {
+                usernameTag = document.createElement('span');
+                usernameTag.id = 'modalUsernameDisplay';
+                usernameTag.className = 'username-tag';
+                modalNameInput.parentNode.appendChild(usernameTag);
+            }
+            
+            let displayUser = data.username;
+            if(!displayUser) {
+                // যদি ডাটাবেসে ইউজারনেম না থাকে, ইনস্ট্যান্ট জেনারেট করে দেখাবে
+                const rnd = Math.floor(1000 + Math.random() * 9000);
+                const cleanName = user.displayName ? user.displayName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '') : "User";
+                displayUser = `@${cleanName}_${rnd}`;
+            }
+            usernameTag.innerText = displayUser;
+
+            // 🔥 ORDER CHANGED: Badges will be rendered FIRST
+            renderBadges(data.badges || []);
+
+            // 🔥 Then Level Bar (নিচে)
+            renderLevelBar(data.level || 1, data.ovr || 0);
+
+            // Pro Status
+            if(data.isPro) {
+                modalStatus.innerText = "PRO MEMBER 👑";
+                modalStatus.style.background = "gold";
+                modalStatus.style.color = "black";
+            } else {
+                modalStatus.innerText = "Free Member";
+                modalStatus.style.background = "#e0e0e0";
+                modalStatus.style.color = "#555";
+            }
+
+            // Chart (10 Days)
+            if(data.history && Array.isArray(data.history)) {
+                renderProfileHistory(data.history);
+            } else {
+                container.innerHTML = '<p style="color:#555; font-size:12px; margin:auto;">No history found yet.</p>';
+            }
+        }
+    } catch (err) {
+        console.error("Profile Load Error:", err);
+        if(container) container.innerHTML = '<p style="color:red; font-size:12px;">Error loading data.</p>';
+    }
+}
+
+// 1. Badges Renderer
+function renderBadges(badges) {
+    const existingBadges = document.querySelector('.badges-section');
+    if(existingBadges) existingBadges.remove();
+
+    const allBadges = [
+        { name: "Rookie", icon: "fa-seedling" },
+        { name: "Speedster", icon: "fa-bolt" },
+        { name: "Ninja", icon: "fa-user-ninja" },
+        { name: "God", icon: "fa-dragon" },
+        { name: "Perfectionist", icon: "fa-gem" }
+    ];
+
+    let badgeHtml = `<div class="badges-section"><h5><i class="fas fa-medal"></i> Achievements (${badges.length})</h5><div class="badges-grid">`;
+    
+    allBadges.forEach(b => {
+        const isUnlocked = badges.includes(b.name);
+        badgeHtml += `
+            <div class="mini-badge ${isUnlocked ? 'unlocked' : ''}" style="opacity: ${isUnlocked ? 1 : 1}">
+                <i class="fas ${b.icon}"></i> ${b.name}
+            </div>
+        `;
+    });
+    badgeHtml += `</div></div>`;
+
+    // 🔥 ব্যাজ এখন ইউজারনেমের ঠিক নিচে ইনজেক্ট হবে
+    const topGrid = document.querySelector('.profile-top-grid');
+    if(topGrid) topGrid.insertAdjacentHTML('afterend', badgeHtml);
+}
+
+// 2. Level Bar Renderer
+function renderLevelBar(level, ovr) {
+    const existingBar = document.querySelector('.level-container');
+    if(existingBar) existingBar.remove();
+
+    const levelHtml = `
+    <div class="level-container">
+        <div class="level-info">
+            <span>LVL ${level}</span>
+            <span>OVR ${ovr}</span>
+        </div>
+        <div class="level-bar-bg">
+            <div class="level-progress" style="width: 0%"></div>
+            <div class="ovr-tooltip">XP: ${ovr} / ${(level * 300)}</div>
+        </div>
+    </div>`;
+    
+    // 🔥 লেভেল এখন ব্যাজের নিচে (Stats Grid এর আগে) বসবে
+    const statsGrid = document.querySelector('.stats-grid');
+    if(statsGrid) statsGrid.insertAdjacentHTML('beforebegin', levelHtml);
+
+    setTimeout(() => {
+        // 🔥 Harder Level Calc for UI Bar (300 points per level)
+        const progress = Math.min((ovr % 300) / 300 * 100, 100); 
+        const bar = document.querySelector('.level-progress');
+        if(bar) bar.style.width = `${progress}%`;
+    }, 100);
+}
+
+// 3. Chart Renderer
+function renderProfileHistory(fullHistory) {
+    const container = document.getElementById('profileChart');
+    if(!container) return;
+    container.innerHTML = '';
+    container.style.paddingTop = "35px";
+    container.style.alignItems = "flex-end"; 
+
+    const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+    const recentData = fullHistory.filter(item => (item.timestamp || 0) >= tenDaysAgo);
+
+    if(recentData.length === 0) {
+        container.innerHTML = '<p style="color:#555; margin:auto;">No activity in last 10 days</p>';
+        return;
+    }
+
+    const MAX_WPM = 100; const MAX_TIME = 60; const MAX_ERR = 10;
+
+    recentData.forEach(data => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'bar-wrapper';
+
+        const group = document.createElement('div');
+        group.className = 'bar-group';
+
+        const wpmBar = document.createElement('div');
+        wpmBar.className = 'sub-bar bar-wpm';
+        let wpmH = (data.wpm / MAX_WPM) * 100; if(wpmH > 100) wpmH = 100; if(wpmH < 5) wpmH = 5;
+        wpmBar.style.height = `${wpmH}%`; wpmBar.setAttribute('data-val', `${data.wpm} WPM`);
+
+        const timeBar = document.createElement('div');
+        timeBar.className = 'sub-bar bar-time';
+        let tVal = data.time || 0; let timeH = (tVal / MAX_TIME) * 100; if(timeH > 100) timeH = 100; if(timeH < 5 && tVal > 0) timeH = 5;
+        timeBar.style.height = `${timeH}%`; timeBar.setAttribute('data-val', `${tVal}s`);
+
+        const errBar = document.createElement('div');
+        errBar.className = 'sub-bar bar-err';
+        let errCount = (data.err !== undefined) ? data.err : (data.errors || 0);
+        let errH = (errCount / MAX_ERR) * 100; if(errH > 100) errH = 100; if(errCount === 0) errH = 0; else if(errH < 5) errH = 5;
+        errBar.style.height = `${errH}%`; errBar.setAttribute('data-val', `${errCount} Err`);
+
+        group.appendChild(wpmBar); group.appendChild(timeBar); group.appendChild(errBar);
+
+        const label = document.createElement('div');
+        label.className = 'bar-label';
+        const displayDate = data.dateDisplay || new Date(data.timestamp).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+        const displayScore = data.score || 0;
+        const displayMode = (data.mode || 'ENG') + '-' + (data.lvl || 'Easy');
+
+        label.innerHTML = `<span style="font-weight:bold; font-size:0.7rem;">${displayDate}</span><br><span style="font-size:0.55rem; opacity:0.7;">Score: ${displayScore} <br> ${displayMode}</span>`;
+
+        wrapper.appendChild(group); wrapper.appendChild(label);
+        container.appendChild(wrapper);
+    });
+
+    setTimeout(() => { container.scrollLeft = container.scrollWidth; }, 100);
+}
+
+/* ==============================
+   🔥 3. HELPER & CORE AUTH LISTENER
+   ============================== */
+
+// ✅ NEW: Helper function to handle UI updates
+function updateProfileUI(user) {
+    if (user) {
+        // Login UI Update
+        if (loginBtn) {
+            loginBtn.innerHTML = `
+                <img src="${user.photoURL || avatars[0]}" style="width:25px;border-radius:50%;margin-right:5px;">
+                ${user.displayName || 'User'}
+            `;
+        }
+        // Optional: Show Badge in Header if element exists
+        const badge = document.getElementById('proBadgeDisplay');
+        if (badge) badge.style.display = window.IS_PRO_USER ? 'inline-block' : 'none';
+        
+    } else {
+        // Guest UI Update
+        if (loginBtn) {
+            loginBtn.innerHTML = '<i class="fas fa-user"></i> Login';
+        }
+    }
+}
+
+// ✅ CORE AUTH LISTENER (🔥 USERNAME & MULTIPLAYER ADDED)
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // ১. ইউজার লগিন অবস্থায় আছে
+        
+        // (Optional) হেডারে নাম আপডেট করা
+        const userBtn = document.getElementById('user-profile-btn');
+        if (userBtn) {
+            userBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName ? user.displayName.split(' ')[0] : 'Profile'}`;
+        }
+
+        try {
+            const ref = doc(db, "users", user.uid);
+            const snap = await getDoc(ref);
+            
+            if (snap.exists()) {
+                const data = snap.data();
+                
+                // গ্লোবাল ভেরিয়েবল সেট করা হচ্ছে
+                window.IS_PRO_USER = data.isPro === true;
+                window.IS_ADMIN = data.isAdmin === true;
+
+                // রোল নির্ধারণ
+                if (window.IS_PRO_USER || window.IS_ADMIN) {
+                    window.USER_ROLE = 'pro';
+                } else {
+                    window.USER_ROLE = 'free';
+                }
+
+                // 🔥 [UPDATED] USERNAME & SEARCH KEYWORDS LOGIC
+                // নাম থেকে স্পেশাল ক্যারেক্টার বাদ দিয়ে ছোট হাতের করা
+                const baseName = (user.displayName || "user").replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
+                
+                let finalUsername = data.username;
+                let updateData = {};
+                let needsUpdate = false;
+
+                // ১. যদি ইউজারনেম না থাকে, নতুন বানাও
+                if (!finalUsername) {
+                    const randomCode = Math.floor(1000 + Math.random() * 9000);
+                    finalUsername = `${baseName}#${randomCode}`;
+                    updateData.username = finalUsername;
+                    needsUpdate = true;
+                    console.log("✅ Username Generated:", finalUsername);
+                }
+
+                // ২. 🔥 সার্চ কি-ওয়ার্ড তৈরি করা (যাতে নাম বা পুরো আইডি দিয়ে খোঁজা যায়)
+                if (!data.searchKeywords) {
+                    const keywords = [
+                        baseName,                 // শুধু নাম (যেমন: "rahim")
+                        finalUsername.toLowerCase() // পুরো আইডি (যেমন: "rahim#1234")
+                    ];
+                    // ডুপ্লিকেট রিমুভ করা
+                    updateData.searchKeywords = [...new Set(keywords)];
+                    needsUpdate = true;
+                    console.log("🔍 Search Keywords Added");
+                }
+
+                // যদি কোনো আপডেট লাগে, ডাটাবেসে সেভ করো
+                if (needsUpdate) {
+                    await updateDoc(ref, updateData);
+                }
+
+                window.CURRENT_USERNAME = finalUsername;
+
+                // Usage লোড করা
+                await loadUserUsage(user.uid);
+                
+                // UI আপডেট করো
+                updateProfileUI(user);
+            }
+        } catch (e) {
+            console.error("Auth Error:", e);
+        }
+
+        // সাইডবার আপডেট
+        if (typeof window.updateSidebarAccess === 'function') {
+            window.updateSidebarAccess();
+        }
+
+        // 🔥 মাল্টিপ্লেয়ার লিসেনার চালু করা
+        if (typeof window.initMultiplayerListener === 'function') {
+            window.initMultiplayerListener();
+        }
+
+    } else {
+        // ২. ইউজার লগআউট (Guest) অবস্থায় আছে
+        console.log("👤 User is Guest");
+        
+        window.USER_ROLE = 'guest';
+        window.USER_USAGE = { banglaWords: 0, englishWords: 0 };
+        window.CURRENT_USERNAME = null;
+        
+        // UI রিসেট
+        updateProfileUI(null);
+
+        // সাইডবার আপডেট
+        if (typeof window.updateSidebarAccess === 'function') {
+            window.updateSidebarAccess();
+        }
     }
 });
