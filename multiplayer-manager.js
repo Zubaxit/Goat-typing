@@ -663,13 +663,13 @@ window.updateWeeklyStats = async function(totalChars, wpm, errors) {
 };
 
 // ৩. লিডারবোর্ড লোড করা
+// ৩. লিডারবোর্ড লোড করা (আপডেটেড)
 async function loadLeaderboard() {
     const list = document.getElementById('weeklyLeaderboardList');
     const loading = document.getElementById('lbLoading');
     if (!list) return;
 
     try {
-        // সবচেয়ে বেশি স্কোর ওয়ালা ৫ জন
         const q = query(collection(db, "users"), orderBy("currentWeeklyScore", "desc"), limit(5));
         const querySnapshot = await getDocs(q);
 
@@ -678,16 +678,15 @@ async function loadLeaderboard() {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            // ডাটা যদি বর্তমান সপ্তাহের না হয়, তাহলে স্কোর ০ দেখাবে (বা তাকে বাদ দিতে পারেন)
-            // সিম্পলিসিটির জন্য আমরা সরাসরি দেখাচ্ছি
             const score = data.currentWeeklyScore || 0;
             const wpm = data.weeklyStats ? Math.round(data.weeklyStats.totalWPM / data.weeklyStats.gamesPlayed) : 0;
             
             let rankClass = rank === 1 ? 'top-1' : (rank === 2 ? 'top-2' : (rank === 3 ? 'top-3' : ''));
             let rankIcon = rank === 1 ? '👑' : `#${rank}`;
 
+            // 🔥 আপডেটেড: onclick ইভেন্ট যোগ করা হয়েছে
             html += `
-                <li class="lb-item">
+                <li class="lb-item" onclick="openPublicProfile('${doc.id}', ${rank})">
                     <span class="lb-rank ${rankClass}">${rankIcon}</span>
                     <img src="${data.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="lb-avatar">
                     <div class="lb-info">
@@ -710,6 +709,79 @@ async function loadLeaderboard() {
         console.error("LB Error:", error);
     }
 }
+
+// ৪. পাবলিক প্রোফাইল ওপেন করা (নতুন ফাংশন)
+window.openPublicProfile = async function(uid, rank) {
+    const modal = document.getElementById('publicProfileModal');
+    if(!modal) return;
+
+    // লোডিং দেখানোর জন্য
+    document.getElementById('pubName').innerText = "Loading...";
+    modal.classList.remove('hidden');
+
+    try {
+        const userSnap = await getDoc(doc(db, "users", uid));
+        
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            const weekly = data.weeklyStats || {};
+
+            // ডাটা সেট করা
+            document.getElementById('pubPic').src = data.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            document.getElementById('pubName').innerText = data.displayName || "Unknown";
+           // 🔥 FIX: ডবল '@' সমস্যা সমাধান
+            let handle = data.username || "user";
+            // যদি নামের শুরুতে ইতিমধ্যে '@' থাকে, তাহলে আর বসাবো না
+            if (!handle.startsWith('@')) {
+                handle = '@' + handle;
+            }
+            document.getElementById('pubUsername').innerText = handle;
+            
+            // ব্যাজ সেট করা
+            const badge = document.getElementById('pubRankBadge');
+            badge.innerText = `#${rank}`;
+            badge.style.background = rank === 1 ? '#facc15' : (rank === 2 ? '#bdc3c7' : (rank === 3 ? '#d35400' : '#333'));
+            badge.style.color = rank > 3 ? '#fff' : '#000';
+
+            // স্ট্যাটস সেট করা
+            document.getElementById('pubScore').innerText = data.currentWeeklyScore || 0;
+            
+            const avgWpm = weekly.gamesPlayed > 0 ? Math.round(weekly.totalWPM / weekly.gamesPlayed) : 0;
+            document.getElementById('pubWPM').innerText = avgWpm;
+            document.getElementById('pubGames').innerText = weekly.gamesPlayed || 0;
+
+            // চ্যালেঞ্জ বাটন সেটআপ
+            const challengeBtn = document.getElementById('pubChallengeBtn');
+            
+            // নিজেকে চ্যালেঞ্জ করা যাবে না
+            if (auth.currentUser && auth.currentUser.uid === uid) {
+                challengeBtn.style.display = 'none';
+            } else {
+                challengeBtn.style.display = 'flex';
+                // বাটন ক্লিক করলে সরাসরি চ্যালেঞ্জ মডাল খুলবে এবং ইউজার সার্চ হয়ে যাবে
+                challengeBtn.onclick = function() {
+                    closePublicProfile();
+                    openMultiplayerModal();
+                    // সার্চ বক্সে নাম বসিয়ে সার্চ ট্রিগার করা
+                    const searchInput = document.getElementById('opponentUidInput');
+                    if (searchInput && data.username) {
+                        searchInput.value = data.username; // ইউজারনেম দিয়ে সার্চ
+                        searchOpponent(); // অটো সার্চ
+                    }
+                };
+            }
+        }
+    } catch (e) {
+        console.error("Profile Load Error:", e);
+        alert("Failed to load profile.");
+        closePublicProfile();
+    }
+};
+
+// মডাল বন্ধ করা
+window.closePublicProfile = function() {
+    document.getElementById('publicProfileModal').classList.add('hidden');
+};
 
 // পেজ লোড হলে লিডারবোর্ড আনবে
 document.addEventListener('DOMContentLoaded', loadLeaderboard);

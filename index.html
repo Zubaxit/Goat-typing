@@ -10,8 +10,45 @@
 </head>
 <body>
 
-<div id="animatedBgContainer"></div>
-<canvas id="effectCanvas"></canvas>
+    
+
+<div id="loaderOverlay">
+    <div class="loader-wrapper">
+        
+        <div class="q-ring ring-1"></div>
+        <div class="q-ring ring-2"></div>
+        <div class="q-ring ring-3"></div>
+        <div class="q-core"></div>
+
+        <div class="loading-text-container">
+            <div class="main-title">
+                <span class="letter-g">G</span>
+                <span class="letter-o">O</span>
+                <span class="letter-a">A</span>
+                <span class="letter-t">T</span>
+                <span class="space"> </span>
+                <span class="word-type">TYPING</span>
+            </div>
+            
+            <div class="loading-bar-container">
+                <div class="loading-bar-fill" id="loaderBarFill"></div>
+            </div>
+            
+            <div class="digital-percent">
+                <span id="loadingPercentage">0</span><span class="symbol">%</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="offlineOverlay" class="hidden">
+    <div class="offline-content">
+        <h1 class="glitch" data-text="CONNECTION LOST">CONNECTION LOST</h1>
+        <p class="cyber-text-small">RECONNECTING...</p>
+        <button onclick="window.location.reload()" class="retry-btn cybr-btn">RETRY</button>
+    </div>
+</div>
 
 <aside class="gt-sidebar">
 
@@ -392,31 +429,65 @@
         </div>
 
     </div>
-    <aside class="right-sidebar">
+   <aside class="right-sidebar" id="rightSidebarPanel">
+    
+    <div class="ad-box top-ad">
+        <span class="ad-label">Sponsored</span>
+        <div class="ad-content">
+            <p>🚀 Top Ad Space</p>
+            <small>300 x 250</small>
+        </div>
+    </div>
+
+    <div class="leaderboard-box">
+        <div class="lb-header">
+            <h3>🏆 সাপ্তাহিক সেরা</h3>
+            <small>Top 5 of This Week</small>
+        </div>
         
-        <div class="ad-box">
-            <span class="ad-label">Sponsored</span>
-            <div class="ad-content">
-                <p>🚀 Your Ad Here</p>
-                <small>300 x 250</small>
-            </div>
+        <div id="lbLoading" style="text-align:center; padding:15px; color:#888;">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
 
-        <div class="leaderboard-box">
-            <div class="lb-header">
-                <h3>🏆 সাপ্তাহিক সেরা</h3>
-                <small>Top 5 of This Week</small>
-            </div>
-            
-            <div id="lbLoading" style="text-align:center; padding:15px; color:#888;">
-                <i class="fas fa-spinner fa-spin"></i> Loading data...
-            </div>
+        <ul id="weeklyLeaderboardList" class="lb-list scrollable-lb">
+            </ul>
+    </div>
 
-            <ul id="weeklyLeaderboardList" class="lb-list">
-                </ul>
+    <div class="ad-box bottom-ad">
+        <span class="ad-label">Advertisement</span>
+        <div class="ad-content">
+            <p>🌟 Bottom Ad Space</p>
+            <small>300 x 250</small>
         </div>
+    </div>
 
-    </aside>
+    <div class="music-player-box hidden" id="proMusicPlayer">
+        <div class="music-header">
+            <span><i class="fas fa-headphones-alt"></i> Focus Mode</span>
+            <div class="live-wave">
+                <span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="music-info">
+            <div class="album-art">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="track-details">
+                <strong id="trackName">Lofi Beats 24/7</strong>
+                <small>Chill & Focus</small>
+            </div>
+        </div>
+        <div class="music-controls">
+            <button onclick="prevTrack()"><i class="fas fa-backward"></i></button>
+            <button onclick="togglePlay()" id="playPauseBtn" class="play-btn"><i class="fas fa-play"></i></button>
+            <button onclick="nextTrack()"><i class="fas fa-forward"></i></button>
+        </div>
+        <audio id="bgAudio" loop>
+            <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mp3">
+        </audio>
+    </div>
+
+</aside>
 
 </div>
 
@@ -943,6 +1014,52 @@
 </div>
     </div>
 </div>
+
+<div id="publicProfileModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 450px; background: linear-gradient(145deg, #1e1e2e, #16213e);">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="color: #4cc9f0;">Player Profile</h3>
+            <button onclick="closePublicProfile()" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="profile-body" style="text-align: center; padding-top: 20px;">
+            
+            <div style="position: relative; display: inline-block;">
+                <img id="pubPic" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #4361ee; object-fit: cover;">
+                <span id="pubRankBadge" style="position: absolute; bottom: 0; right: 0; background: #facc15; color: #000; font-size: 0.8rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">#1</span>
+            </div>
+
+            <h2 id="pubName" style="margin: 15px 0 5px 0; color: white;">User Name</h2>
+            <p id="pubUsername" style="color: #aaa; font-family: monospace; font-size: 1rem;">@username</p>
+
+            <div style="margin-top: 25px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <h4 style="margin: 0 0 15px 0; color: #facc15; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">🏆 Weekly Performance</h4>
+                
+                <div style="display: flex; justify-content: space-around;">
+                    <div>
+                        <strong id="pubScore" style="display: block; font-size: 1.5rem; color: white;">0</strong>
+                        <span style="font-size: 0.75rem; color: #888;">Points</span>
+                    </div>
+                    <div>
+                        <strong id="pubWPM" style="display: block; font-size: 1.5rem; color: #2ecc71;">0</strong>
+                        <span style="font-size: 0.75rem; color: #888;">Avg WPM</span>
+                    </div>
+                    <div>
+                        <strong id="pubGames" style="display: block; font-size: 1.5rem; color: #4cc9f0;">0</strong>
+                        <span style="font-size: 0.75rem; color: #888;">Matches</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="pubChallengeBtn" class="stylish-btn start-btn-stylish" style="width: 100%; margin-top: 25px; justify-content: center;">
+                <i class="fas fa-gamepad"></i> Challenge This Player
+            </button>
+
+        </div>
+    </div>
+</div>
+
+
 <script src="text-db.js"></script>
 <script src="online-db.js"></script>
 <script src="bengali-utils.js"></script>

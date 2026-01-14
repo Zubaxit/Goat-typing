@@ -68,7 +68,7 @@ async function loadUserUsage(uid) {
         
         // ডিফল্ট ভ্যালু
         window.USER_USAGE = { banglaWords: 0, englishWords: 0 };
-        window.USER_LOCKS = { banglaUntil: 0, englishUntil: 0 }; // নতুন ভ্যারিয়েবল
+        window.USER_LOCKS = { banglaUntil: 0, englishUntil: 0 }; // নতুন ভ্যারিয়েবল
 
         if (snap.exists()) {
             const data = snap.data();
@@ -86,25 +86,25 @@ async function loadUserUsage(uid) {
                 };
             }
 
-            // 🔥 অটো রিসেট চেক: যদি লকের সময় শেষ হয়ে যায়, তাহলে Usage ০ করে দাও
+            // 🔥 অটো রিসেট চেক: যদি লকের সময় শেষ হয়ে যায়, তাহলে Usage ০ করে দাও
             const now = Date.now();
             let needUpdate = false;
 
-            // ইংরেজির সময় শেষ হলে রিসেট
+            // ইংরেজির সময় শেষ হলে রিসেট
             if (window.USER_LOCKS.englishUntil > 0 && now > window.USER_LOCKS.englishUntil) {
                 window.USER_USAGE.englishWords = 0;
                 window.USER_LOCKS.englishUntil = 0;
                 needUpdate = true;
             }
 
-            // বাংলার সময় শেষ হলে রিসেট
+            // বাংলার সময় শেষ হলে রিসেট
             if (window.USER_LOCKS.banglaUntil > 0 && now > window.USER_LOCKS.banglaUntil) {
                 window.USER_USAGE.banglaWords = 0;
                 window.USER_LOCKS.banglaUntil = 0;
                 needUpdate = true;
             }
 
-            // যদি রিসেট হয়, তাহলে ডাটাবেসেও আপডেট করে দাও
+            // যদি রিসেট হয়, তাহলে ডাটাবেসেও আপডেট করে দাও
             if (needUpdate) {
                 await updateDoc(ref, {
                     usage: window.USER_USAGE,
@@ -169,9 +169,145 @@ window.hasExceededLimit = function (mode) {
 };
 
 /* ==============================
-   1. AUTHENTICATION & UI EVENTS
+   🔐 CORE AUTH LISTENER (FIXED)
    ============================== */
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // ১. ইউজার লগিন আছে
+        console.log("🟢 User Logged In:", user.displayName);
 
+        // UI আপডেট
+        updateProfileUI(user);
+
+        try {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+
+                // 🔥 PRO STATUS CHECK
+                const isPro = data.isPro === true || data.subscription === 'premium';
+                
+                // গ্লোবাল ভেরিয়েবল সেট
+                window.IS_PRO_USER = isPro;
+                window.IS_ADMIN = data.isAdmin === true;
+                window.USER_ROLE = isPro || window.IS_ADMIN ? 'pro' : 'free';
+
+                // 🔥 SIDEBAR UPDATE (ADS vs PRO)
+                if (typeof window.updateSidebarLayout === 'function') {
+                    window.updateSidebarLayout(isPro);
+                }
+
+                // ইউজারনেম এবং সার্চ কি-ওয়ার্ড লজিক
+                const baseName = (user.displayName || "user").replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
+                let finalUsername = data.username;
+                let updateData = {};
+                let needsUpdate = false;
+
+                // ১. যদি ইউজারনেম না থাকে, নতুন বানাও
+                if (!finalUsername) {
+                    const rnd = Math.floor(1000 + Math.random() * 9000);
+                    finalUsername = `${baseName}#${rnd}`;
+                    updateData.username = finalUsername;
+                    needsUpdate = true;
+                    console.log("✅ Username Generated:", finalUsername);
+                }
+
+                // ২. 🔥 সার্চ কি-ওয়ার্ড তৈরি করা (যাতে নাম বা পুরো আইডি দিয়ে খোঁজা যায়)
+                if (!data.searchKeywords) {
+                    const keywords = [
+                        baseName,                 // শুধু নাম (যেমন: "rahim")
+                        finalUsername.toLowerCase() // পুরো আইডি (যেমন: "rahim#1234")
+                    ];
+                    // ডুপ্লিকেট রিমুভ করা
+                    updateData.searchKeywords = [...new Set(keywords)];
+                    needsUpdate = true;
+                    console.log("🔍 Search Keywords Added");
+                }
+
+                // যদি কোনো আপডেট লাগে, ডাটাবেসে সেভ করো
+                if (needsUpdate) {
+                    await updateDoc(userRef, updateData);
+                }
+
+                window.CURRENT_USERNAME = finalUsername;
+
+                // Usage লোড করা
+                await loadUserUsage(user.uid);
+                
+                // UI আপডেট করো
+                updateProfileUI(user);
+            } else {
+                // নতুন ইউজার (ডাটাবেসে নেই) -> ফ্রি মোড
+                console.log("⚠️ User doc not found, treating as Free.");
+                window.IS_PRO_USER = false;
+                if (typeof window.updateSidebarLayout === 'function') window.updateSidebarLayout(false);
+            }
+
+        } catch (e) {
+            console.error("Auth Data Error:", e);
+        }
+
+        // সাইডবার আপডেট
+        if (typeof window.updateSidebarAccess === 'function') {
+            window.updateSidebarAccess();
+        }
+
+        // 🔥 মাল্টিপ্লেয়ার লিসেনার চালু করা
+        if (typeof window.initMultiplayerListener === 'function') {
+            window.initMultiplayerListener();
+        }
+
+    } else {
+        // ২. ইউজার লগআউট (Guest) অবস্থায় আছে
+        console.log("👤 User is Guest");
+        
+        // গ্লোবাল রিসেট
+        window.USER_ROLE = 'guest';
+        window.IS_PRO_USER = false;
+        window.IS_ADMIN = false;
+        window.CURRENT_USERNAME = null;
+        window.USER_USAGE = { banglaWords: 0, englishWords: 0 };
+        
+        // UI রিসেট
+        updateProfileUI(null);
+
+        // 🔥 SIDEBAR RESET TO FREE MODE (Ads Visible)
+        if (typeof window.updateSidebarLayout === 'function') {
+            window.updateSidebarLayout(false);
+        }
+
+        // সাইডবার আপডেট
+        if (typeof window.updateSidebarAccess === 'function') {
+            window.updateSidebarAccess();
+        }
+    }
+});
+
+/* ==============================
+   UI HELPER FUNCTIONS
+   ============================== */
+function updateProfileUI(user) {
+    if (user) {
+        if (loginBtn) {
+            loginBtn.innerHTML = `
+                <img src="${user.photoURL || avatars[0]}" style="width:25px;border-radius:50%;margin-right:5px;">
+                ${user.displayName || 'User'}
+            `;
+        }
+        const badge = document.getElementById('proBadgeDisplay');
+        if (badge) badge.style.display = window.IS_PRO_USER ? 'inline-block' : 'none';
+    } else {
+        if (loginBtn) loginBtn.innerHTML = '<i class="fab fa-google"></i> G Login';
+        const badge = document.getElementById('proBadgeDisplay');
+        if (badge) badge.style.display = 'none';
+    }
+}
+
+/* ==============================
+   PROFILE MODAL LOGIC & LISTENERS
+   ============================== */
 if(loginBtn) {
     loginBtn.addEventListener('click', () => {
         const user = auth.currentUser;
@@ -183,7 +319,6 @@ if(loginBtn) {
     });
 }
 
-// চেক করে বাটন দেখাবে কি না
 function checkChanges() {
     const currentName = modalNameInput.value.trim();
     const currentPhoto = modalImg.src;
@@ -195,24 +330,22 @@ function checkChanges() {
     }
 }
 
-// ইভেন্ট লিসেনার ফর স্মার্ট সেভ বাটন
-modalImg.addEventListener('click', () => {
+if(modalImg) modalImg.addEventListener('click', () => {
     currentAvatarIndex = (currentAvatarIndex + 1) % avatars.length;
     modalImg.src = avatars[currentAvatarIndex];
-    checkChanges(); // 🔥 চেক চেঞ্জ
+    checkChanges(); 
 });
 
-modalNameInput.addEventListener('input', checkChanges); // 🔥 চেক চেঞ্জ
+if(modalNameInput) modalNameInput.addEventListener('input', checkChanges); 
 
-saveBtn.addEventListener('click', async () => {
+if(saveBtn) saveBtn.addEventListener('click', async () => {
     const user = auth.currentUser;
     const newName = modalNameInput.value;
     const newPhoto = modalImg.src;
 
     try {
         await updateProfile(user, { displayName: newName, photoURL: newPhoto });
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, { displayName: newName, photoURL: newPhoto });
+        await updateDoc(doc(db, "users", user.uid), { displayName: newName, photoURL: newPhoto });
 
         alert("Profile Updated Successfully!");
         
@@ -221,7 +354,8 @@ saveBtn.addEventListener('click', async () => {
         originalPhoto = newPhoto;
         checkChanges(); // বাটন আবার হাইড হবে
 
-        loginBtn.innerHTML = `<img src="${newPhoto}" style="width:25px;border-radius:50%;margin-right:5px;"> ${newName}`;
+        // UI Update
+        updateProfileUI(user);
 
     } catch (error) {
         console.error("Update Error:", error);
@@ -229,14 +363,14 @@ saveBtn.addEventListener('click', async () => {
     }
 });
 
-closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+if(closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
-logoutBtn.addEventListener('click', () => {
+if(logoutBtn) logoutBtn.addEventListener('click', () => {
     signOut(auth).then(() => location.reload());
 });
 
 /* ==============================
-   2. PROFILE MODAL LOGIC
+   2. PROFILE DATA RENDERERS
    ============================== */
 
 async function openProfileModal(user) {
@@ -278,17 +412,14 @@ async function openProfileModal(user) {
             
             let displayUser = data.username;
             if(!displayUser) {
-                // যদি ডাটাবেসে ইউজারনেম না থাকে, ইনস্ট্যান্ট জেনারেট করে দেখাবে
                 const rnd = Math.floor(1000 + Math.random() * 9000);
                 const cleanName = user.displayName ? user.displayName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '') : "User";
                 displayUser = `@${cleanName}_${rnd}`;
             }
             usernameTag.innerText = displayUser;
 
-            // 🔥 ORDER CHANGED: Badges will be rendered FIRST
+            // Badges & Level
             renderBadges(data.badges || []);
-
-            // 🔥 Then Level Bar (নিচে)
             renderLevelBar(data.level || 1, data.ovr || 0);
 
             // Pro Status
@@ -333,14 +464,13 @@ function renderBadges(badges) {
     allBadges.forEach(b => {
         const isUnlocked = badges.includes(b.name);
         badgeHtml += `
-            <div class="mini-badge ${isUnlocked ? 'unlocked' : ''}" style="opacity: ${isUnlocked ? 1 : 1}">
+            <div class="mini-badge ${isUnlocked ? 'unlocked' : ''}" style="opacity: ${isUnlocked ? 1 : 0.4}">
                 <i class="fas ${b.icon}"></i> ${b.name}
             </div>
         `;
     });
     badgeHtml += `</div></div>`;
 
-    // 🔥 ব্যাজ এখন ইউজারনেমের ঠিক নিচে ইনজেক্ট হবে
     const topGrid = document.querySelector('.profile-top-grid');
     if(topGrid) topGrid.insertAdjacentHTML('afterend', badgeHtml);
 }
@@ -362,12 +492,10 @@ function renderLevelBar(level, ovr) {
         </div>
     </div>`;
     
-    // 🔥 লেভেল এখন ব্যাজের নিচে (Stats Grid এর আগে) বসবে
     const statsGrid = document.querySelector('.stats-grid');
     if(statsGrid) statsGrid.insertAdjacentHTML('beforebegin', levelHtml);
 
     setTimeout(() => {
-        // 🔥 Harder Level Calc for UI Bar (300 points per level)
         const progress = Math.min((ovr % 300) / 300 * 100, 100); 
         const bar = document.querySelector('.level-progress');
         if(bar) bar.style.width = `${progress}%`;
@@ -431,132 +559,3 @@ function renderProfileHistory(fullHistory) {
 
     setTimeout(() => { container.scrollLeft = container.scrollWidth; }, 100);
 }
-
-/* ==============================
-   🔥 3. HELPER & CORE AUTH LISTENER
-   ============================== */
-
-// ✅ NEW: Helper function to handle UI updates
-function updateProfileUI(user) {
-    if (user) {
-        // Login UI Update
-        if (loginBtn) {
-            loginBtn.innerHTML = `
-                <img src="${user.photoURL || avatars[0]}" style="width:25px;border-radius:50%;margin-right:5px;">
-                ${user.displayName || 'User'}
-            `;
-        }
-        // Optional: Show Badge in Header if element exists
-        const badge = document.getElementById('proBadgeDisplay');
-        if (badge) badge.style.display = window.IS_PRO_USER ? 'inline-block' : 'none';
-        
-    } else {
-        // Guest UI Update
-        if (loginBtn) {
-            loginBtn.innerHTML = '<i class="fas fa-user"></i> Login';
-        }
-    }
-}
-
-// ✅ CORE AUTH LISTENER (🔥 USERNAME & MULTIPLAYER ADDED)
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // ১. ইউজার লগিন অবস্থায় আছে
-        
-        // (Optional) হেডারে নাম আপডেট করা
-        const userBtn = document.getElementById('user-profile-btn');
-        if (userBtn) {
-            userBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName ? user.displayName.split(' ')[0] : 'Profile'}`;
-        }
-
-        try {
-            const ref = doc(db, "users", user.uid);
-            const snap = await getDoc(ref);
-            
-            if (snap.exists()) {
-                const data = snap.data();
-                
-                // গ্লোবাল ভেরিয়েবল সেট করা হচ্ছে
-                window.IS_PRO_USER = data.isPro === true;
-                window.IS_ADMIN = data.isAdmin === true;
-
-                // রোল নির্ধারণ
-                if (window.IS_PRO_USER || window.IS_ADMIN) {
-                    window.USER_ROLE = 'pro';
-                } else {
-                    window.USER_ROLE = 'free';
-                }
-
-                // 🔥 [UPDATED] USERNAME & SEARCH KEYWORDS LOGIC
-                // নাম থেকে স্পেশাল ক্যারেক্টার বাদ দিয়ে ছোট হাতের করা
-                const baseName = (user.displayName || "user").replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
-                
-                let finalUsername = data.username;
-                let updateData = {};
-                let needsUpdate = false;
-
-                // ১. যদি ইউজারনেম না থাকে, নতুন বানাও
-                if (!finalUsername) {
-                    const randomCode = Math.floor(1000 + Math.random() * 9000);
-                    finalUsername = `${baseName}#${randomCode}`;
-                    updateData.username = finalUsername;
-                    needsUpdate = true;
-                    console.log("✅ Username Generated:", finalUsername);
-                }
-
-                // ২. 🔥 সার্চ কি-ওয়ার্ড তৈরি করা (যাতে নাম বা পুরো আইডি দিয়ে খোঁজা যায়)
-                if (!data.searchKeywords) {
-                    const keywords = [
-                        baseName,                 // শুধু নাম (যেমন: "rahim")
-                        finalUsername.toLowerCase() // পুরো আইডি (যেমন: "rahim#1234")
-                    ];
-                    // ডুপ্লিকেট রিমুভ করা
-                    updateData.searchKeywords = [...new Set(keywords)];
-                    needsUpdate = true;
-                    console.log("🔍 Search Keywords Added");
-                }
-
-                // যদি কোনো আপডেট লাগে, ডাটাবেসে সেভ করো
-                if (needsUpdate) {
-                    await updateDoc(ref, updateData);
-                }
-
-                window.CURRENT_USERNAME = finalUsername;
-
-                // Usage লোড করা
-                await loadUserUsage(user.uid);
-                
-                // UI আপডেট করো
-                updateProfileUI(user);
-            }
-        } catch (e) {
-            console.error("Auth Error:", e);
-        }
-
-        // সাইডবার আপডেট
-        if (typeof window.updateSidebarAccess === 'function') {
-            window.updateSidebarAccess();
-        }
-
-        // 🔥 মাল্টিপ্লেয়ার লিসেনার চালু করা
-        if (typeof window.initMultiplayerListener === 'function') {
-            window.initMultiplayerListener();
-        }
-
-    } else {
-        // ২. ইউজার লগআউট (Guest) অবস্থায় আছে
-        console.log("👤 User is Guest");
-        
-        window.USER_ROLE = 'guest';
-        window.USER_USAGE = { banglaWords: 0, englishWords: 0 };
-        window.CURRENT_USERNAME = null;
-        
-        // UI রিসেট
-        updateProfileUI(null);
-
-        // সাইডবার আপডেট
-        if (typeof window.updateSidebarAccess === 'function') {
-            window.updateSidebarAccess();
-        }
-    }
-});

@@ -1,8 +1,93 @@
-// script.js - Core Game Logic & Controller (FIXED & MERGED)
+// script.js - Core Game Logic & Controller (FIXED)
 
-// ==========================================
-// ⚡ SECURITY FLASH FIX
-// ==========================================
+/* =========================================
+   🔥 LOADER JS (PERCENTAGE FIX & QUANTUM CORE)
+   ========================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+    const loader = document.getElementById('loaderOverlay');
+    const barFill = document.getElementById('loaderBarFill');
+    const percentNum = document.getElementById('loadingPercentage');
+    
+    let progress = 0;
+    let isFinished = false;
+
+    // Loader bondho korar function
+    function closeLoader() {
+        if(isFinished) return;
+        isFinished = true;
+
+        if (loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 600);
+        }
+    }
+
+    // Animation Loop
+    const interval = setInterval(() => {
+        // Randomly increase progress
+        progress += Math.floor(Math.random() * 5) + 2; 
+
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Final Update
+            if(barFill) barFill.style.width = '100%';
+            if(percentNum) percentNum.innerText = '100';
+            
+            // 0.5s por bondho hobe
+            setTimeout(closeLoader, 500);
+        } else {
+            // Running Update
+            if(barFill) barFill.style.width = `${progress}%`;
+            if(percentNum) percentNum.innerText = progress;
+        }
+    }, 80); // Speed: 80ms
+
+    // Real Window Load Override (Safety)
+    window.onload = () => {
+        progress = 100;
+    };
+
+    // Backup Safety (6 sec por auto close)
+    setTimeout(() => {
+        if(!isFinished) {
+            progress = 100;
+            if(percentNum) percentNum.innerText = '100';
+            closeLoader();
+        }
+    }, 6000);
+});
+
+/* =========================================
+   🌐 OFFLINE/ONLINE DETECTION
+   ========================================= */
+const offlineScreen = document.getElementById('offlineOverlay');
+
+function updateOnlineStatus() {
+    if(!offlineScreen) return;
+    
+    if (navigator.onLine) {
+        offlineScreen.classList.add('hidden');
+        console.log("🟢 Back Online - System Restored");
+    } else {
+        offlineScreen.classList.remove('hidden');
+        console.log("🔴 Connection Lost - System Failure");
+    }
+}
+
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+// Initial check
+updateOnlineStatus();
+
+
+/* ==========================================
+   ⚡ SECURITY FLASH FIX
+   ========================================== */
 (function() {
     if (sessionStorage.getItem('isUnlocked') === 'true') {
         const style = document.createElement('style');
@@ -11,9 +96,9 @@
     }
 })();
 
-// ==========================================
-// 🌍 GLOBAL VARIABLES
-// ==========================================
+/* ==========================================
+   🌍 GLOBAL VARIABLES
+   ========================================== */
 // Audio Context Setup
 let audioCtxMain; 
 function initAudio() {
@@ -44,11 +129,12 @@ let sessionTotalErrors = 0;
 let sessionTotalTimeElapsed = 0; 
 let currentWPM = 0; 
 
-// ==========================================
-// 🚀 INITIAL SETUP
-// ==========================================
+/* ==========================================
+   🚀 INITIAL SETUP
+   ========================================== */
 window.addEventListener('DOMContentLoaded', function() {
-    switchTab('normal'); 
+    // Tab initialize
+    if(typeof switchTab === 'function') switchTab('normal'); 
    
     const typingSection = document.getElementById('typingSection');
     if(typingSection) {
@@ -56,25 +142,30 @@ window.addEventListener('DOMContentLoaded', function() {
         bar.id = 'timerProgressBar';
         typingSection.appendChild(bar);
     }
+    
     const checkCaps = (e) => {
-        if (e.getModifierState("CapsLock")) document.getElementById('capsLockWarning').style.display = 'block';
-        else document.getElementById('capsLockWarning').style.display = 'none';
+        if (e.getModifierState("CapsLock")) {
+            const warning = document.getElementById('capsLockWarning');
+            if(warning) warning.style.display = 'block';
+        } else {
+            const warning = document.getElementById('capsLockWarning');
+            if(warning) warning.style.display = 'none';
+        }
     };
+    
     document.addEventListener('keydown', checkCaps);
     document.addEventListener('keyup', checkCaps);
     document.addEventListener('click', checkCaps);
     
-    // UI Visibility Update (System Status vs AI Profile)
-   
-    
     // AI Analyst Timer Start
     if (typeof timerProfile !== 'undefined') clearInterval(timerProfile);
-    timerProfile = setInterval(updateTypingProfile, 1500);
+    // timerProfile is global, assume declared or auto-global
+    window.timerProfile = setInterval(updateTypingProfile, 1500);
 });
 
-// ==========================================
-// 🔊 SOUND LOGIC
-// ==========================================
+/* ==========================================
+   🔊 SOUND LOGIC
+   ========================================== */
 function playSound(type) {
     initAudio(); // Ensure AudioContext is ready
     if (!audioCtxMain) return;
@@ -109,19 +200,17 @@ function playSound(type) {
     }
 }
 
-// ==========================================
-// ⌨️ KEYBOARD LISTENERS
-// ==========================================
+/* ==========================================
+   ⌨️ KEYBOARD LISTENERS
+   ========================================== */
 document.addEventListener('keydown', (e) => {
     // 🔥 MULTIPLAYER CONFLICT FIX
-    // যদি মাল্টিপ্লেয়ার মোড চালু থাকে, তাহলে নরমাল স্ক্রিপ্ট কাজ করবে না
     if (window.currentMode === 'multiplayer') {
-        // ফোকাস ইনপুটে নিয়ে যাও যাতে টাইপ করা যায়
         const input = document.getElementById('inputField');
         if(input && document.activeElement !== input) {
             input.focus();
         }
-        return; // এখানেই থামো, নিচের কোডে যেও না
+        return; 
     }
 
     if (isTyping) return;
@@ -129,13 +218,13 @@ document.addEventListener('keydown', (e) => {
     if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.id === 'customTimeInput' || document.activeElement.tagName === 'SELECT') return;
 
     if (!isFocusMode) {
-        document.getElementById('warningModal').style.display = 'flex';
+        const warningModal = document.getElementById('warningModal');
+        if(warningModal) warningModal.style.display = 'flex';
     } else {
         if(!isTyping) startTest();
     }
 });
 
-// Scroll Fix: AI Box on Top
 function scrollToGameView() {
     const aiBox = document.getElementById('profilePanel'); 
     
@@ -155,11 +244,10 @@ function closeWarningAndStart() {
     startTest();
 }
 
-// ==========================================
-// 🎮 GAME CONTROL
-// ==========================================
+/* ==========================================
+   🎮 GAME CONTROL
+   ========================================== */
 function startTest(previewOnly = false) {
-    // Multiplayer Check
     if (window.currentMode === 'multiplayer') return;
 
     if (isTyping && !previewOnly) return;
@@ -181,10 +269,7 @@ function startTest(previewOnly = false) {
             }
         }
     } else {
-        // 🔥 CRITICAL FIX: Session Start Flag & UI Switch
         sessionStorage.setItem("typing_started", "true");
-        // Force UI update immediately
-
         setupTestUI(true); 
         scrollToGameView();
     }
@@ -243,11 +328,10 @@ function setupTestUI(resetSentenceTimer = true) {
     updateStats(); 
 }
 
-// ==========================================
-// 📝 INPUT LOGIC
-// ==========================================
+/* ==========================================
+   📝 INPUT LOGIC
+   ========================================== */
 document.getElementById('inputField').addEventListener('keydown', (e) => {
-    // Multiplayer Conflict Fix
     if (window.currentMode === 'multiplayer') return;
 
     if (!isTyping) return;
@@ -334,7 +418,6 @@ document.getElementById('inputField').addEventListener('keydown', (e) => {
 });
 
 document.getElementById('inputField').addEventListener('input', (e) => {
-    // Multiplayer Conflict Fix
     if (window.currentMode === 'multiplayer') return;
 
     if (!isTyping || currentMode === 'bengali') return;
@@ -415,7 +498,6 @@ function finishSession() {
     }
 
     // 🔥🔥 WEEKLY STATS UPDATE (REAL DATA) 🔥🔥
-    // এই অংশটুকু নতুন যোগ করা হয়েছে
     if (typeof window.updateWeeklyStats === 'function') {
         window.updateWeeklyStats(totalTyped, finalWPM || 0, sessionTotalErrors);
     }
@@ -480,28 +562,14 @@ function updateStats() {
     if(sb.errors) sb.errors.innerText = sessionTotalErrors;
     updateSidebarStats({ wpm: wpm, accuracy: acc, errors: sessionTotalErrors, time: timeLeft });
 
-    // 🔥 MULTIPLAYER SYNC ADDITION (ONLY FOR MULTIPLAYER MODE)
-    // NOTE: This part is for syncing stats during normal play IF you want to track stats live even in non-multiplayer mode,
-    // but typically this should be inside the specific typing handlers if you want real-time updates.
-    // However, since we separated Multiplayer logic into multiplayer-manager.js, 
-    // we don't strictly need it here unless you are reusing this updateStats for multiplayer UI.
-    // For safety, let's keep it conditional.
-    
     if (window.currentMode === 'multiplayer' && typeof window.syncMultiplayerProgress === 'function') {
-        // Progress %
         const progress = Math.min(100, Math.floor((charIndex / currentText.length) * 100));
-        
-        // Accuracy
-        const totalKeystrokes = sessionTotalCorrect + sessionTotalErrors;
-        const accuracy = totalKeystrokes > 0 ? Math.round((sessionTotalCorrect / totalKeystrokes) * 100) : 100;
-        
-        // Sync
+        const accuracy = totalTyped > 0 ? Math.round((sessionTotalCorrect / totalTyped) * 100) : 100;
         window.syncMultiplayerProgress(currentWPM, progress, sessionTotalErrors, accuracy);
     }
 }
 
 function resetTest(fullReset = false) {
-    // 🔥 ফিক্স: গাড়ি বা পেস ক্যারেট থামানো
     if (typeof stopGhost === 'function') stopGhost(); 
 
     clearInterval(timer); isTyping = false; currentText = ""; 
@@ -517,17 +585,15 @@ function resetTest(fullReset = false) {
     document.getElementById('certBtn').style.display = 'none';
     
     const bar = document.getElementById('timerProgressBar');
-    if(bar) bar.style.width = '100%'; // বার রিসেট
+    if(bar) bar.style.width = '100%'; 
     
     startTest(true); 
     if(typeof scrollToTopView === 'function') scrollToTopView(); 
 }
 
-// ==========================================
-// 🛠 SYSTEM STATUS & FEATURE RANDOMIZER (FIXED)
-// ==========================================
-
-// Auto Focus & Popups
+/* ==========================================
+   🛠 SYSTEM STATUS & FEATURE RANDOMIZER
+   ========================================== */
 document.addEventListener('click', (e) => {
     const popup = document.getElementById('creatorPopup');
     const fab = document.getElementById('contactFab');
@@ -548,11 +614,9 @@ window.addEventListener('click', function(e) {
     }
 });
 
-// ==========================================
-// 🔥 ULTIMATE AI TYPING ANALYST (FINGER & PATTERN)
-// ==========================================
-
-// 1. Finger Mapping Database
+/* ==========================================
+   🔥 ULTIMATE AI TYPING ANALYST
+   ========================================== */
 const fingerMapDb = {
     'q': 'Left Pinky', 'a': 'Left Pinky', 'z': 'Left Pinky', '1': 'Left Pinky',
     'w': 'Left Ring', 's': 'Left Ring', 'x': 'Left Ring', '2': 'Left Ring',
@@ -564,7 +628,6 @@ const fingerMapDb = {
     'p': 'Right Pinky', '0': 'Right Pinky', ';': 'Right Pinky', '/': 'Right Pinky', '[': 'Right Pinky', ']': 'Right Pinky', "'": 'Right Pinky'
 };
 
-// 2. Rank Tracking Variable
 let lastRankIndex = -1;
 
 function updateTypingProfile() {
@@ -573,7 +636,6 @@ function updateTypingProfile() {
     
     if (!badgesContainer || !summaryEl) return;
 
-    // Default Message if not started
     if (!isTyping && sessionSentencesCompleted === 0) {
         lastRankIndex = -1; 
         badgesContainer.innerHTML = `<span class="rank-badge rank-neutral"><i class="fas fa-robot"></i> AI Analysis Ready</span>`;
@@ -581,13 +643,11 @@ function updateTypingProfile() {
         return;
     }
 
-    // --- Data Calculation ---
     const wpm = currentWPM || 0;
     const total = sessionTotalCorrect + sessionTotalErrors;
     const acc = total > 0 ? Math.round((sessionTotalCorrect / total) * 100) : 100;
     const errors = sessionTotalErrors;
 
-    // --- Weak Finger Detection ---
     let weakFingerName = "";
     let maxMistakes = 0;
     let problematicKeys = [];
@@ -609,7 +669,6 @@ function updateTypingProfile() {
         }
     }
 
-    // --- Rank Logic ---
     let rankTitle = "";
     let rankClass = "";
     let rankIcon = "";
@@ -627,7 +686,6 @@ function updateTypingProfile() {
     else if (wpm < 100) { currentRankIndex = 9; rankTitle = "Cyber Machine"; rankClass = "rank-god"; rankIcon = "fa-robot"; }
     else { currentRankIndex = 10; rankTitle = "Alien God"; rankClass = "rank-god"; rankIcon = "fa-reddit-alien"; }
 
-    // --- Animation Logic ---
     let animClass = "";
     if (lastRankIndex !== -1) {
         if (currentRankIndex > lastRankIndex) {
@@ -639,7 +697,6 @@ function updateTypingProfile() {
     }
     lastRankIndex = currentRankIndex; 
 
-    // --- Smart Suggestions ---
     let suggestion = "";
     let feedbackClass = "";
 
@@ -671,7 +728,6 @@ function updateTypingProfile() {
         }
     }
 
-    // --- Render Badges ---
     let badgesHtml = `<span class="rank-badge ${rankClass} ${animClass}"><i class="fas ${rankIcon}"></i> ${rankTitle}</span>`;
     
     if (weakFingerName && errors > 2) {
@@ -686,9 +742,6 @@ function updateTypingProfile() {
     summaryEl.innerHTML = suggestion;
 }
 
-// Start AI Timer
-if (typeof timerProfile !== 'undefined') clearInterval(timerProfile);
-timerProfile = setInterval(updateTypingProfile, 1500);
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (typeof updateSidebarAccess === 'function') {
@@ -696,3 +749,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 300);
 });
+
+/* =========================================
+   🎵 SIDEBAR MANAGER (FREE vs PRO)
+   ========================================= */
+
+// ১. প্রো স্ট্যাটাস চেক করে UI আপডেট করা
+window.updateSidebarLayout = function(isProUser) {
+    const body = document.body;
+    
+    if (isProUser) {
+        console.log("💎 Pro Mode Activated");
+        body.classList.add('pro-active'); 
+    } else {
+        console.log("👤 Free Mode Activated");
+        body.classList.remove('pro-active'); 
+    }
+};
+
+// ২. মিউজিক প্লেয়ার লজিক
+const audio = document.getElementById('bgAudio');
+let isPlaying = false;
+
+window.togglePlay = function() {
+    const btn = document.getElementById('playPauseBtn');
+    if(!audio || !btn) return;
+
+    if (isPlaying) {
+        audio.pause();
+        btn.innerHTML = '<i class="fas fa-play"></i>';
+    } else {
+        audio.play();
+        btn.innerHTML = '<i class="fas fa-pause"></i>';
+    }
+    isPlaying = !isPlaying;
+};
+
+window.nextTrack = function() {
+    alert("Next track loading...");
+};
+
+window.prevTrack = function() {
+    alert("Previous track loading...");
+};

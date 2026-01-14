@@ -10,7 +10,7 @@ import {
     signInWithPopup, 
     signOut, 
     onAuthStateChanged, 
-    updateProfile 
+    updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 // Firestore Imports (With arrayRemove & others)
@@ -29,7 +29,9 @@ import {
     onSnapshot, 
     arrayUnion, 
     arrayRemove, // 🔥 Critical for Quit Fix
-    increment 
+    increment,
+    orderBy, // 🔥 Added
+    limit    // 🔥 Added
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -72,5 +74,7 @@ export {
     onSnapshot, 
     arrayUnion, 
     arrayRemove, // 🔥 Exported
-    increment 
+    increment,
+    orderBy, // 🔥 Exported
+    limit    // 🔥 Exported
 };
