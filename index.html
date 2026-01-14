@@ -763,38 +763,6 @@
 
     </div>
 </div>
-<div id="multiplayerModal" class="modal-overlay hidden">
-    <div class="modal-content mp-modal">
-        <div class="modal-header">
-            <h2>⚔️ Multiplayer Challenge</h2>
-            <button class="close-btn" onclick="closeMultiplayerModal()">×</button>
-        </div>
-        
-        <div class="mp-body">
-            <div class="my-uid-box">
-                <span>My UID:</span>
-                <code id="myUidDisplay">Loading...</code>
-                <button onclick="copyMyUid()" class="icon-btn" title="Copy UID"><i class="far fa-copy"></i></button>
-            </div>
-
-            <div class="mp-search-box">
-                <input type="text" id="opponentUidInput" placeholder="Paste friend's UID here...">
-                <button onclick="searchOpponent()" class="btn-primary">Search</button>
-            </div>
-
-            <div id="mpSearchResult" class="mp-user-card hidden">
-                <img src="" id="mpUserImg" class="mp-avatar" alt="User">
-                <div class="mp-user-info">
-                    <h4 id="mpUserName">User Name</h4>
-                    <span id="mpUserStatus" class="status-badge offline">Offline</span>
-                </div>
-                <button id="sendChallengeBtn" class="btn-success">Send Request</button>
-            </div>
-
-            <div id="mpFeedbackMsg" class="mp-msg"></div>
-        </div>
-    </div>
-</div>
 
 <div id="challengeToast" class="challenge-toast hidden">
     <div class="toast-content">
@@ -810,7 +778,138 @@
     </div>
 </div>
 
+<div id="multiplayerModal" class="modal-overlay hidden">
+    <div class="modal-content mp-modal">
+        <div class="modal-header">
+            <h2>⚔️ Multiplayer Challenge</h2>
+            <button class="close-btn" onclick="closeMultiplayerModal()">×</button>
+        </div>
+        
+        <div class="mp-body">
+            <div class="my-uid-box">
+                <span>My Username:</span>
+                <code id="myUidDisplay">Loading...</code>
+                <button onclick="copyMyUid()" class="icon-btn"><i class="far fa-copy"></i></button>
+            </div>
+
+            <div class="mp-search-box">
+                <input type="text" id="opponentUidInput" placeholder="Friend's username...">
+                <button onclick="searchOpponent()" class="btn-primary">Search</button>
+            </div>
+
+            <div id="mpSearchResult" class="mp-user-card hidden">
+                <img src="" id="mpUserImg" class="mp-avatar" alt="User">
+                <div class="mp-user-info">
+                    <h4 id="mpUserName">User Name</h4>
+                    <span id="mpUserStatus" class="status-badge">Found</span>
+                </div>
+                
+                <div class="mp-settings-box">
+                    <label>Mode:</label>
+                    <select id="mpGameMode">
+                        <option value="english">English (Hard)</option>
+                        <option value="bengali">Bangla (Hard)</option>
+                    </select>
+                    
+                    <label>Sentences:</label>
+                   <select id="mpGameLength">
+    <option value="1">1 Sentence (Quick)</option> <option value="2">2 Sentences</option>
+    <option value="5">5 Sentences</option>
+    <option value="10">10 Sentences</option>
+</select>
+                </div>
+
+                <button id="sendChallengeBtn" class="btn-success">Send Challenge</button>
+            </div>
+
+            <div id="mpFeedbackMsg" class="mp-msg"></div>
+        </div>
+    </div>
+</div>
+
+<div id="mpGameRoom" class="mp-game-room hidden">
+    <div class="mp-room-header">
+        <div class="mp-player-card" id="p1Card">
+            <img id="p1Img" src="" alt="">
+            <div>
+                <h3 id="p1Name">Me</h3>
+                <div class="mp-stats">
+                    <span id="p1Wpm">0 WPM</span> • 
+                    <span id="p1Err" class="stat-err">0 Err</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mp-vs-badge">VS</div>
+
+        <div class="mp-player-card opponent" id="p2Card">
+            <div style="text-align:right;">
+                <h3 id="p2Name">Opponent</h3>
+                <div class="mp-stats">
+                    <span id="p2Wpm">0 WPM</span> • 
+                    <span id="p2Err" class="stat-err">0 Err</span>
+                </div>
+            </div>
+            <img id="p2Img" src="" alt="">
+        </div>
+    </div>
+
+    <div class="mp-track-container">
+        <div class="mp-track">
+            <div class="mp-car my-car" id="myCar" style="left: 0%;">🏎️ <span class="car-label">YOU</span></div>
+            <div class="mp-progress-line" id="myProgressLine" style="width: 0%;"></div>
+        </div>
+        <div class="mp-track">
+            <div class="mp-car opp-car" id="oppCar" style="left: 0%;">🚗 <span class="car-label">OPP</span></div>
+            <div class="mp-progress-line opp-line" id="oppProgressLine" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <div class="mp-status-bar">
+        <span id="mpGameStatus">Waiting for opponent...</span>
+        <button id="quitMatchBtn" class="btn-danger" onclick="quitMultiplayerMatch()">🚫 Quit Match</button>
+    </div>
+
+    <div id="mpTextDisplay" class="mp-text-display"></div>
+</div>
+
+<div id="mpResultModal" class="modal-overlay hidden">
+    <div class="modal-content mp-result-card">
+        <h2>🏁 RACE FINISHED!</h2>
+        <div id="winnerDisplay" class="winner-text">Winner: ...</div>
+        
+        <div class="mp-result-grid">
+            <div class="result-col me">
+                <img id="resMyImg" src="" class="res-avatar">
+                <h3>YOU</h3>
+                <p>WPM: <span id="resMyWpm">0</span></p>
+                <p>Accuracy: <span id="resMyAcc">0%</span></p>
+                <p>Errors: <span id="resMyErr">0</span></p>
+            </div>
+            
+            <div class="result-vs">VS</div>
+
+            <div class="result-col opp">
+                <img id="resOppImg" src="" class="res-avatar">
+                <h3>OPPONENT</h3>
+                <p>WPM: <span id="resOppWpm">0</span></p>
+                <p>Accuracy: <span id="resOppAcc">0%</span></p>
+                <p>Errors: <span id="resOppErr">0</span></p>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+        </div>
+        <div class="modal-actions">
+    <button onclick="closeResultAndQuit()" class="btn-primary">Back to Lobby</button>
+    <button onclick="playAgain()" class="btn-success" style="margin-left: 10px;">
+        <i class="fas fa-redo"></i> Play Again
+    </button>
+</div>
+    </div>
+</div>
 <script src="text-db.js"></script>
+<script src="online-db.js"></script>
 <script src="bengali-utils.js"></script>
 <script src="settings-manager.js"></script>
 

@@ -1,4 +1,4 @@
-// firebase-config.js (FULL & FIXED)
+// firebase-config.js - Full Configuration
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
@@ -13,13 +13,13 @@ import {
     updateProfile 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Firestore Imports (🔥 getDocs যোগ করা হয়েছে)
+// Firestore Imports (With arrayRemove & others)
 import { 
     getFirestore, 
     doc, 
     setDoc, 
     getDoc, 
-    getDocs,        // <--- এই লাইনটা মিসিং ছিল
+    getDocs, 
     updateDoc, 
     deleteDoc, 
     addDoc, 
@@ -28,6 +28,7 @@ import {
     where, 
     onSnapshot, 
     arrayUnion, 
+    arrayRemove, // 🔥 Critical for Quit Fix
     increment 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -48,7 +49,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// 🔥 EXPORT EVERYTHING (সহজে ব্যবহারের জন্য)
+// Export Everything
 export { 
     auth, 
     db, 
@@ -61,7 +62,7 @@ export {
     doc, 
     setDoc, 
     getDoc, 
-    getDocs,        // <--- এখানেও এক্সপোর্ট করতে হবে
+    getDocs, 
     updateDoc, 
     deleteDoc, 
     addDoc, 
@@ -70,5 +71,6 @@ export {
     where, 
     onSnapshot, 
     arrayUnion, 
+    arrayRemove, // 🔥 Exported
     increment 
 };

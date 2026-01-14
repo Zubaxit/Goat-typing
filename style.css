@@ -3480,7 +3480,7 @@ body.focus-mode .exit-fs-btn {
 #limitFloatingBar {
     position: fixed;
     top: 0;
-    left: 50%;
+    left: 9%;
     transform: translateX(-50%);
     background: rgba(20, 20, 20, 0.95);
     border: 1px solid #ff4757;
@@ -3653,6 +3653,7 @@ body.focus-mode .exit-fs-btn {
     font-size: 1.5rem;
     font-weight: 800;
     background: linear-gradient(to right, #fff, #4361ee);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-transform: uppercase;
@@ -3863,4 +3864,440 @@ body.focus-mode .exit-fs-btn {
     .mp-user-card { flex-direction: column; text-align: center; gap: 15px; }
     .mp-user-card::before { width: 100%; height: 5px; top: 0; left: 0; }
     .btn-success { width: 100%; }
+}
+
+/* =========================================
+   🔔 CHALLENGE TOAST NOTIFICATION UI
+========================================= */
+
+.challenge-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 320px;
+    background: rgba(16, 20, 30, 0.95); /* গাঢ় ব্যাকগ্রাউন্ড */
+    backdrop-filter: blur(12px);         /* গ্লাস ইফেক্ট */
+    border: 1px solid rgba(67, 97, 238, 0.3);
+    border-left: 5px solid #22c55e;      /* বাম পাশে গ্রিন বর্ডার */
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(34, 197, 94, 0.2);
+    z-index: 10001;
+    
+    /* এনিমেশন সেটআপ */
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    visibility: hidden;
+}
+
+/* যখন hidden ক্লাস সরে যাবে, তখন এই ক্লাস কাজ করবে */
+.challenge-toast:not(.hidden) {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+}
+
+/* লুকানো অবস্থা */
+.challenge-toast.hidden {
+    display: none;
+}
+
+/* --- Content Layout --- */
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Challenger Image */
+.toast-content img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #22c55e;
+    padding: 2px;
+    object-fit: cover;
+}
+
+/* Text Info */
+.toast-content div {
+    display: flex;
+    flex-direction: column;
+}
+
+.toast-content h4 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.toast-content span {
+    font-size: 0.8rem;
+    color: #aab;
+    font-weight: 500;
+}
+
+.toast-content p {
+    margin: 3px 0 0 0;
+    font-size: 0.85rem;
+    color: #22c55e; /* Green text for "Wants to race" */
+    font-weight: 600;
+}
+
+/* --- Buttons --- */
+.toast-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.toast-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Accept Button */
+.btn-accept {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+}
+.btn-accept:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6);
+}
+
+/* Decline Button */
+.btn-reject {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.btn-reject:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fff;
+}
+
+/* =========================================
+   🏎️ MULTIPLAYER GAME ROOM UI
+========================================= */
+
+.mp-game-room {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #0f172a;
+    z-index: 15000; /* Sidebar এর উপরে */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.mp-game-room.hidden { display: none; }
+
+/* Header Cards */
+.mp-room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+    width: 100%;
+}
+
+.mp-player-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mp-player-card img {
+    width: 50px; height: 50px; border-radius: 50%; border: 2px solid #4361ee;
+}
+.mp-player-card.opponent img { border-color: #ef4444; }
+
+.mp-player-card h3 { margin: 0; font-size: 1.1rem; color: #fff; }
+.mp-player-card span { font-family: monospace; color: #4cc9f0; font-size: 1.2rem; font-weight: bold; }
+
+.mp-vs-badge {
+    font-size: 2rem; font-weight: 900; color: #fff; opacity: 0.2; font-style: italic;
+}
+
+/* Racing Tracks */
+.mp-track-container {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto 40px auto;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #333;
+}
+
+.mp-track {
+    position: relative;
+    height: 40px;
+    background: #1e293b;
+    border-radius: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #333;
+}
+
+.mp-progress-line {
+    height: 100%;
+    background: linear-gradient(90deg, #4361ee, #3a0ca3);
+    border-radius: 20px;
+    transition: width 0.2s linear;
+    opacity: 0.5;
+}
+.mp-progress-line.opp-line { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+
+.mp-car {
+    position: absolute;
+    top: -25px; /* ট্র্যাকের উপরে ভাসবে */
+    transform: translateX(-50%);
+    font-size: 2rem;
+    transition: left 0.3s linear;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+    z-index: 10;
+}
+.car-label {
+    position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+    font-size: 0.7rem; color: #aaa; font-weight: bold;
+}
+
+/* Status & Text */
+.mp-status-bar {
+    text-align: center; margin-bottom: 20px;
+}
+#mpGameStatus {
+    font-size: 1.5rem; font-weight: bold; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px;
+}
+
+/* style.css এ mp-text-display আপডেট করো */
+
+/* 🔥 MULTIPLAYER TEXT BOX FIX (FINAL) */
+
+.mp-text-display {
+    max-height: 100px;        /* ৩ লাইনের বেশি দেখাবে না */
+    overflow: hidden;         /* স্ক্রলবার লুকানো থাকবে */
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 15px 20px;
+    font-family: 'Courier New', monospace; /* সমান স্পেসের ফন্ট */
+    font-size: 1.5rem;
+    line-height: 1.6em;       /* লাইন হাইট ফিক্সড */
+    letter-spacing: 1px;
+    color: #64748b;
+    position: relative;       /* অটো স্ক্রলের জন্য জরুরি */
+    white-space: pre-wrap;    /* লাইন ব্রেক ও স্পেস ঠিক রাখবে */
+    word-break: break-word;   /* শব্দ ভেঙে নিচে নামাবে */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    scroll-behavior: smooth;  /* স্মুথ স্ক্রল */
+}
+
+/* 🔥 EYE-CATCHING TEXT COLORS */
+
+/* সাধারণ টেক্সট (টাইপ করার আগে) */
+.mp-text-display span {
+    color: #666; /* একটু গাঢ় ধূসর, যাতে কালারফুল টেক্সট বেশি ফোটে */
+    transition: all 0.1s ease;
+    border-bottom: 2px solid transparent;
+}
+
+/* ✅ সঠিক অক্ষর (উজ্জ্বল সবুজ + গ্লো) */
+.mp-text-display span.correct {
+    color: #00ff88; /* Neon Green */
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); /* গ্লো ইফেক্ট */
+    font-weight: 600;
+}
+
+/* ❌ ভুল অক্ষর (উজ্জ্বল লাল + হালকা লাল ব্যাকগ্রাউন্ড) */
+.mp-text-display span.incorrect {
+    color: #ff3333; /* Bright Red */
+    background-color: rgba(255, 51, 51, 0.15);
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.5); /* গ্লো ইফেক্ট */
+    border-radius: 3px;
+}
+
+/* 📍 বর্তমান কার্সার (উজ্জ্বল হলুদ বর্ডার) */
+.mp-text-display span.current-char {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-bottom: 3px solid #ffff00; /* Yellow Cursor */
+    animation: blinkCursor 1s infinite;
+}
+
+@keyframes blinkCursor {
+    50% { border-color: transparent; }
+}
+
+/* --- SETTINGS BOX IN MODAL --- */
+/* 🔥 MULTIPLAYER SETTINGS FIX */
+
+/* Settings Container */
+.mp-settings-box {
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;         /* Grid এর বদলে Flex ব্যবহার করছি যাতে জায়গা পায় */
+    flex-direction: column; /* নিচে নিচে দেখাবে */
+    gap: 12px;
+}
+
+/* Labels */
+.mp-settings-box label {
+    font-size: 0.85rem;
+    color: #ccc;
+    margin-bottom: 5px;
+    display: block;
+    font-weight: 600;
+}
+
+/* Select Dropdowns */
+.mp-settings-box select {
+    width: 100%;
+    padding: 10px;
+    background: #1e1e2e;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+    transition: border 0.3s;
+    appearance: none; /* ডিফল্ট অ্যারো রিমুভ করে ক্লিন লুক */
+}
+
+.mp-settings-box select:focus {
+    border-color: #4361ee;
+}
+
+/* User Card Layout Adjustment */
+.mp-user-card {
+    display: flex;
+    flex-direction: column; /* কার্ডের কন্টেন্ট নিচে নিচে সাজানো */
+    gap: 15px;
+}
+
+/* --- GAME ROOM UPDATES --- */
+.mp-stats { font-family: monospace; font-size: 1rem; color: #fbbf24; margin-top: 2px; }
+.stat-err { color: #ef4444; }
+
+#quitMatchBtn {
+    margin-left: 15px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    background: #ef4444;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+#quitMatchBtn:hover { background: #c0392b; }
+
+/* --- RESULT POPUP --- */
+.mp-result-card {
+    background: linear-gradient(135deg, #1e1e2f, #16213e);
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #4361ee;
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 50px rgba(67, 97, 238, 0.4);
+}
+.winner-text {
+    font-size: 2rem; font-weight: 800; color: #2ecc71; margin: 10px 0 30px 0;
+    text-transform: uppercase; letter-spacing: 2px;
+}
+.mp-result-grid {
+    display: flex; justify-content: space-around; align-items: center; margin-bottom: 30px;
+}
+.result-col {
+    background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; width: 40%;
+}
+.res-avatar { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px; border: 2px solid #fff; }
+.result-col h3 { margin: 5px 0 15px 0; color: #fff; }
+.result-col p { margin: 5px 0; color: #ccc; font-size: 0.95rem; }
+.result-col span { color: #4cc9f0; font-weight: bold; }
+.result-vs { font-size: 1.5rem; font-weight: bold; color: #666; font-style: italic; }
+/* 🔥 AUTO SCROLL & RESULT FIX */
+
+.mp-text-display {
+    max-height: 120px; /* ৩ লাইনের বেশি হলে স্ক্রল হবে */
+    overflow-y: hidden; /* ম্যানুয়াল স্ক্রল বন্ধ, অটো হবে */
+    scroll-behavior: smooth; /* স্মুথ স্ক্রলিং */
+    position: relative;
+    padding-top: 50px; /* যাতে কার্সার মাঝখানে থাকে */
+}
+
+/* হাইলাইটেড ক্যারেক্টার (Current Cursor) */
+.mp-text-display span.current-char {
+    background-color: rgba(67, 97, 238, 0.4);
+    border-bottom: 2px solid #4361ee;
+}
+
+/* রেজাল্ট পপআপ বাটন */
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+/* 🔥 FINAL CSS FIX: TEXT & SCROLL */
+
+.mp-text-display {
+    height: 120px;            /* ফিক্সড হাইট */
+    overflow: hidden;         /* স্ক্রলবার লুকানো */
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    line-height: 2rem;        /* লাইন হাইট বাড়ানো হলো */
+    color: #64748b;
+    position: relative;       /* অটো স্ক্রলের জন্য জরুরি */
+    white-space: pre-wrap;    /* লাইন ব্রেক ঠিক রাখবে */
+    word-break: break-word;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    scroll-behavior: smooth;  /* স্মুথ স্ক্রল */
+}
+
+/* অক্ষরগুলো যেন ভেঙে না যায় */
+.mp-text-display span {
+    display: inline;          /* ⚠️ এটা না থাকলে ডিজাইন ভেঙে যাবে */
+    background: transparent;
+    border-bottom: 2px solid transparent;
+}
+
+.mp-text-display span.correct {
+    color: #eee;
+    text-shadow: 0 0 2px #fff;
+}
+
+.mp-text-display span.incorrect {
+    color: #ff4757;
+    background-color: rgba(255, 71, 87, 0.2);
+    border-radius: 2px;
+}
+
+/* কার্সার স্টাইল */
+.mp-text-display span.current-char {
+    border-bottom: 3px solid #4361ee;
+    background-color: rgba(67, 97, 238, 0.2);
 }

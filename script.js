@@ -113,6 +113,17 @@ function playSound(type) {
 // ⌨️ KEYBOARD LISTENERS
 // ==========================================
 document.addEventListener('keydown', (e) => {
+    // 🔥 MULTIPLAYER CONFLICT FIX
+    // যদি মাল্টিপ্লেয়ার মোড চালু থাকে, তাহলে নরমাল স্ক্রিপ্ট কাজ করবে না
+    if (window.currentMode === 'multiplayer') {
+        // ফোকাস ইনপুটে নিয়ে যাও যাতে টাইপ করা যায়
+        const input = document.getElementById('inputField');
+        if(input && document.activeElement !== input) {
+            input.focus();
+        }
+        return; // এখানেই থামো, নিচের কোডে যেও না
+    }
+
     if (isTyping) return;
     if (['Shift', 'Alt', 'Control', 'CapsLock', 'Tab', 'Meta'].includes(e.key)) return;
     if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.id === 'customTimeInput' || document.activeElement.tagName === 'SELECT') return;
@@ -148,6 +159,9 @@ function closeWarningAndStart() {
 // 🎮 GAME CONTROL
 // ==========================================
 function startTest(previewOnly = false) {
+    // Multiplayer Check
+    if (window.currentMode === 'multiplayer') return;
+
     if (isTyping && !previewOnly) return;
     if (!previewOnly) {
         sessionSentencesCompleted = 0; sessionTotalCorrect = 0; sessionTotalErrors = 0; sessionTotalTimeElapsed = 0; window.keyMistakes = {};
@@ -233,6 +247,9 @@ function setupTestUI(resetSentenceTimer = true) {
 // 📝 INPUT LOGIC
 // ==========================================
 document.getElementById('inputField').addEventListener('keydown', (e) => {
+    // Multiplayer Conflict Fix
+    if (window.currentMode === 'multiplayer') return;
+
     if (!isTyping) return;
     if (['F5', 'F11', 'Tab', 'Alt', 'Control', 'CapsLock'].includes(e.key)) return;
     scrollToGameView(); 
@@ -317,6 +334,9 @@ document.getElementById('inputField').addEventListener('keydown', (e) => {
 });
 
 document.getElementById('inputField').addEventListener('input', (e) => {
+    // Multiplayer Conflict Fix
+    if (window.currentMode === 'multiplayer') return;
+
     if (!isTyping || currentMode === 'bengali') return;
     scrollToGameView();
     const chars = document.getElementById('quoteDisplay').querySelectorAll('span');
@@ -453,6 +473,25 @@ function updateStats() {
     if(sb.accuracy) sb.accuracy.innerText = acc + '%';
     if(sb.errors) sb.errors.innerText = sessionTotalErrors;
     updateSidebarStats({ wpm: wpm, accuracy: acc, errors: sessionTotalErrors, time: timeLeft });
+
+    // 🔥 MULTIPLAYER SYNC ADDITION (ONLY FOR MULTIPLAYER MODE)
+    // NOTE: This part is for syncing stats during normal play IF you want to track stats live even in non-multiplayer mode,
+    // but typically this should be inside the specific typing handlers if you want real-time updates.
+    // However, since we separated Multiplayer logic into multiplayer-manager.js, 
+    // we don't strictly need it here unless you are reusing this updateStats for multiplayer UI.
+    // For safety, let's keep it conditional.
+    
+    if (window.currentMode === 'multiplayer' && typeof window.syncMultiplayerProgress === 'function') {
+        // Progress %
+        const progress = Math.min(100, Math.floor((charIndex / currentText.length) * 100));
+        
+        // Accuracy
+        const totalKeystrokes = sessionTotalCorrect + sessionTotalErrors;
+        const accuracy = totalKeystrokes > 0 ? Math.round((sessionTotalCorrect / totalKeystrokes) * 100) : 100;
+        
+        // Sync
+        window.syncMultiplayerProgress(currentWPM, progress, sessionTotalErrors, accuracy);
+    }
 }
 
 function resetTest(fullReset = false) {
@@ -481,11 +520,6 @@ function resetTest(fullReset = false) {
 // ==========================================
 // 🛠 SYSTEM STATUS & FEATURE RANDOMIZER (FIXED)
 // ==========================================
-
-
-
-
-
 
 // Auto Focus & Popups
 document.addEventListener('click', (e) => {
