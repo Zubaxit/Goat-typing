@@ -1,6 +1,5 @@
-import { auth, db, doc, getDoc, getDocs, setDoc, collection, addDoc, onSnapshot, query, where, updateDoc, deleteDoc, arrayRemove } from "./firebase-config.js";
-
-console.log("🚀 Multiplayer Manager Loaded (Loop & Play Again Fixed)");
+import { auth, db, doc, getDoc, getDocs, setDoc, collection, addDoc, onSnapshot, query, where, updateDoc, deleteDoc, arrayRemove, orderBy, limit } from "./firebase-config.js";
+console.log("🚀 Multiplayer Manager Loaded (UI Polish & Position Fix)");
 
 // ===================================
 // 1. DOM EVENTS & UI
@@ -37,7 +36,7 @@ window.copyMyUid = function() {
 // 2. SEARCH & CHALLENGE
 // ===================================
 
-let lastOpponentUid = null; // রিম্যাচের জন্য সেভ রাখা
+let lastOpponentUid = null;
 
 window.searchOpponent = async function() {
     const inputVal = document.getElementById('opponentUidInput').value.trim().toLowerCase();
@@ -58,33 +57,27 @@ window.searchOpponent = async function() {
         if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0]; 
             const data = userDoc.data();
-            const targetUid = userDoc.id;
-            lastOpponentUid = targetUid; // Store for rematch
+            lastOpponentUid = userDoc.id;
 
             document.getElementById('mpUserImg').src = data.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
             document.getElementById('mpUserName').innerHTML = `${data.displayName} <br><small style="color:#4cc9f0;">${data.username}</small>`;
-            document.getElementById('mpUserStatus').innerText = "Found";
-
+            
             const btn = document.getElementById('sendChallengeBtn');
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             newBtn.disabled = false;
             newBtn.innerText = "Send Request";
-            newBtn.addEventListener('click', () => sendChallengeRequest(targetUid, data.displayName));
+            newBtn.addEventListener('click', () => sendChallengeRequest(userDoc.id, data.displayName));
 
             resultBox.classList.remove('hidden');
             msgBox.innerText = "";
         } else {
             msgBox.innerText = "❌ User not found.";
         }
-    } catch (err) {
-        console.error(err);
-        msgBox.innerText = "❌ Error searching.";
-    }
+    } catch (err) { console.error(err); }
 };
 
 async function sendChallengeRequest(targetUid, targetName) {
-    const msgBox = document.getElementById('mpFeedbackMsg');
     const btn = document.querySelector('#mpSearchResult .btn-success');
     const mode = document.getElementById('mpGameMode').value;
     const length = document.getElementById('mpGameLength').value;
@@ -104,11 +97,10 @@ async function sendChallengeRequest(targetUid, targetName) {
             gameLength: length,  
             timestamp: Date.now()
         });
-        msgBox.innerText = `✅ Challenge sent!`;
+        document.getElementById('mpFeedbackMsg').innerText = `✅ Challenge sent!`;
         if(btn) btn.innerText = "Sent ✅";
-    } catch (err) {
-        console.error(err);
-        msgBox.innerText = "❌ Failed.";
+    } catch (err) { 
+        console.error(err); 
         if(btn) btn.disabled = false;
     }
 }
@@ -144,6 +136,11 @@ let isMyMatchActive = false;
 let mpStartTime = null;
 let mpTotalErrors = 0;
 
+// বাংলা টাইপিং ভেরিয়েবল
+let banglaSequence = [];
+let banglaIndex = 0;
+let originalGuideParent = null;
+
 export function initMultiplayerListener() {
     if (!auth.currentUser) return;
     
@@ -164,8 +161,6 @@ export function initMultiplayerListener() {
     onSnapshot(matchQ, (snapshot) => {
         snapshot.docChanges().forEach((change) => {
             const matchData = change.doc.data();
-            
-            // 🔥 LOOP FIX 1: Check localStorage immediately
             const quitMatchId = localStorage.getItem('quitMatchId');
             if (quitMatchId === matchData.matchId) return; 
 
@@ -191,6 +186,7 @@ function enterGameRoom(matchData) {
     window.activeMultiplayerMatchId = matchData.matchId; 
 
     mpStartTime = null; mpTotalErrors = 0;
+    banglaIndex = 0; 
 
     closeMultiplayerModal();
     document.querySelector('.gt-sidebar').style.display = 'none';
@@ -207,9 +203,41 @@ function enterGameRoom(matchData) {
     inputField.style.top = '0';
     inputField.style.zIndex = '999';
 
+    // 🔥🔥 HAND GUIDE CUSTOMIZATION (Updated) 🔥🔥
+    const guide = document.getElementById('instructionPanel');
+    const mpTextDisplay = document.getElementById('mpTextDisplay');
+    
+    let guideContainer = document.getElementById('mpGuideContainer');
+    if (!guideContainer) {
+        guideContainer = document.createElement('div');
+        guideContainer.id = 'mpGuideContainer';
+        
+        // ১. আরো নিচে নামানো হয়েছে (60px)
+        guideContainer.style.marginTop = '60px'; 
+        
+        guideContainer.style.display = 'flex';
+        guideContainer.style.justifyContent = 'center';
+        guideContainer.style.width = '100%';
+        mpTextDisplay.after(guideContainer); 
+    }
+
+    if (guide && !originalGuideParent) {
+        originalGuideParent = guide.parentNode; 
+        guideContainer.appendChild(guide); 
+        guide.style.display = 'flex';
+        
+        // ২. ব্যাকগ্রাউন্ড কালার এবং স্টাইল পরিবর্তন
+        guide.style.backgroundColor = '#090e19'; // গাঢ় নীল ব্যাকগ্রাউন্ড
+        guide.style.padding = '15px 30px';       // একটু জায়গা দেওয়া হলো
+        guide.style.borderRadius = '12px';       // কোণাগুলো গোল করা হলো
+        guide.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)'; // সুন্দর শ্যাডো
+        guide.style.border = '1px solid rgba(255, 255, 255, 0.1)'; // হালকা বর্ডার
+    }
+
+    // Player Data Setup
     const myUid = auth.currentUser.uid;
     const oppUid = matchData.players.find(id => id !== myUid);
-    lastOpponentUid = oppUid; // Save for Play Again
+    lastOpponentUid = oppUid;
 
     const myData = matchData.playerData[myUid];
     const oppData = oppUid ? matchData.playerData[oppUid] : null;
@@ -222,20 +250,110 @@ function enterGameRoom(matchData) {
 
     renderMultiplayerText(matchData.text);
 
+    // Language Detection
+    const isBengali = /[\u0980-\u09FF]/.test(matchData.text);
+
+    if (isBengali) {
+        if (window.buildBijoySequence) {
+            banglaSequence = window.buildBijoySequence(matchData.text);
+            if(banglaSequence.length > 0 && window.updateFingerGuide) {
+                window.updateFingerGuide(banglaSequence[0].code, banglaSequence[0].shift, true);
+            }
+        }
+        inputField.onkeydown = (e) => {
+            e.stopPropagation();
+            handleBengaliTyping(e, matchData.text);
+        };
+        inputField.oninput = (e) => e.stopPropagation(); 
+    } else {
+        if (matchData.text.length > 0 && window.getKeyFromChar && window.updateFingerGuide) {
+            const firstKey = window.getKeyFromChar(matchData.text[0]);
+            if(firstKey) window.updateFingerGuide(firstKey.code, firstKey.shift, true);
+        }
+        inputField.onkeydown = (e) => e.stopPropagation();
+        inputField.oninput = (e) => {
+            e.stopPropagation();
+            handleEnglishTyping(e, matchData.text);
+        };
+    }
+
     inputField.value = '';
     inputField.disabled = false;
     inputField.focus();
     inputField.onblur = () => setTimeout(() => { if(isMyMatchActive) inputField.focus(); }, 10);
-
-    inputField.oninput = (e) => {
-        e.stopPropagation();
-        handleMultiplayerTyping(e, matchData.text);
-    };
-    
-    inputField.onkeydown = (e) => e.stopPropagation();
 }
 
-function handleMultiplayerTyping(e, targetText) {
+// Bangla Typing Logic
+function handleBengaliTyping(e, targetText) {
+    if (e.key === 'Shift' || e.key === 'Alt' || e.key === 'Control') return;
+    
+    const spans = document.querySelectorAll('#mpTextDisplay span');
+    
+    if (e.key === 'Backspace') {
+        if (banglaIndex > 0) {
+            banglaIndex--;
+            const prev = banglaSequence[banglaIndex];
+            let start = prev.startIndex !== undefined ? prev.startIndex : prev.charIndex;
+            let end = prev.charIndex;
+
+            for (let k = start; k <= end; k++) {
+                if(spans[k]) spans[k].classList.remove('correct', 'incorrect', 'current-char');
+            }
+            if(spans[start]) spans[start].classList.add('current-char');
+            if (window.updateFingerGuide) window.updateFingerGuide(prev.code, prev.shift, true);
+        }
+        return;
+    }
+
+    if (!mpStartTime) mpStartTime = new Date();
+    e.preventDefault();
+
+    if (banglaIndex >= banglaSequence.length) return;
+
+    const target = banglaSequence[banglaIndex];
+    let start = target.startIndex !== undefined ? target.startIndex : target.charIndex;
+    let end = target.charIndex;
+
+    if (e.code === target.code && e.shiftKey === target.shift) {
+        for (let k = start; k <= end; k++) {
+            if(spans[k]) {
+                spans[k].classList.add('correct');
+                spans[k].classList.remove('current-char');
+            }
+        }
+    } else {
+        mpTotalErrors++;
+        for (let k = start; k <= end; k++) {
+            if(spans[k]) {
+                spans[k].classList.add('incorrect');
+                spans[k].classList.remove('current-char');
+            }
+        }
+    }
+
+    banglaIndex++;
+
+    if (banglaIndex < banglaSequence.length) {
+        const next = banglaSequence[banglaIndex];
+        if (window.updateFingerGuide) window.updateFingerGuide(next.code, next.shift, true);
+        
+        let nextStart = next.startIndex !== undefined ? next.startIndex : next.charIndex;
+        if(spans[nextStart]) {
+            spans[nextStart].classList.add('current-char');
+            const container = document.getElementById('mpTextDisplay');
+            container.scrollTop = spans[nextStart].offsetTop - 50;
+        }
+    } else {
+        syncMyProgress(calculateWPM(targetText.length), 100, mpTotalErrors, 100, calculateScore(targetText.length));
+    }
+
+    const progress = Math.min(100, Math.floor((banglaIndex / banglaSequence.length) * 100));
+    const wpm = calculateWPM(banglaIndex); 
+    syncMyProgress(wpm, progress, mpTotalErrors, 100, calculateScore(banglaIndex)); 
+}
+
+// English Typing Logic
+function handleEnglishTyping(e, targetText) {
     const inputField = document.getElementById('inputField');
     const typedVal = inputField.value;
     const arrayQuote = document.querySelectorAll('#mpTextDisplay span');
@@ -260,23 +378,39 @@ function handleMultiplayerTyping(e, targetText) {
         }
     });
 
-    const currentSpan = arrayQuote[typedVal.length];
-    const container = document.getElementById('mpTextDisplay');
+    const currentIndex = typedVal.length;
+    if (currentIndex < targetText.length) {
+        const currentSpan = arrayQuote[currentIndex];
+        const container = document.getElementById('mpTextDisplay');
+        
+        if (currentSpan) {
+            currentSpan.classList.add('current-char');
+            container.scrollTop = currentSpan.offsetTop - 50;
+        }
 
-    if (currentSpan && container) {
-        currentSpan.classList.add('current-char');
-        container.scrollTop = currentSpan.offsetTop - 50; 
+        const nextChar = targetText[currentIndex];
+        if (window.getKeyFromChar && window.updateFingerGuide) {
+            const keyData = window.getKeyFromChar(nextChar);
+            if (keyData) window.updateFingerGuide(keyData.code, keyData.shift, true);
+        }
     }
 
     if(errors > mpTotalErrors) mpTotalErrors = errors;
 
-    const timeSpent = (new Date() - mpStartTime) / 1000 / 60; 
-    const wpm = timeSpent > 0 ? Math.round((correctChars / 5) / timeSpent) : 0;
+    const wpm = calculateWPM(correctChars);
     const accuracy = typedVal.length > 0 ? Math.round(((typedVal.length - errors) / typedVal.length) * 100) : 100;
     const progress = Math.min(100, Math.floor((typedVal.length / targetText.length) * 100));
-    const score = Math.max(0, Math.round(wpm + (accuracy / 2) - errors));
+    
+    syncMyProgress(wpm, progress, mpTotalErrors, accuracy, calculateScore(wpm, accuracy, errors));
+}
 
-    syncMyProgress(wpm, progress, mpTotalErrors, accuracy, score);
+function calculateWPM(chars) {
+    const timeSpent = (new Date() - mpStartTime) / 1000 / 60; 
+    return timeSpent > 0 ? Math.round((chars / 5) / timeSpent) : 0;
+}
+
+function calculateScore(wpm, accuracy = 100, errors = 0) {
+    return Math.max(0, Math.round(wpm + (accuracy / 2) - errors));
 }
 
 function updateOpponentProgress(matchData) {
@@ -292,16 +426,12 @@ function updateOpponentProgress(matchData) {
     document.getElementById('oppProgressLine').style.width = `${progress}%`;
 }
 
-// 🔥 CRITICAL FIXES FOR BUTTONS (Back to Lobby & Play Again)
 function endGameLocally(matchData) {
     isMyMatchActive = false;
-    
-    // Fix: ম্যানুয়ালি ভেরিয়েবল সেট করা হচ্ছে যাতে বাটন কাজ করে
-    activeMatchId = matchData.matchId; 
-    
+    activeMatchId = matchData.matchId;
     if (auth.currentUser) {
         const oppUid = matchData.players.find(id => id !== auth.currentUser.uid);
-        if (oppUid) lastOpponentUid = oppUid; // Fix Play Again
+        if (oppUid) lastOpponentUid = oppUid;
     }
 
     const input = document.getElementById('inputField');
@@ -310,7 +440,6 @@ function endGameLocally(matchData) {
 }
 
 function showResultPopup(matchData) {
-    // Double check loop prevention
     if (localStorage.getItem('quitMatchId') === matchData.matchId) return;
 
     const modal = document.getElementById('mpResultModal');
@@ -337,26 +466,47 @@ function showResultPopup(matchData) {
     document.getElementById('resOppErr').innerText = oppData.errors;
 }
 
-// 🔥 Fix: Loop বন্ধ করা এবং Reload
-window.closeResultAndQuit = function() { 
-    if (activeMatchId) {
-        localStorage.setItem('quitMatchId', activeMatchId);
-        console.log("🚫 Match Ignored:", activeMatchId);
+// 🔥🔥 RESTORE STYLE (Reset) 🔥🔥
+function restoreHandGuide() {
+    const guide = document.getElementById('instructionPanel');
+    if(guide && originalGuideParent) {
+        originalGuideParent.appendChild(guide); 
+        originalGuideParent = null;
+        
+        // রিসেট স্টাইল
+        guide.style.backgroundColor = ''; 
+        guide.style.padding = '';
+        guide.style.borderRadius = '';
+        guide.style.boxShadow = '';
+        guide.style.border = '';
     }
+}
+
+window.closeResultAndQuit = function() { 
+    restoreHandGuide();
+    if (activeMatchId) localStorage.setItem('quitMatchId', activeMatchId);
     window.currentMode = 'normal';
     location.reload(); 
 };
 
-// 🔥 Fix: Opponent ID খুঁজে পাওয়া
+window.quitMultiplayerMatch = async function() {
+    if(!confirm("Are you sure?")) return;
+    restoreHandGuide();
+    try {
+        if (activeMatchId && auth.currentUser) {
+            localStorage.setItem('quitMatchId', activeMatchId);
+            const matchRef = doc(db, "matches", activeMatchId);
+            await updateDoc(matchRef, { players: arrayRemove(auth.currentUser.uid) });
+        }
+    } catch (e) { console.error(e); }
+    finally { location.reload(); }
+};
+
+// ... Play Again & Others ...
 window.playAgain = async function() {
-    if (!lastOpponentUid) {
-        console.error("Opponent ID missing!");
-        return alert("Opponent not found! (Try finding from lobby)");
-    }
-    
+    if (!lastOpponentUid) return alert("Opponent not found!");
     const btn = document.querySelector('.mp-result-grid button') || document.querySelector('.btn-success');
     if(btn) btn.innerText = "Sending...";
-
     try {
         await addDoc(collection(db, "notifications"), {
             fromUid: auth.currentUser.uid,
@@ -371,44 +521,9 @@ window.playAgain = async function() {
             timestamp: Date.now()
         });
         alert("🔄 Rematch Request Sent!");
-        
-        // রিম্যাচ রিকোয়েস্ট পাঠানোর পর এই ম্যাচটি ইগনোর লিস্টে দিয়ে রিলোড দেওয়া ভালো
         if (activeMatchId) localStorage.setItem('quitMatchId', activeMatchId);
+        restoreHandGuide();
         location.reload(); 
-
-    } catch(e) { console.error(e); }
-};
-
-window.quitMultiplayerMatch = async function() {
-    if(!confirm("Are you sure?")) return;
-    try {
-        if (activeMatchId && auth.currentUser) {
-            localStorage.setItem('quitMatchId', activeMatchId);
-            const matchRef = doc(db, "matches", activeMatchId);
-            await updateDoc(matchRef, { players: arrayRemove(auth.currentUser.uid) });
-        }
-    } catch (e) { console.error(e); }
-    finally { location.reload(); }
-};
-
-window.currentChallengeDocId = null;
-function showChallengeToast(docId, data) {
-    const toast = document.getElementById('challengeToast');
-    window.currentChallengeDocId = docId; 
-    if (toast) {
-        document.getElementById('challengerImg').src = data.fromPhoto;
-        const details = `${data.gameMode} (${data.gameLength} S)`;
-        document.getElementById('challengerName').innerHTML = `${data.fromName}<br><small>${details}</small>`;
-        toast.classList.remove('hidden');
-        if(typeof window.playSound === 'function') window.playSound('notification');
-    }
-}
-
-window.rejectChallenge = async function() {
-    if(!window.currentChallengeDocId) return;
-    try {
-        await deleteDoc(doc(db, "notifications", window.currentChallengeDocId));
-        document.getElementById('challengeToast').classList.add('hidden');
     } catch(e) { console.error(e); }
 };
 
@@ -416,11 +531,9 @@ window.acceptChallenge = async function() {
     if(!window.currentChallengeDocId) return;
     const toast = document.getElementById('challengeToast');
     const docId = window.currentChallengeDocId;
-    
     try {
         const acceptBtn = document.querySelector('.btn-accept');
         if(acceptBtn) acceptBtn.innerText = "Starting...";
-
         const notifSnap = await getDoc(doc(db, "notifications", docId));
         if(!notifSnap.exists()) return alert("Expired!");
         
@@ -440,12 +553,25 @@ window.acceptChallenge = async function() {
             },
             createdAt: Date.now()
         });
-
         await deleteDoc(doc(db, "notifications", docId));
         toast.classList.add('hidden');
     } catch(e) { console.error(e); alert("Failed!"); toast.classList.add('hidden'); }
 };
 
+window.rejectChallenge = async function() {
+    if(!window.currentChallengeDocId) return;
+    try { await deleteDoc(doc(db, "notifications", window.currentChallengeDocId)); document.getElementById('challengeToast').classList.add('hidden'); } catch(e) {}
+};
+window.currentChallengeDocId = null;
+function showChallengeToast(docId, data) {
+    const toast = document.getElementById('challengeToast');
+    window.currentChallengeDocId = docId; 
+    if (toast) {
+        document.getElementById('challengerImg').src = data.fromPhoto;
+        document.getElementById('challengerName').innerHTML = `${data.fromName}<br><small>${data.gameMode}</small>`;
+        toast.classList.remove('hidden');
+    }
+}
 export async function syncMyProgress(wpm, progress, errors, accuracy, score) {
     if (!activeMatchId || !auth.currentUser) return;
     const matchRef = doc(db, "matches", activeMatchId);
@@ -461,23 +587,129 @@ export async function syncMyProgress(wpm, progress, errors, accuracy, score) {
         updates.winner = auth.currentUser.uid;
     }
     await updateDoc(matchRef, updates);
-
     document.getElementById('p1Wpm').innerText = `${wpm} WPM`;
     document.getElementById('p1Err').innerText = `${errors} Err`;
     document.getElementById('myCar').style.left = `${progress}%`;
     document.getElementById('myProgressLine').style.width = `${progress}%`;
 }
 window.syncMultiplayerProgress = syncMyProgress;
-
 function renderMultiplayerText(text) {
     const display = document.getElementById('mpTextDisplay');
     display.innerHTML = '';
     text.split('').forEach(char => {
         const span = document.createElement('span');
         span.innerText = char;
-        // ডিফল্ট কালার
         span.style.color = '#64748b'; 
         display.appendChild(span);
     });
     window.currentText = text;
 }
+
+// =========================================
+// 🏆 REAL-TIME WEEKLY LEADERBOARD SYSTEM
+// =========================================
+
+// ১. বর্তমান সপ্তাহের আইডি বের করা (যেমন: 2024-W05)
+function getWeekID() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return `${d.getFullYear()}-W${weekNo}`;
+}
+
+// ২. গেম শেষে স্কোর আপডেট করা (Global Function)
+window.updateWeeklyStats = async function(totalChars, wpm, errors) {
+    if (!auth.currentUser) return;
+
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    const currentWeek = getWeekID();
+
+    try {
+        const userSnap = await getDoc(userRef);
+        let userData = userSnap.exists() ? userSnap.data() : {};
+        let weeklyData = userData.weeklyStats || { weekId: "", totalWords: 0, totalWPM: 0, gamesPlayed: 0, errors: 0, score: 0 };
+
+        // নতুন সপ্তাহ শুরু হলে সব রিসেট
+        if (weeklyData.weekId !== currentWeek) {
+            weeklyData = { weekId: currentWeek, totalWords: 0, totalWPM: 0, gamesPlayed: 0, errors: 0, score: 0 };
+        }
+
+        // ডাটা যোগ করা
+        const words = Math.round(totalChars / 5);
+        weeklyData.totalWords += words;
+        weeklyData.totalWPM += wpm;
+        weeklyData.gamesPlayed += 1;
+        weeklyData.errors += errors;
+
+        // স্কোরিং ফর্মুলা (Words + Avg WPM - Errors)
+        const avgWPM = Math.round(weeklyData.totalWPM / weeklyData.gamesPlayed);
+        // ভুল করলে পয়েন্ট কাটা যাবে (Error * 5)
+        weeklyData.score = Math.max(0, weeklyData.totalWords + (avgWPM * 10) - (weeklyData.errors * 5));
+
+        // ফায়ারবেসে সেভ
+        await updateDoc(userRef, {
+            weeklyStats: weeklyData,
+            currentWeeklyScore: weeklyData.score // সার্চের জন্য আলাদা ফিল্ড
+        });
+
+        console.log("✅ Weekly Stats Updated:", weeklyData.score);
+        loadLeaderboard(); // সাথে সাথে রিফ্রেশ
+
+    } catch (e) {
+        console.error("Stats Update Error:", e);
+    }
+};
+
+// ৩. লিডারবোর্ড লোড করা
+async function loadLeaderboard() {
+    const list = document.getElementById('weeklyLeaderboardList');
+    const loading = document.getElementById('lbLoading');
+    if (!list) return;
+
+    try {
+        // সবচেয়ে বেশি স্কোর ওয়ালা ৫ জন
+        const q = query(collection(db, "users"), orderBy("currentWeeklyScore", "desc"), limit(5));
+        const querySnapshot = await getDocs(q);
+
+        let html = '';
+        let rank = 1;
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            // ডাটা যদি বর্তমান সপ্তাহের না হয়, তাহলে স্কোর ০ দেখাবে (বা তাকে বাদ দিতে পারেন)
+            // সিম্পলিসিটির জন্য আমরা সরাসরি দেখাচ্ছি
+            const score = data.currentWeeklyScore || 0;
+            const wpm = data.weeklyStats ? Math.round(data.weeklyStats.totalWPM / data.weeklyStats.gamesPlayed) : 0;
+            
+            let rankClass = rank === 1 ? 'top-1' : (rank === 2 ? 'top-2' : (rank === 3 ? 'top-3' : ''));
+            let rankIcon = rank === 1 ? '👑' : `#${rank}`;
+
+            html += `
+                <li class="lb-item">
+                    <span class="lb-rank ${rankClass}">${rankIcon}</span>
+                    <img src="${data.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="lb-avatar">
+                    <div class="lb-info">
+                        <span class="lb-name">${data.displayName || 'Unknown'}</span>
+                        <span class="lb-stats">Avg WPM: ${wpm} | Pts: ${score}</span>
+                    </div>
+                </li>
+            `;
+            rank++;
+        });
+
+        if (html === '') {
+            html = '<li style="text-align:center; padding:10px; font-size:0.8rem; color:#888;">No players this week yet!</li>';
+        }
+
+        list.innerHTML = html;
+        if(loading) loading.style.display = 'none';
+
+    } catch (error) {
+        console.error("LB Error:", error);
+    }
+}
+
+// পেজ লোড হলে লিডারবোর্ড আনবে
+document.addEventListener('DOMContentLoaded', loadLeaderboard);

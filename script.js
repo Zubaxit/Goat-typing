@@ -414,6 +414,12 @@ function finishSession() {
         console.log(`📊 Usage Update Sent: ${totalTyped} characters`);
     }
 
+    // 🔥🔥 WEEKLY STATS UPDATE (REAL DATA) 🔥🔥
+    // এই অংশটুকু নতুন যোগ করা হয়েছে
+    if (typeof window.updateWeeklyStats === 'function') {
+        window.updateWeeklyStats(totalTyped, finalWPM || 0, sessionTotalErrors);
+    }
+
     if (typeof openResultModal === 'function') {
         openResultModal(finalWPM, accuracy, sessionTotalErrors, sessionTotalTimeElapsed, currentMode, lvl);
     } else {

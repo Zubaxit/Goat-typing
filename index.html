@@ -185,209 +185,239 @@
 
 <div class="app-container">
     
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('normal')"><i class="fas fa-font"></i> সাধারণ</button>
-        <button class="tab-btn" onclick="switchTab('coding')"><i class="fas fa-code"></i> কোডিং</button>
-        <button class="tab-btn" onclick="switchTab('bengali')"><i class="fas fa-language"></i> বাংলা</button>
-        <button class="tab-btn" onclick="switchTab('custom')"><i class="fas fa-pen"></i> কাস্টম</button>
-    </div>
-
-    <header class="top-bar">
-        <div class="settings-group game-settings" id="gameSettings">
-            <select id="levelSelector" class="stylish-input" onchange="changeLevel()">
-                <option value="easy">লেভেল: সহজ</option>
-                <option value="medium">লেভেল: মাঝারি</option>
-                <option value="hard">লেভেল: কঠিন</option>
-            </select>
-            <select id="timeSelector" class="stylish-input" onchange="changeTime()">
-                <option value="30">৩০ সেকেন্ড</option>
-                <option value="60" selected>৬০ সেকেন্ড</option>
-                <option value="120">২ মিনিট</option>
-            </select>
+    <div class="main-game-area">
+        
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('normal')"><i class="fas fa-font"></i> সাধারণ</button>
+            <button class="tab-btn" onclick="switchTab('coding')"><i class="fas fa-code"></i> কোডিং</button>
+            <button class="tab-btn" onclick="switchTab('bengali')"><i class="fas fa-language"></i> বাংলা</button>
+            <button class="tab-btn" onclick="switchTab('custom')"><i class="fas fa-pen"></i> কাস্টম</button>
         </div>
 
-        <div class="settings-group">
-            <button id="startBtn" class="stylish-btn start-btn-stylish" onclick="startTest()">
-                <i class="fas fa-play"></i> Start
-            </button>
-            <button id="resetBtn" class="stylish-btn btn-reset" onclick="resetTest()" style="display: none;">
-                <i class="fas fa-redo"></i> Reset
-            </button>
+        <header class="top-bar">
+            <div class="settings-group game-settings" id="gameSettings">
+                <select id="levelSelector" class="stylish-input" onchange="changeLevel()">
+                    <option value="easy">লেভেল: সহজ</option>
+                    <option value="medium">লেভেল: মাঝারি</option>
+                    <option value="hard">লেভেল: কঠিন</option>
+                </select>
+                <select id="timeSelector" class="stylish-input" onchange="changeTime()">
+                    <option value="30">৩০ সেকেন্ড</option>
+                    <option value="60" selected>৬০ সেকেন্ড</option>
+                    <option value="120">২ মিনিট</option>
+                </select>
+            </div>
+
             <div class="settings-group">
-                <div class="reset-dropdown-wrapper" style="position: relative;">
-                    <button class="stylish-btn" onclick="toggleResetMenu()" title="রিসেট অপশন">
-                        <i class="fas fa-power-off"></i> 
-                    </button>
-                    <div id="resetDropdown" class="reset-dropdown-content">
-                        <a href="#" onclick="softReset()"><i class="fas fa-sync-alt"></i> রিসেট (রিফ্রেশ)</a>
-                        <a href="#" onclick="hardReset()" class="danger-option"><i class="fas fa-trash-alt"></i> হার্ড রিসেট</a>
-                    </div>
-                </div>
-            </div>
-            <button class="stylish-btn theme-btn" onclick="toggleTheme()" title="ডার্ক মোড">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button class="stylish-btn" onclick="toggleFullScreen()" title="ফোকাস মোড">
-                <i class="fas fa-expand"></i> Focus
-            </button>
-            
-            <button class="stylish-btn" onclick="openProSettings()" title="Pro Settings">
-                <i class="fas fa-cog"></i>
-            </button>
-           <button onclick="openMultiplayerModal()" class="icon-btn multiplayer-trigger" title="Multiplayer Mode">
-    <i class="fas fa-users"></i>
-</button>
-            <div class="auth-section">
-                <button id="login-btn" class="btn-login">
-                    <i class="fab fa-google"></i> G Login
+                <button id="startBtn" class="stylish-btn start-btn-stylish" onclick="startTest()">
+                    <i class="fas fa-play"></i> Start
                 </button>
+                <button id="resetBtn" class="stylish-btn btn-reset" onclick="resetTest()" style="display: none;">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+                <div class="settings-group">
+                    <div class="reset-dropdown-wrapper" style="position: relative;">
+                        <button class="stylish-btn" onclick="toggleResetMenu()" title="রিসেট অপশন">
+                            <i class="fas fa-power-off"></i> 
+                        </button>
+                        <div id="resetDropdown" class="reset-dropdown-content">
+                            <a href="#" onclick="softReset()"><i class="fas fa-sync-alt"></i> রিসেট (রিফ্রেশ)</a>
+                            <a href="#" onclick="hardReset()" class="danger-option"><i class="fas fa-trash-alt"></i> হার্ড রিসেট</a>
+                        </div>
+                    </div>
+                </div>
+                <button class="stylish-btn theme-btn" onclick="toggleTheme()" title="ডার্ক মোড">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="stylish-btn" onclick="toggleFullScreen()" title="ফোকাস মোড">
+                    <i class="fas fa-expand"></i> Focus
+                </button>
+                
+                <button class="stylish-btn" onclick="openProSettings()" title="Pro Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button onclick="openMultiplayerModal()" class="icon-btn multiplayer-trigger" title="Multiplayer Mode">
+                    <i class="fas fa-users"></i>
+                </button>
+                <div class="auth-section">
+                    <button id="login-btn" class="btn-login">
+                        <i class="fab fa-google"></i> G Login
+                    </button>
 
-                <div id="userProfileArea" style="display: none; align-items: center; gap: 10px; cursor: pointer;" onclick="handleLogout()" title="Click to Logout">
-                    <img id="userImgDisplay" src="" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white;">
-                    <div style="line-height: 1.2;">
-                        <span id="userNameDisplay" style="font-weight: bold; font-size: 0.9rem;">User</span>
-                        <span id="proBadgeDisplay" style="display:none; background: gold; color: black; font-size: 0.6rem; padding: 1px 4px; border-radius: 4px;">PRO</span>
+                    <div id="userProfileArea" style="display: none; align-items: center; gap: 10px; cursor: pointer;" onclick="handleLogout()" title="Click to Logout">
+                        <img id="userImgDisplay" src="" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white;">
+                        <div style="line-height: 1.2;">
+                            <span id="userNameDisplay" style="font-weight: bold; font-size: 0.9rem;">User</span>
+                            <span id="proBadgeDisplay" style="display:none; background: gold; color: black; font-size: 0.6rem; padding: 1px 4px; border-radius: 4px;">PRO</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <div id="customInputArea" class="custom-area" style="display: none;">
-        <div class="settings-group" style="margin-bottom: 15px; justify-content: center; flex-wrap: wrap;">
-            <select id="customModeSelector" class="stylish-input" onchange="updateCustomKeyboardPreview(this.value)">
-                <option value="normal">মোড: সাধারণ (English)</option>
-                <option value="bengali">মোড: বাংলা (বিজয়)</option>
-                <option value="coding">মোড: কোডিং</option>
-            </select>
-            <select id="customTimeSelector" class="stylish-input">
-                <option value="30">৩০ সেকেন্ড</option>
-                <option value="60" selected>৬০ সেকেন্ড</option>
-                <option value="120">২ মিনিট</option>
-                <option value="300">৫ মিনিট</option>
-            </select>
-        </div>
-        <textarea id="customTextSrc" placeholder="এখানে আপনার টেক্সট পেস্ট করুন..."></textarea>
-        <button class="stylish-btn start-btn-stylish" onclick="startCustomTest()" style="width: 100%; margin-top: 10px; justify-content: center;">
-            <i class="fas fa-play"></i> কাস্টম স্টার্ট
-        </button>
-    </div>
-
-    <div id="insightPanel">
-        <div id="profilePanel" class="insight-box">
-            <h4>Typing Analysis</h4>
-            <div id="typingBadges"></div>
-            <p id="typingSummary">Start typing to see analysis...</p>
-        </div>
-    </div>
-
-    <div class="typing-section" id="typingSection">
-        <div class="text-display" id="quoteDisplay">লোড হচ্ছে...</div>
-        <input type="text" id="inputField" class="hidden-input" 
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
-        data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" disabled>
-        <div id="timerProgressBar"></div>
-    </div>
-
-    <div class="instruction-panel" id="instructionPanel">
-        <div class="mini-hands-container">
-            <svg viewBox="0 0 200 100" class="mini-hands-svg">
-                <g transform="translate(10, 10) scale(0.4)">
-                    <path id="svg-l-pinky" d="M20,100 L20,50 Q20,40 30,40 Q40,40 40,50 L40,100" class="mini-finger"/>
-                    <path id="svg-l-ring" d="M50,100 L50,30 Q50,20 60,20 Q70,20 70,30 L70,100" class="mini-finger"/>
-                    <path id="svg-l-middle" d="M80,100 L80,10 Q80,0 90,0 Q100,0 100,10 L100,100" class="mini-finger"/>
-                    <path id="svg-l-index" d="M110,100 L110,20 Q110,10 120,10 Q130,10 130,20 L130,100" class="mini-finger"/>
-                    <path id="svg-l-thumb" d="M140,120 L160,110 Q170,115 160,130 L140,140" class="mini-finger"/>
-                </g>
-                <g transform="translate(110, 10) scale(0.4)">
-                    <path id="svg-r-pinky" d="M230,100 L230,50 Q230,40 220,40 Q210,40 210,50 L210,100" class="mini-finger"/>
-                    <path id="svg-r-ring" d="M200,100 L200,30 Q200,20 190,20 Q180,20 180,30 L180,100" class="mini-finger"/>
-                    <path id="svg-r-middle" d="M170,100 L170,10 Q170,0 160,0 Q150,0 150,10 L150,100" class="mini-finger"/>
-                    <path id="svg-r-index" d="M140,100 L140,20 Q140,10 130,10 Q120,10 120,20 L120,100" class="mini-finger"/>
-                    <path id="svg-r-thumb" d="M110,120 L90,110 Q80,115 90,130 L110,140" class="mini-finger"/>
-                </g>
-            </svg>
-        </div>
-        <div class="instruction-text-wrapper">
-            <span id="guideText" class="guide-text">লোড হচ্ছে...</span>
-            <div id="capsLockWarning" class="caps-warning" style="display: none;">CAPS LOCK ON</div>
-        </div>
-    </div>
-
-    <div class="keyboard-container">
-        <div class="keyboard" id="virtualKeyboard">
-            <div class="row">
-                <div class="key pinky-zone" data-key="Backquote">`</div>
-                <div class="key pinky-zone" data-key="Digit1">1</div>
-                <div class="key ring-zone" data-key="Digit2">2</div>
-                <div class="key middle-zone" data-key="Digit3">3</div>
-                <div class="key index-zone" data-key="Digit4">4</div>
-                <div class="key index-zone" data-key="Digit5">5</div>
-                <div class="key index-zone" data-key="Digit6">6</div>
-                <div class="key index-zone" data-key="Digit7">7</div>
-                <div class="key middle-zone" data-key="Digit8">8</div>
-                <div class="key ring-zone" data-key="Digit9">9</div>
-                <div class="key pinky-zone" data-key="Digit0">0</div>
-                <div class="key pinky-zone" data-key="Minus">-</div>
-                <div class="key pinky-zone" data-key="Equal">=</div>
-                <div class="key key-backspace pinky-zone" data-key="Backspace">⌫</div>
+        <div id="customInputArea" class="custom-area" style="display: none;">
+            <div class="settings-group" style="margin-bottom: 15px; justify-content: center; flex-wrap: wrap;">
+                <select id="customModeSelector" class="stylish-input" onchange="updateCustomKeyboardPreview(this.value)">
+                    <option value="normal">মোড: সাধারণ (English)</option>
+                    <option value="bengali">মোড: বাংলা (বিজয়)</option>
+                    <option value="coding">মোড: কোডিং</option>
+                </select>
+                <select id="customTimeSelector" class="stylish-input">
+                    <option value="30">৩০ সেকেন্ড</option>
+                    <option value="60" selected>৬০ সেকেন্ড</option>
+                    <option value="120">২ মিনিট</option>
+                    <option value="300">৫ মিনিট</option>
+                </select>
             </div>
-            <div class="row">
-                <div class="key key-tab pinky-zone" data-key="Tab">Tab</div>
-                <div class="key pinky-zone" data-key="KeyQ">Q</div>
-                <div class="key ring-zone" data-key="KeyW">W</div>
-                <div class="key middle-zone" data-key="KeyE">E</div>
-                <div class="key index-zone" data-key="KeyR">R</div>
-                <div class="key index-zone" data-key="KeyT">T</div>
-                <div class="key index-zone" data-key="KeyY">Y</div>
-                <div class="key index-zone" data-key="KeyU">U</div>
-                <div class="key middle-zone" data-key="KeyI">I</div>
-                <div class="key ring-zone" data-key="KeyO">O</div>
-                <div class="key pinky-zone" data-key="KeyP">P</div>
-                <div class="key pinky-zone" data-key="BracketLeft">[</div>
-                <div class="key pinky-zone" data-key="BracketRight">]</div>
-                <div class="key pinky-zone" data-key="Backslash">\</div>
-            </div>
-            <div class="row">
-                <div class="key key-caps pinky-zone" data-key="CapsLock">Caps</div>
-                <div class="key pinky-zone" data-key="KeyA">A</div>
-                <div class="key ring-zone" data-key="KeyS">S</div>
-                <div class="key middle-zone" data-key="KeyD">D</div>
-                <div class="key index-zone" data-key="KeyF">F</div>
-                <div class="key index-zone" data-key="KeyG">G</div>
-                <div class="key index-zone" data-key="KeyH">H</div>
-                <div class="key index-zone" data-key="KeyJ">J</div>
-                <div class="key middle-zone" data-key="KeyK">K</div>
-                <div class="key ring-zone" data-key="KeyL">L</div>
-                <div class="key pinky-zone" data-key="Semicolon">;</div>
-                <div class="key pinky-zone" data-key="Quote">'</div>
-                <div class="key key-enter pinky-zone" data-key="Enter">Enter</div>
-            </div>
-            <div class="row">
-                <div class="key key-shift pinky-zone" data-key="ShiftLeft">Shift</div>
-                <div class="key pinky-zone" data-key="KeyZ">Z</div>
-                <div class="key ring-zone" data-key="KeyX">X</div>
-                <div class="key middle-zone" data-key="KeyC">C</div>
-                <div class="key index-zone" data-key="KeyV">V</div>
-                <div class="key index-zone" data-key="KeyB">B</div>
-                <div class="key index-zone" data-key="KeyN">N</div>
-                <div class="key index-zone" data-key="KeyM">M</div>
-                <div class="key middle-zone" data-key="Comma">,</div>
-                <div class="key ring-zone" data-key="Period">.</div>
-                <div class="key pinky-zone" data-key="Slash">/</div>
-                <div class="key key-shift pinky-zone" data-key="ShiftRight">Shift</div>
-            </div>
-            <div class="row">
-                <div class="key key-space thumb-zone" data-key="Space">Space</div>
+            <textarea id="customTextSrc" placeholder="এখানে আপনার টেক্সট পেস্ট করুন..."></textarea>
+            <button class="stylish-btn start-btn-stylish" onclick="startCustomTest()" style="width: 100%; margin-top: 10px; justify-content: center;">
+                <i class="fas fa-play"></i> কাস্টম স্টার্ট
+            </button>
+        </div>
+
+        <div id="insightPanel">
+            <div id="profilePanel" class="insight-box">
+                <h4>Typing Analysis</h4>
+                <div id="typingBadges"></div>
+                <p id="typingSummary">Start typing to see analysis...</p>
             </div>
         </div>
+
+        <div class="typing-section" id="typingSection">
+            <div class="text-display" id="quoteDisplay">লোড হচ্ছে...</div>
+            <input type="text" id="inputField" class="hidden-input" 
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+            data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" disabled>
+            <div id="timerProgressBar"></div>
+        </div>
+
+        <div class="instruction-panel" id="instructionPanel">
+            <div class="mini-hands-container">
+                <svg viewBox="0 0 200 100" class="mini-hands-svg">
+                    <g transform="translate(10, 10) scale(0.4)">
+                        <path id="svg-l-pinky" d="M20,100 L20,50 Q20,40 30,40 Q40,40 40,50 L40,100" class="mini-finger"/>
+                        <path id="svg-l-ring" d="M50,100 L50,30 Q50,20 60,20 Q70,20 70,30 L70,100" class="mini-finger"/>
+                        <path id="svg-l-middle" d="M80,100 L80,10 Q80,0 90,0 Q100,0 100,10 L100,100" class="mini-finger"/>
+                        <path id="svg-l-index" d="M110,100 L110,20 Q110,10 120,10 Q130,10 130,20 L130,100" class="mini-finger"/>
+                        <path id="svg-l-thumb" d="M140,120 L160,110 Q170,115 160,130 L140,140" class="mini-finger"/>
+                    </g>
+                    <g transform="translate(110, 10) scale(0.4)">
+                        <path id="svg-r-pinky" d="M230,100 L230,50 Q230,40 220,40 Q210,40 210,50 L210,100" class="mini-finger"/>
+                        <path id="svg-r-ring" d="M200,100 L200,30 Q200,20 190,20 Q180,20 180,30 L180,100" class="mini-finger"/>
+                        <path id="svg-r-middle" d="M170,100 L170,10 Q170,0 160,0 Q150,0 150,10 L150,100" class="mini-finger"/>
+                        <path id="svg-r-index" d="M140,100 L140,20 Q140,10 130,10 Q120,10 120,20 L120,100" class="mini-finger"/>
+                        <path id="svg-r-thumb" d="M110,120 L90,110 Q80,115 90,130 L110,140" class="mini-finger"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="instruction-text-wrapper">
+                <span id="guideText" class="guide-text">লোড হচ্ছে...</span>
+                <div id="capsLockWarning" class="caps-warning" style="display: none;">CAPS LOCK ON</div>
+            </div>
+        </div>
+
+        <div class="keyboard-container">
+            <div class="keyboard" id="virtualKeyboard">
+                <div class="row">
+                    <div class="key pinky-zone" data-key="Backquote">`</div>
+                    <div class="key pinky-zone" data-key="Digit1">1</div>
+                    <div class="key ring-zone" data-key="Digit2">2</div>
+                    <div class="key middle-zone" data-key="Digit3">3</div>
+                    <div class="key index-zone" data-key="Digit4">4</div>
+                    <div class="key index-zone" data-key="Digit5">5</div>
+                    <div class="key index-zone" data-key="Digit6">6</div>
+                    <div class="key index-zone" data-key="Digit7">7</div>
+                    <div class="key middle-zone" data-key="Digit8">8</div>
+                    <div class="key ring-zone" data-key="Digit9">9</div>
+                    <div class="key pinky-zone" data-key="Digit0">0</div>
+                    <div class="key pinky-zone" data-key="Minus">-</div>
+                    <div class="key pinky-zone" data-key="Equal">=</div>
+                    <div class="key key-backspace pinky-zone" data-key="Backspace">⌫</div>
+                </div>
+                <div class="row">
+                    <div class="key key-tab pinky-zone" data-key="Tab">Tab</div>
+                    <div class="key pinky-zone" data-key="KeyQ">Q</div>
+                    <div class="key ring-zone" data-key="KeyW">W</div>
+                    <div class="key middle-zone" data-key="KeyE">E</div>
+                    <div class="key index-zone" data-key="KeyR">R</div>
+                    <div class="key index-zone" data-key="KeyT">T</div>
+                    <div class="key index-zone" data-key="KeyY">Y</div>
+                    <div class="key index-zone" data-key="KeyU">U</div>
+                    <div class="key middle-zone" data-key="KeyI">I</div>
+                    <div class="key ring-zone" data-key="KeyO">O</div>
+                    <div class="key pinky-zone" data-key="KeyP">P</div>
+                    <div class="key pinky-zone" data-key="BracketLeft">[</div>
+                    <div class="key pinky-zone" data-key="BracketRight">]</div>
+                    <div class="key pinky-zone" data-key="Backslash">\</div>
+                </div>
+                <div class="row">
+                    <div class="key key-caps pinky-zone" data-key="CapsLock">Caps</div>
+                    <div class="key pinky-zone" data-key="KeyA">A</div>
+                    <div class="key ring-zone" data-key="KeyS">S</div>
+                    <div class="key middle-zone" data-key="KeyD">D</div>
+                    <div class="key index-zone" data-key="KeyF">F</div>
+                    <div class="key index-zone" data-key="KeyG">G</div>
+                    <div class="key index-zone" data-key="KeyH">H</div>
+                    <div class="key index-zone" data-key="KeyJ">J</div>
+                    <div class="key middle-zone" data-key="KeyK">K</div>
+                    <div class="key ring-zone" data-key="KeyL">L</div>
+                    <div class="key pinky-zone" data-key="Semicolon">;</div>
+                    <div class="key pinky-zone" data-key="Quote">'</div>
+                    <div class="key key-enter pinky-zone" data-key="Enter">Enter</div>
+                </div>
+                <div class="row">
+                    <div class="key key-shift pinky-zone" data-key="ShiftLeft">Shift</div>
+                    <div class="key pinky-zone" data-key="KeyZ">Z</div>
+                    <div class="key ring-zone" data-key="KeyX">X</div>
+                    <div class="key middle-zone" data-key="KeyC">C</div>
+                    <div class="key index-zone" data-key="KeyV">V</div>
+                    <div class="key index-zone" data-key="KeyB">B</div>
+                    <div class="key index-zone" data-key="KeyN">N</div>
+                    <div class="key index-zone" data-key="KeyM">M</div>
+                    <div class="key middle-zone" data-key="Comma">,</div>
+                    <div class="key ring-zone" data-key="Period">.</div>
+                    <div class="key pinky-zone" data-key="Slash">/</div>
+                    <div class="key key-shift pinky-zone" data-key="ShiftRight">Shift</div>
+                </div>
+                <div class="row">
+                    <div class="key key-space thumb-zone" data-key="Space">Space</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align:center; margin-top:20px;">
+            <button class="stylish-btn" onclick="downloadCertificate()" id="certBtn" style="display: none; margin: 0 auto; background: #2ecc71; color: white; border: none;">
+                <i class="fas fa-certificate"></i> সার্টিফিকেট ডাউনলোড
+            </button>
+        </div>
+
     </div>
-    
-    <div style="text-align:center; margin-top:20px;">
-        <button class="stylish-btn" onclick="downloadCertificate()" id="certBtn" style="display: none; margin: 0 auto; background: #2ecc71; color: white; border: none;">
-            <i class="fas fa-certificate"></i> সার্টিফিকেট ডাউনলোড
-        </button>
-    </div>
+    <aside class="right-sidebar">
+        
+        <div class="ad-box">
+            <span class="ad-label">Sponsored</span>
+            <div class="ad-content">
+                <p>🚀 Your Ad Here</p>
+                <small>300 x 250</small>
+            </div>
+        </div>
+
+        <div class="leaderboard-box">
+            <div class="lb-header">
+                <h3>🏆 সাপ্তাহিক সেরা</h3>
+                <small>Top 5 of This Week</small>
+            </div>
+            
+            <div id="lbLoading" style="text-align:center; padding:15px; color:#888;">
+                <i class="fas fa-spinner fa-spin"></i> Loading data...
+            </div>
+
+            <ul id="weeklyLeaderboardList" class="lb-list">
+                </ul>
+        </div>
+
+    </aside>
+
 </div>
 
 <div id="proSettingsModal" class="settings-overlay" style="display: none;">
@@ -786,43 +816,48 @@
         </div>
         
         <div class="mp-body">
-            <div class="my-uid-box">
-                <span>My Username:</span>
-                <code id="myUidDisplay">Loading...</code>
-                <button onclick="copyMyUid()" class="icon-btn"><i class="far fa-copy"></i></button>
+            <div class="my-uid-box" style="background: #1e293b; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span style="color: #94a3b8; font-size: 0.9rem;">My Username:</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <code id="myUidDisplay" style="color: #4cc9f0; font-weight: bold;">Loading...</code>
+                    <button onclick="copyMyUid()" style="background:none; border:none; color:#666; cursor:pointer;"><i class="far fa-copy"></i></button>
+                </div>
             </div>
 
-            <div class="mp-search-box">
-                <input type="text" id="opponentUidInput" placeholder="Friend's username...">
-                <button onclick="searchOpponent()" class="btn-primary">Search</button>
+            <div class="mp-search-box" style="display: flex; gap: 8px;">
+                <input type="text" id="opponentUidInput" placeholder="Friend's username..." style="flex:1; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;">
+                <button onclick="searchOpponent()" class="btn-primary" style="padding: 0 20px;">Search</button>
             </div>
 
             <div id="mpSearchResult" class="mp-user-card hidden">
-                <img src="" id="mpUserImg" class="mp-avatar" alt="User">
-                <div class="mp-user-info">
-                    <h4 id="mpUserName">User Name</h4>
-                    <span id="mpUserStatus" class="status-badge">Found</span>
-                </div>
+                <img src="" id="mpUserImg" style="width: 60px; height: 60px; border-radius: 50%; border: 3px solid #4cc9f0; margin-bottom: 10px;">
+                <h4 id="mpUserName" style="margin: 0; color: white;">User Name</h4>
+                <span id="mpUserStatus" class="status-badge" style="background: #22c55e; color: black; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem;">Found</span>
                 
                 <div class="mp-settings-box">
-                    <label>Mode:</label>
-                    <select id="mpGameMode">
-                        <option value="english">English (Hard)</option>
-                        <option value="bengali">Bangla (Hard)</option>
-                    </select>
+                    <div class="mp-settings-row">
+                        <label>Mode:</label>
+                        <select id="mpGameMode">
+                            <option value="english">English (Hard)</option>
+                            <option value="bengali">Bangla (Hard)</option>
+                        </select>
+                    </div>
                     
-                    <label>Sentences:</label>
-                   <select id="mpGameLength">
-    <option value="1">1 Sentence (Quick)</option> <option value="2">2 Sentences</option>
-    <option value="5">5 Sentences</option>
-    <option value="10">10 Sentences</option>
-</select>
+                    <div class="mp-settings-row">
+                        <label>Length:</label>
+                        <select id="mpGameLength">
+                            <option value="1">1 Sentence (Quick)</option>
+                            <option value="2">2 Sentences</option>
+                            <option value="5">5 Sentences</option>
+                            <option value="10">10 Sentences</option>
+                        </select>
+                    </div>
                 </div>
 
-                <button id="sendChallengeBtn" class="btn-success">Send Challenge</button>
+                <button id="sendChallengeBtn">Send Challenge</button>
             </div>
 
-            <div id="mpFeedbackMsg" class="mp-msg"></div>
+            <div id="mpFeedbackMsg" class="mp-msg" style="margin-top: 10px; text-align: center; color: #facc15;"></div>
         </div>
     </div>
 </div>
