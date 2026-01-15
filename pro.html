@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoatType PRO - Upgrade</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&family=Hind+Siliguri:wght@400;600&display=swap');
+
+        /* PRO PAGE GLOBAL STYLES */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: #050505;
+            overflow-x: hidden;
+            color: white;
+            font-family: 'Poppins', 'Hind Siliguri', sans-serif;
+        }
+        
+        /* Background Particles */
+        .bg-particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(250, 204, 21, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(76, 201, 240, 0.05) 0%, transparent 50%);
+        }
+
+        /* 🔥 BACK BUTTON STYLE (FIXED) */
+        .back-btn {
+            position: fixed;
+            top: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .back-btn:hover {
+            background: #facc15;
+            color: black;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+            transform: translateX(-5px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 60vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 80px 20px 20px 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .pro-badge-lg {
+            font-size: 5rem; font-weight: 900;
+            background: linear-gradient(to right, #facc15, #f59e0b, #fff, #facc15);
+            background-size: 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shineText 3s linear infinite;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem; color: #ccc; max-width: 700px;
+            margin-bottom: 40px; line-height: 1.6;
+        }
+
+        /* 🔥 FLIP CARD GRID (14 CARDS) */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Responsive */
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+        }
+
+        /* CARD CONTAINER */
+        .feature-card {
+            background: transparent;
+            height: 280px; /* Fixed Height for Flip */
+            perspective: 1000px; /* 3D Effect er jonno emergency */
+            cursor: pointer;
+        }
+
+        /* INNER WRAPPER (This flips) */
+        .card-inner {
+            position: relative;
+            width: 100%; height: 100%;
+            text-align: center;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        /* HOVER EFFECT */
+        .feature-card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* FRONT & BACK COMMON STYLES */
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* FRONT DESIGN */
+        .card-front {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+        }
+        
+        .f-icon { font-size: 3.5rem; color: #facc15; margin-bottom: 20px; transition: 0.3s;}
+        .feature-card:hover .f-icon { transform: scale(1.2); }
+        
+        .f-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; color: #fff; }
+        .f-desc { color: #aaa; font-size: 0.9rem; line-height: 1.4; }
+
+        /* BACK DESIGN (IMAGE) */
+        .card-back {
+            background: #111;
+            transform: rotateY(180deg);
+            padding: 0; /* Image full howar jonno */
+            overflow: hidden;
+        }
+        
+        .card-back img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.6; /* Ektu dark kora jate text thakle dekha jay */
+            transition: 0.5s;
+        }
+        
+        .feature-card:hover .card-back img {
+            opacity: 0.8;
+            transform: scale(1.1);
+        }
+
+        .back-overlay-text {
+            position: absolute;
+            bottom: 15px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #facc15;
+            font-weight: bold;
+        }
+
+        /* Pricing Section */
+        .pricing-section {
+            text-align: center; margin: 80px 0; padding: 50px 20px;
+            background: linear-gradient(180deg, transparent, rgba(250, 204, 21, 0.05));
+        }
+
+        .price-tag { font-size: 4rem; font-weight: 800; color: #fff; }
+        .price-sub { font-size: 1.2rem; color: #facc15; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Buttons & Inputs */
+        .glow-btn {
+            background: #facc15; color: black; padding: 15px 40px;
+            font-weight: bold; border-radius: 50px; text-decoration: none;
+            display: inline-block; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+            transition: 0.3s; border: none; width: 100%; margin-top: 20px;
+        }
+        .glow-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(250, 204, 21, 0.6); }
+
+        /* Payment Modal */
+        .pay-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 9999;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .pay-box {
+            background: #111; padding: 40px; border-radius: 20px;
+            width: 90%; max-width: 450px; border: 1px solid #333;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            animation: slideUp 0.5s ease;
+        }
+        .pay-input {
+            width: 100%; padding: 15px; margin: 10px 0;
+            background: #222; border: 1px solid #444; color: white;
+            border-radius: 8px; font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes shineText { 0% { background-position: 0%; } 100% { background-position: 200%; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles"></div>
+
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Game
+    </a>
+
+    <section class="hero-section">
+        <div class="pro-badge-lg">GOAT PRO</div>
+        <p class="hero-subtitle">
+            Unlock the ultimate typing experience. No Ads. Exclusive Music. Unlimited Power. <br>
+            <span style="color:#facc15">Become a legend today.</span>
+        </p>
+        <button onclick="scrollToPricing()" class="glow-btn" style="width: auto;">Get Access Now</button>
+    </section>
+
+    <div class="features-grid">
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-list-ol"></i></div>
+                    <div class="f-title">Leaderboard</div>
+                    <div class="f-desc">লিডারবোর্ডের ফুল এক্সেস। টপ ৫ সহ পুরো লিস্ট দেখার সুবিধা।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/facc15?text=Leaderboard+Preview" alt="LB">
+                    <div class="back-overlay-text">Unlimited View</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-keyboard"></i></div>
+                    <div class="f-title">Pro Keyboard</div>
+                    <div class="f-desc">প্রো কিবোর্ড লেআউট এবং কালার কাস্টমাইজেশন ফিচার।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Keyboard+Preview" alt="KB">
+                    <div class="back-overlay-text">Custom Layouts</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-star"></i></div>
+                    <div class="f-title">Special Features</div>
+                    <div class="f-desc">সিক্রেট এবং এক্সক্লুসিভ প্রো ফিচারস শুধুমাত্র মেম্বারদের জন্য।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/ff5555?text=Special+Features" alt="Features">
+                    <div class="back-overlay-text">VIP Only</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-headphones-alt"></i></div>
+                    <div class="f-title">Lofi Music</div>
+                    <div class="f-desc">টাইপিংয়ের সময় ফোকাস বাড়াতে বিল্ট-ইন লোফাই মিউজিক প্লেয়ার।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/facc15?text=Lofi+Player" alt="Music">
+                    <div class="back-overlay-text">Focus Mode</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-palette"></i></div>
+                    <div class="f-title">Themes</div>
+                    <div class="f-desc">ব্যাকগ্রাউন্ড এবং কালার থিম নিজের মতো কাস্টমাইজ করার সুবিধা।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Themes+Preview" alt="Theme">
+                    <div class="back-overlay-text">Animated BG</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-ban"></i></div>
+                    <div class="f-title">Zero Ads</div>
+                    <div class="f-desc">সম্পূর্ণ বিজ্ঞাপন মুক্ত ইন্টারফেস। কোনো ডিস্টার্বেন্স ছাড়া টাইপ করুন।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/ff5555?text=No+Ads" alt="Ads">
+                    <div class="back-overlay-text">100% Clean</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-certificate"></i></div>
+                    <div class="f-title">Golden Badge</div>
+                    <div class="f-desc">প্রোফাইলে এবং লিডারবোর্ডে গোল্ডেন "PRO" ব্যাজ শো করবে।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/facc15?text=Golden+Badge" alt="Badge">
+                    <div class="back-overlay-text">Show Off</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-language"></i></div>
+                    <div class="f-title">Bangla Typing</div>
+                    <div class="f-desc">আনলিমিটেড বাংলা টাইপিং প্র্যাকটিস। কোনো ডেইলি লিমিট নেই।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Bangla+Mode" alt="Bangla">
+                    <div class="back-overlay-text">Unlimited</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="f-title">Custom Text</div>
+                    <div class="f-desc">নিজের পছন্দের টেক্সট বা প্যারাগ্রাফ দিয়ে আনলিমিটেড টাইপিং।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/ff5555?text=Custom+Text" alt="Custom">
+                    <div class="back-overlay-text">Paste & Type</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-robot"></i></div>
+                    <div class="f-title">AI Guide</div>
+                    <div class="f-desc">স্মার্ট AI আপনার টাইপিং মনিটর করবে এবং লাইভ পরামর্শ দিবে।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/facc15?text=AI+Analysis" alt="AI">
+                    <div class="back-overlay-text">Personal Coach</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="f-title">Live Stats</div>
+                    <div class="f-desc">টাইপ করার সময় রিয়েল-টাইম WPM, Accuracy এবং Error গ্রাফ।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Live+Stats" alt="Stats">
+                    <div class="back-overlay-text">Advanced Data</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-chart-area"></i></div>
+                    <div class="f-title">Pace Chart</div>
+                    <div class="f-desc">পুরো সেশনের টাইপিং স্পিডের ওঠানামা দেখার জন্য পেস চার্ট।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/ff5555?text=Pace+Chart" alt="Pace">
+                    <div class="back-overlay-text">Visualize Speed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-bug"></i></div>
+                    <div class="f-title">Mistake Pattern</div>
+                    <div class="f-desc">আপনার ভুলগুলো কোন আঙুলে বেশি হচ্ছে তা শনাক্ত করা।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/facc15?text=Mistake+Analysis" alt="Pattern">
+                    <div class="back-overlay-text">Fix Weakness</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="f-icon"><i class="fas fa-gift"></i></div>
+                    <div class="f-title">More Coming...</div>
+                    <div class="f-desc">ভবিষ্যতে আরও নতুন নতুন সব প্রিমিয়াম ফিচার যুক্ত হতে থাকবে।</div>
+                </div>
+                <div class="card-back">
+                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Future+Updates" alt="Updates">
+                    <div class="back-overlay-text">Stay Tuned</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <section id="pricing" class="pricing-section">
+        <h2 style="font-size: 2rem; margin-bottom: 20px;">SIMPLE PRICING</h2>
+        <div class="price-tag">50 BDT <span style="font-size:1.5rem; color:#888;">/ 30 Days</span></div>
+        <p class="price-sub">Cheap as a Cup of Coffee ☕</p>
+        
+        <br><br>
+        <button onclick="openPaymentModal()" class="glow-btn" style="max-width: 300px;">UPGRADE NOW</button>
+    </section>
+
+    <div id="paymentModal" class="pay-modal">
+        <div class="pay-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>🚀 Confirm Membership</h3>
+                <i class="fas fa-times" onclick="closePaymentModal()" style="cursor:pointer; color:#888;"></i>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
+                <p>Send <b>50 BDT</b> to:</p>
+                <h2 style="color:#facc15; margin:5px 0;">017XXXXXXXX</h2>
+                <p><small>(Bkash / Nagad - Send Money)</small></p>
+            </div>
+
+            <form id="paymentForm">
+                <input type="text" id="payName" class="pay-input" placeholder="Your Name" required>
+                <input type="number" id="payPhone" class="pay-input" placeholder="Sender Phone Number" required>
+                <input type="text" id="payTrx" class="pay-input" placeholder="Transaction ID (TrxID)" required>
+                
+                <select id="payMethod" class="pay-input">
+                    <option value="Bkash">Bkash</option>
+                    <option value="Nagad">Nagad</option>
+                </select>
+
+                <button type="submit" class="glow-btn">Submit Request</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, collection, addDoc, doc, getDoc } from "./firebase-config.js";
+
+        // Scroll Logic
+        window.scrollToPricing = () => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'});
+        
+        // Modal Logic
+        window.openPaymentModal = async () => {
+            if(!auth.currentUser) {
+                alert("Please login first to upgrade!");
+                window.location.href = "index.html";
+                return;
+            }
+            document.getElementById('paymentModal').style.display = 'flex';
+        };
+
+        window.closePaymentModal = () => {
+            document.getElementById('paymentModal').style.display = 'none';
+        };
+
+        // Payment Submission Logic
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            const name = document.getElementById('payName').value;
+            const phone = document.getElementById('payPhone').value;
+            const trx = document.getElementById('payTrx').value;
+            const method = document.getElementById('payMethod').value;
+            const uid = auth.currentUser.uid;
+            const email = auth.currentUser.email;
+
+            try {
+                // 1. Save Request to Firebase
+                await addDoc(collection(db, "payment_requests"), {
+                    uid: uid,
+                    email: email,
+                    name: name,
+                    phone: phone,
+                    trxId: trx,
+                    method: method,
+                    amount: 50,
+                    status: "pending", // Admin will change to 'approved'
+                    timestamp: Date.now()
+                });
+
+                alert("✅ Request Sent! Please wait for admin approval (Max 24h).");
+                closePaymentModal();
+                e.target.reset();
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("❌ Failed to send request. Try again.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

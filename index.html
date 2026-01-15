@@ -62,13 +62,15 @@
 
     <div class="sidebar-inner">
         
-        <div class="gt-logo">
-            <div class="gt-logo-icon">⌨️</div>
-            <div>
-                <h1>GoatType</h1>
-                <span class="gt-badge">PRO v2.0</span>
-            </div>
-        </div>
+       <div class="gt-logo">
+    <div class="gt-logo-icon">⌨️</div>
+    <div>
+        <h1>GoatType</h1>
+        <a href="pro.html" class="gt-badge" style="text-decoration:none; cursor:pointer;">
+            PRO v2.0 <i class="fas fa-arrow-right" style="font-size:0.6rem;"></i>
+        </a>
+    </div>
+</div>
 
         <div class="gt-section">
             <h3>📈 LIVE STATS</h3>
@@ -1058,8 +1060,22 @@
         </div>
     </div>
 </div>
-
-
+<div id="proLockModal" class="pro-lock-overlay">
+    <div class="pro-lock-box">
+        <div class="lock-icon-circle">
+            <i class="fas fa-crown"></i>
+        </div>
+        <h2 class="gold-text">PRO FEATURE LOCKED</h2>
+        <p id="lockMsg">This feature is available for <br> Premium Members only.</p>
+        
+        <div class="lock-actions">
+            <button onclick="closeProLock()" class="btn-cancel">Cancel</button>
+            <a href="pro.html" class="btn-upgrade-gold">
+                UPGRADE NOW <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
 <script src="text-db.js"></script>
 <script src="online-db.js"></script>
 <script src="bengali-utils.js"></script>

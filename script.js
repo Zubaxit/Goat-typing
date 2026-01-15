@@ -792,3 +792,33 @@ window.nextTrack = function() {
 window.prevTrack = function() {
     alert("Previous track loading...");
 };
+
+/* =========================================
+   🔒 SECURE PRO FEATURE GUARD (GOLDEN)
+   ========================================= */
+
+// পপআপ বন্ধ করার ফাংশন
+window.closeProLock = function() {
+    const modal = document.getElementById('proLockModal');
+    if(modal) modal.style.display = 'none';
+}
+
+// মেইন চেকিং ফাংশন
+window.checkProFeature = function(featureName) {
+    // ১. প্রথমে চেক করো ইউজার অ্যাডমিন বা প্রো কিনা
+    if (window.IS_PRO_USER === true || window.IS_ADMIN === true) {
+        return true; // ✅ সব ঠিক আছে, এক্সেস দাও
+    } 
+    
+    // ২. যদি প্রো না হয়, তাহলে গোল্ডেন পপআপ দেখাও
+    const modal = document.getElementById('proLockModal');
+    const msg = document.getElementById('lockMsg');
+    
+    if(modal && msg) {
+        msg.innerHTML = `The <b>'${featureName}'</b> feature is locked.<br>Upgrade to PRO to unlock limitlessness.`;
+        modal.style.display = 'flex'; // পপআপ শো
+    }
+    
+    // ৩. ❌ মিথ্যা রিটার্ন করো যাতে মূল ফাংশন কাজ না করে
+    return false; 
+}

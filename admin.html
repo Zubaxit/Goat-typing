@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoatType - Admin Command Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ADMIN DASHBOARD STYLES */
+        body { background: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        
+        /* Header */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #1e293b; padding: 15px 30px; border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 30px;
+            border: 1px solid #334155;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #facc15; }
+        .logo i { margin-right: 10px; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px; margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155;
+            transition: 0.3s; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .stat-card:hover { transform: translateY(-5px); border-color: #facc15; }
+        .stat-val { font-size: 2.5rem; font-weight: bold; color: #facc15; }
+        .stat-label { color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-icon { position: absolute; right: 20px; top: 20px; font-size: 3rem; opacity: 0.1; color: white; }
+
+        /* Tables Section */
+        .section-title { font-size: 1.5rem; margin-bottom: 15px; color: #fff; border-left: 5px solid #facc15; padding-left: 15px; }
+        
+        .table-wrapper {
+            background: #1e293b; border-radius: 12px; overflow: hidden;
+            border: 1px solid #334155; margin-bottom: 40px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .table-header {
+            padding: 20px; border-bottom: 1px solid #334155;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #020617;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #334155; }
+        th { background: #0f172a; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #334155; }
+
+        /* User Info in Table */
+        .user-cell { display: flex; flex-direction: column; }
+        .u-name { font-weight: bold; color: #fff; }
+        .u-email { font-size: 0.8rem; color: #94a3b8; }
+        .u-uid { font-size: 0.7rem; color: #64748b; font-family: monospace; }
+
+        /* Status Badges */
+        .badge { padding: 4px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+        .bg-pending { background: rgba(250, 204, 21, 0.2); color: #facc15; }
+        .bg-approved { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .bg-rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .bg-pro { background: linear-gradient(45deg, #facc15, #eab308); color: black; }
+        .bg-free { background: #334155; color: #cbd5e1; }
+        .bg-banned { background: #ef4444; color: white; }
+
+        /* Buttons */
+        .action-btn {
+            border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+            font-size: 0.8rem; font-weight: bold; margin-right: 5px; transition: 0.2s;
+        }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-dark { background: #0f172a; color: #ccc; border: 1px solid #334155; }
+        
+        .action-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        /* Modals / Overlays */
+        #authCheckOverlay, #userModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95); z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        #userModal { display: none; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        
+        .modal-box {
+            background: #1e293b; width: 90%; max-width: 1000px; height: 80vh;
+            border-radius: 15px; border: 1px solid #334155; display: flex; flex-direction: column;
+        }
+        .modal-head { padding: 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="authCheckOverlay">
+        <h2 style="color:#facc15"><i class="fas fa-shield-alt"></i> Verifying Admin Access...</h2>
+    </div>
+
+    <div id="userModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>👥 User Management Database</h3>
+                <button onclick="closeUserModal()" class="action-btn btn-red">Close</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="userSearch" placeholder="Search by Name, Email or UID..." 
+                       style="width:100%; padding:15px; background:#0f172a; border:1px solid #334155; color:white; border-radius:8px; margin-bottom:20px;"
+                       onkeyup="filterUsers()">
+                <div id="userListContainer">Loading users...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="logo"><i class="fas fa-crown"></i> GoatType Admin</div>
+        <div>
+            <span id="adminName" style="margin-right:20px; color:#94a3b8;">Admin</span>
+            <a href="index.html" class="action-btn btn-dark" style="text-decoration:none;">Back to Site</a>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="statPending">0</div>
+                <div class="stat-label">Pending Payments</div>
+                <i class="fas fa-clock stat-icon"></i>
+            </div>
+            <div class="stat-card" onclick="openUserModal()">
+                <div class="stat-val" id="statTotalUsers">0</div>
+                <div class="stat-label">Total Users (Click to View)</div>
+                <i class="fas fa-users stat-icon"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statProUsers" style="color:#22c55e;">0</div>
+                <div class="stat-label">Active PRO Members</div>
+                <i class="fas fa-star stat-icon"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statFreeUsers" style="color:#94a3b8;">0</div>
+                <div class="stat-label">Free Users</div>
+                <i class="fas fa-user stat-icon"></i>
+            </div>
+        </div>
+
+        <h3 class="section-title">💰 Payment Requests</h3>
+        <div class="table-wrapper">
+            <div class="table-header">
+                <span>Recent Transactions</span>
+                <button onclick="loadData()" class="action-btn btn-dark"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+            <div id="paymentTableContainer">Loading...</div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { auth, db, doc, getDoc, collection, getDocs, updateDoc, query, where, orderBy } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        let allUsers = []; // Store users for search
+
+        // 1. Security Check
+        onAuthStateChanged(auth, async (user) => {
+            const overlay = document.getElementById('authCheckOverlay');
+            if (user) {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists() && snap.data().isAdmin === true) {
+                    overlay.style.display = 'none'; 
+                    document.getElementById('adminName').innerText = user.displayName;
+                    loadData();
+                } else {
+                    alert("⛔ ACCESS DENIED: Admin Only.");
+                    window.location.href = "index.html";
+                }
+            } else {
+                window.location.href = "index.html"; 
+            }
+        });
+
+        // 2. Load ALL Data
+        window.loadData = async () => {
+            await Promise.all([loadStatsAndUsers(), loadPayments()]);
+        };
+
+        // 3. Load Stats & User List (Fixes 0 user issue)
+        async function loadStatsAndUsers() {
+            try {
+                // Get ALL Users
+                const userSnap = await getDocs(collection(db, "users"));
+                allUsers = [];
+                let proCount = 0;
+                let freeCount = 0;
+
+                userSnap.forEach(doc => {
+                    const d = doc.data();
+                    d.uid = doc.id; // Save ID
+                    allUsers.push(d);
+                    
+                    // Check Pro Status
+                    let isPro = d.isPro === true;
+                    if (d.proExpiresAt && Date.now() > d.proExpiresAt) isPro = false;
+
+                    if(isPro) proCount++; else freeCount++;
+                });
+
+                // Update Stats UI
+                document.getElementById('statTotalUsers').innerText = allUsers.length;
+                document.getElementById('statProUsers').innerText = proCount;
+                document.getElementById('statFreeUsers').innerText = freeCount;
+
+                renderUserList(allUsers); // Prepare modal list
+
+            } catch (e) {
+                console.error("Stats Error:", e);
+            }
+        }
+
+        // 4. Load Payments
+        async function loadPayments() {
+            const container = document.getElementById('paymentTableContainer');
+            container.innerHTML = '<div style="padding:20px; text-align:center;">Fetching...</div>';
+
+            try {
+                const q = query(collection(db, "payment_requests"), orderBy("timestamp", "desc"));
+                const snap = await getDocs(q);
+                
+                // Count Pending
+                const pendingCount = snap.docs.filter(d => d.data().status === 'pending').length;
+                document.getElementById('statPending').innerText = pendingCount;
+
+                if (snap.empty) {
+                    container.innerHTML = '<div style="padding:20px; text-align:center;">No requests found.</div>';
+                    return;
+                }
+
+                let html = `<table><thead><tr><th>User Details</th><th>Payment Info</th><th>TrxID</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const date = new Date(data.timestamp).toLocaleDateString();
+                    const statusClass = data.status === 'pending' ? 'bg-pending' : (data.status === 'approved' ? 'bg-approved' : 'bg-rejected');
+                    
+                    let buttons = '';
+                    if(data.status === 'pending') {
+                        buttons = `
+                            <button onclick="processPayment('${doc.id}', '${data.uid}', 'approve')" class="action-btn btn-green">Approve</button>
+                            <button onclick="processPayment('${doc.id}', '${data.uid}', 'reject')" class="action-btn btn-red">Reject</button>
+                        `;
+                    } else {
+                        buttons = `<span style="color:#64748b; font-size:0.8rem;">${data.status}</span>`;
+                    }
+
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <span class="u-name">${data.name || 'Unknown'}</span>
+                                    <span class="u-email">${data.email || 'No Email'}</span>
+                                    <span class="u-uid">${data.uid}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="u-name">${data.amount} BDT</div>
+                                <div class="u-email">${data.method} - ${data.phone}</div>
+                                <div class="u-uid">${date}</div>
+                            </td>
+                            <td style="font-family:monospace; color:#facc15;">${data.trxId}</td>
+                            <td><span class="badge ${statusClass}">${data.status}</span></td>
+                            <td>${buttons}</td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `Error: ${e.message}`;
+            }
+        }
+
+        // 5. User List Modal Functions
+        window.openUserModal = () => document.getElementById('userModal').style.display = 'flex';
+        window.closeUserModal = () => document.getElementById('userModal').style.display = 'none';
+
+        window.renderUserList = (users) => {
+            const container = document.getElementById('userListContainer');
+            if(users.length === 0) { container.innerHTML = "No users found."; return; }
+
+            let html = `<table><thead><tr><th>User</th><th>Role</th><th>Expiry</th><th>Actions</th></tr></thead><tbody>`;
+            
+            users.forEach(u => {
+                let isPro = u.isPro === true;
+                let roleBadge = isPro ? '<span class="badge bg-pro">PRO</span>' : '<span class="badge bg-free">FREE</span>';
+                if(u.isBanned) roleBadge = '<span class="badge bg-banned">BANNED</span>';
+
+                let expiry = "N/A";
+                if(isPro && u.proExpiresAt) {
+                    const daysLeft = Math.ceil((u.proExpiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+                    expiry = daysLeft > 0 ? `${daysLeft} days left` : "Expired";
+                } else if (isPro) {
+                    expiry = "Lifetime";
+                }
+
+                html += `
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <span class="u-name">${u.displayName || 'No Name'}</span>
+                                <span class="u-email">${u.email || 'No Email'}</span>
+                                <span class="u-uid">${u.uid}</span>
+                            </div>
+                        </td>
+                        <td>${roleBadge}</td>
+                        <td style="color:#ccc; font-size:0.8rem;">${expiry}</td>
+                        <td>
+                            ${!isPro ? `<button onclick="modifyUser('${u.uid}', 'make_pro')" class="action-btn btn-green">Make Pro</button>` : ''}
+                            ${isPro ? `<button onclick="modifyUser('${u.uid}', 'downgrade')" class="action-btn btn-blue">Downgrade</button>` : ''}
+                            ${!u.isBanned ? `<button onclick="modifyUser('${u.uid}', 'ban')" class="action-btn btn-red">Ban</button>` : `<button onclick="modifyUser('${u.uid}', 'unban')" class="action-btn btn-green">Unban</button>`}
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        window.filterUsers = () => {
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            const filtered = allUsers.filter(u => 
+                (u.displayName && u.displayName.toLowerCase().includes(query)) ||
+                (u.email && u.email.toLowerCase().includes(query)) ||
+                u.uid.includes(query)
+            );
+            renderUserList(filtered);
+        }
+
+        // 6. ACTION CONTROLLERS
+        window.processPayment = async (docId, uid, action) => {
+            if(!confirm(`Confirm ${action.toUpperCase()}?`)) return;
+            try {
+                if(action === 'approve') {
+                    const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                    await updateDoc(doc(db, "users", uid), { isPro: true, proExpiresAt: expiry, subscription: 'premium' });
+                    await updateDoc(doc(db, "payment_requests", docId), { status: 'approved' });
+                } else {
+                    await updateDoc(doc(db, "payment_requests", docId), { status: 'rejected' });
+                }
+                loadData();
+            } catch(e) { alert(e.message); }
+        }
+
+        window.modifyUser = async (uid, action) => {
+            if(!confirm(`Are you sure you want to ${action} this user?`)) return;
+            const ref = doc(db, "users", uid);
+            try {
+                if(action === 'make_pro') {
+                    const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                    await updateDoc(ref, { isPro: true, proExpiresAt: expiry, subscription: 'premium' });
+                }
+                else if(action === 'downgrade') {
+                    await updateDoc(ref, { isPro: false, proExpiresAt: 0, subscription: 'free' });
+                }
+                else if(action === 'ban') {
+                    await updateDoc(ref, { isBanned: true });
+                }
+                else if(action === 'unban') {
+                    await updateDoc(ref, { isBanned: false });
+                }
+                loadData(); // Reload to see changes
+            } catch(e) { alert("Error: " + e.message); }
+        }
+    </script>
+</body>
+</html>

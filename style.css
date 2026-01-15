@@ -5349,3 +5349,66 @@ body.pro-active #proMusicPlayer {
 /* Utils */
 .hidden { display: none !important; }
 .fade-out { opacity: 0; pointer-events: none; }
+/* --- 🔒 PRO LOCK MODAL STYLES --- */
+.pro-lock-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* গাঢ় অন্ধকার ব্যাকগ্রাউন্ড */
+    backdrop-filter: blur(8px); /* ব্লার ইফেক্ট */
+    z-index: 100000; /* সবার উপরে */
+    display: none; /* শুরুতে লুকানো */
+    justify-content: center; align-items: center;
+    animation: fadeInLock 0.3s ease;
+}
+
+.pro-lock-box {
+    background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+    border: 2px solid #facc15; /* গোল্ডেন বর্ডার */
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%; max-width: 400px;
+    box-shadow: 0 0 50px rgba(250, 204, 21, 0.3);
+    transform: scale(0.9);
+    animation: popUpLock 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.lock-icon-circle {
+    width: 80px; height: 80px;
+    background: rgba(250, 204, 21, 0.1);
+    border-radius: 50%;
+    margin: 0 auto 20px auto;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 2.5rem; color: #facc15;
+    border: 2px solid #facc15;
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.5);
+}
+
+.gold-text {
+    font-family: 'Poppins', sans-serif;
+    color: #facc15;
+    font-size: 1.8rem; margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+}
+
+#lockMsg { color: #ccc; font-size: 1rem; margin-bottom: 30px; line-height: 1.5; }
+
+.lock-actions { display: flex; gap: 15px; justify-content: center; }
+
+.btn-cancel {
+    background: transparent; border: 1px solid #444; color: #888;
+    padding: 12px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s;
+}
+.btn-cancel:hover { background: #222; color: white; border-color: white; }
+
+.btn-upgrade-gold {
+    background: linear-gradient(45deg, #facc15, #ca8a04);
+    color: black; font-weight: bold; text-decoration: none;
+    padding: 12px 25px; border-radius: 8px; cursor: pointer;
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); transition: 0.3s;
+    display: flex; align-items: center; gap: 8px;
+}
+.btn-upgrade-gold:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); }
+
+@keyframes fadeInLock { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popUpLock { to { transform: scale(1); } }

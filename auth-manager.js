@@ -169,7 +169,7 @@ window.hasExceededLimit = function (mode) {
 };
 
 /* ==============================
-   🔐 CORE AUTH LISTENER (FIXED)
+   🔐 CORE AUTH LISTENER (UPDATED)
    ============================== */
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -186,10 +186,25 @@ onAuthStateChanged(auth, async (user) => {
             if (userSnap.exists()) {
                 const data = userSnap.data();
 
-                // 🔥 PRO STATUS CHECK
-                const isPro = data.isPro === true || data.subscription === 'premium';
+                // 🔥 PRO STATUS & EXPIRY CHECK (UPDATED)
+                let isPro = data.isPro === true || data.subscription === 'premium';
                 
-                // গ্লোবাল ভেরিয়েবল সেট
+                // যদি Expiry Date থাকে, চেক করো সময় আছে কিনা
+                if (data.proExpiresAt) {
+                    const now = Date.now();
+                    if (now > data.proExpiresAt) {
+                        // সময় শেষ! মেম্বারশিপ বাতিল করো
+                        isPro = false;
+                        if (data.isPro) {
+                            await updateDoc(userRef, { isPro: false, proExpiresAt: 0, subscription: 'free' });
+                            console.log("⚠️ Pro membership expired. Downgraded to Free.");
+                        }
+                    } else {
+                        isPro = true; // সময় এখনো আছে
+                    }
+                }
+
+                // গ্লোবাল ভেরিয়েবল সেট
                 window.IS_PRO_USER = isPro;
                 window.IS_ADMIN = data.isAdmin === true;
                 window.USER_ROLE = isPro || window.IS_ADMIN ? 'pro' : 'free';
@@ -199,7 +214,7 @@ onAuthStateChanged(auth, async (user) => {
                     window.updateSidebarLayout(isPro);
                 }
 
-                // ইউজারনেম এবং সার্চ কি-ওয়ার্ড লজিক
+                // ইউজারনেম এবং সার্চ কি-ওয়ার্ড লজিক
                 const baseName = (user.displayName || "user").replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
                 let finalUsername = data.username;
                 let updateData = {};
@@ -422,15 +437,27 @@ async function openProfileModal(user) {
             renderBadges(data.badges || []);
             renderLevelBar(data.level || 1, data.ovr || 0);
 
-            // Pro Status
+            // 🔥 PRO STATUS DISPLAY (UPDATED FOR TIME LEFT)
             if(data.isPro) {
-                modalStatus.innerText = "PRO MEMBER 👑";
+                let timeLeftHtml = "";
+                // যদি এক্সপায়ার ডেট থাকে, তাহলে কত দিন বাকি তা বের করো
+                if (data.proExpiresAt) {
+                    const now = Date.now();
+                    const diff = data.proExpiresAt - now;
+                    if (diff > 0) {
+                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        timeLeftHtml = `<br><span style="font-size:0.7rem; color:#333; font-weight:normal;">(${daysLeft} days left)</span>`;
+                    }
+                }
+                
+                modalStatus.innerHTML = `PRO MEMBER 👑${timeLeftHtml}`;
                 modalStatus.style.background = "gold";
                 modalStatus.style.color = "black";
             } else {
-                modalStatus.innerText = "Free Member";
-                modalStatus.style.background = "#e0e0e0";
-                modalStatus.style.color = "#555";
+                // Free Member হলে Upgrade লিংক দেখাও
+                modalStatus.innerHTML = `Free Member <br> <a href="pro.html" style="font-size:0.75rem; color:#4cc9f0; text-decoration:underline; font-weight:bold;">Upgrade to Pro</a>`;
+                modalStatus.style.background = "rgba(255,255,255,0.1)";
+                modalStatus.style.color = "#ccc";
             }
 
             // Chart (10 Days)
