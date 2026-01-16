@@ -203,6 +203,9 @@ function playSound(type) {
 /* ==========================================
    ⌨️ KEYBOARD LISTENERS
    ========================================== */
+/* ==========================================
+   ⌨️ KEYBOARD LISTENERS (AUTO START FIX)
+   ========================================== */
 document.addEventListener('keydown', (e) => {
     // 🔥 MULTIPLAYER CONFLICT FIX
     if (window.currentMode === 'multiplayer') {
@@ -213,15 +216,21 @@ document.addEventListener('keydown', (e) => {
         return; 
     }
 
+    // যদি টাইপিং ইতিমধ্যে চলছে, তাহলে রিটার্ন করো
     if (isTyping) return;
-    if (['Shift', 'Alt', 'Control', 'CapsLock', 'Tab', 'Meta'].includes(e.key)) return;
-    if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.id === 'customTimeInput' || document.activeElement.tagName === 'SELECT') return;
 
-    if (!isFocusMode) {
-        const warningModal = document.getElementById('warningModal');
-        if(warningModal) warningModal.style.display = 'flex';
-    } else {
-        if(!isTyping) startTest();
+    // এই সিস্টেম কিগুলো চাপলে গেম স্টার্ট হবে না (সেফটি)
+    if (['Shift', 'Alt', 'Control', 'CapsLock', 'Tab', 'Meta', 'Escape'].includes(e.key)) return;
+    
+    // যদি অন্য কোনো ইনপুট বক্সে (যেমন কাস্টম টেক্সট এরিয়া) থাকে, তাহলে ইগনোর করো
+    if (document.activeElement.tagName === 'TEXTAREA' || 
+        document.activeElement.id === 'customTimeInput' || 
+        document.activeElement.tagName === 'SELECT' ||
+        document.activeElement.tagName === 'INPUT') return;
+
+    // 🔥 POPUP REMOVED: পপআপ ছাড়াই সরাসরি গেম স্টার্ট হবে
+    if (!isTyping) {
+        startTest();
     }
 });
 
@@ -417,37 +426,57 @@ document.getElementById('inputField').addEventListener('keydown', (e) => {
     updateStats();
 });
 
+// script.js এর আনুমানিক ৩১১ নম্বর লাইনে input event listener টি রিপ্লেস করুন:
+
 document.getElementById('inputField').addEventListener('input', (e) => {
     if (window.currentMode === 'multiplayer') return;
-
     if (!isTyping || currentMode === 'bengali') return;
+    
     scrollToGameView();
     const chars = document.getElementById('quoteDisplay').querySelectorAll('span');
     const val = e.target.value;
     
     if (val.length > charIndex) {
         const typed = val[val.length - 1];
-        if (typed === chars[charIndex].innerText) {
-            chars[charIndex].classList.add('correct'); sessionTotalCorrect++; 
+        const isCorrect = typed === chars[charIndex].innerText;
+
+        // 🔥🔥 MISSING LINK FIX: Global Effects Trigger 🔥🔥
+        // এই লাইনটিই আপনার Ghost, Particles, Heatmap এবং Sudden Death চালু করবে
+        if (typeof window.triggerGlobalEffects === 'function') {
+            window.triggerGlobalEffects(isCorrect);
+        }
+
+        if (isCorrect) {
+            chars[charIndex].classList.add('correct'); 
+            sessionTotalCorrect++; 
         } else {
-            chars[charIndex].classList.add('incorrect'); sessionTotalErrors++; 
+            chars[charIndex].classList.add('incorrect'); 
+            sessionTotalErrors++; 
+            
+            // Heatmap Data Collection
             const expectedChar = chars[charIndex].innerText.toLowerCase();
             window.keyMistakes = window.keyMistakes || {};
             window.keyMistakes[expectedChar] = (window.keyMistakes[expectedChar] || 0) + 1;
         }
+
         chars[charIndex].classList.remove('current');
         charIndex++;
+
         if (charIndex < chars.length) {
             chars[charIndex].classList.add('current');
             const nextKey = getKeyFromChar(chars[charIndex].innerText);
             updateFingerGuide(nextKey.code, nextKey.shift, true);
+            
+            // Auto Scroll Logic
             const display = document.getElementById('quoteDisplay');
             const prevSpan = chars[charIndex - 1];
             const currSpan = chars[charIndex];
             if (prevSpan && currSpan && currSpan.offsetTop > prevSpan.offsetTop) {
                 display.style.top = `-${currSpan.offsetTop}px`;
             }
-        } else { triggerSuccessAndNext(); }
+        } else { 
+            triggerSuccessAndNext(); 
+        }
     }
     updateStats();
 });
@@ -822,3 +851,122 @@ window.checkProFeature = function(featureName) {
     // ৩. ❌ মিথ্যা রিটার্ন করো যাতে মূল ফাংশন কাজ না করে
     return false; 
 }
+// script.js এর একদম নিচে পেস্ট কর:
+
+// 🔥 HEATMAP DATA TRACKER FIX
+// এটা নিশ্চিত করবে যে ইউজার ভুল করলে সেটা রেকর্ড হচ্ছে
+const inputFieldFix = document.getElementById('inputField');
+if (inputFieldFix) {
+    inputFieldFix.addEventListener('input', (e) => {
+        // টেক্সট এবং কারেন্ট ক্যারেক্টার চেক
+        const quoteChars = document.querySelectorAll('.quote-chars'); // তোর স্প্যান ক্লাস অনুযায়ী নাম দে
+        const arrayQuote = quoteDisplay.querySelectorAll('span');
+        const arrayValue = inputField.value.split('');
+        
+        let correct = true;
+        
+        // গ্লোবাল ভেরিয়েবল না থাকলে বানাও
+        if (!window.keyMistakes) window.keyMistakes = {};
+
+        // শেষ যে অক্ষরটা টাইপ করেছে সেটা চেক করো
+        const lastIndex = arrayValue.length - 1;
+        if (lastIndex >= 0 && lastIndex < arrayQuote.length) {
+            const expectedChar = arrayQuote[lastIndex].innerText;
+            const typedChar = arrayValue[lastIndex];
+
+            // যদি ভুল হয়
+            if (typedChar !== expectedChar) {
+                const upperKey = expectedChar.toUpperCase();
+                
+                // ডাটাবেসে বা লোকাল ভেরিয়েবলে বাড়াও
+                if (/[A-Z0-9]/.test(upperKey)) {
+                    window.keyMistakes[upperKey] = (window.keyMistakes[upperKey] || 0) + 1;
+                    
+                    // যদি লাইভ হিটম্যাপ অন থাকে, সাথে সাথে কালার আপডেট করো
+                    if (document.getElementById('toggleHeatmap')?.checked) {
+                        if (typeof renderHeatmap === 'function') renderHeatmap();
+                    }
+                }
+            }
+        }
+    });
+}
+/* =========================================
+   🎵 PRO MUSIC PLAYER (WITH LOCK SYSTEM)
+   ========================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const playerContainer = document.getElementById('proMusicPlayer');
+    const playBtn = document.getElementById('playMusicBtn');
+    const trackNameDisplay = document.getElementById('musicTrackName');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    // Error Prevention
+    if (!playerContainer || !playBtn) return;
+
+    // Playlist
+    const playlist = [
+        { name: "Chill Lofi Beats", url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" },
+        { name: "Night Rain", url: "https://cdn.pixabay.com/download/audio/2022/03/24/audio_07821c97a5.mp3" },
+        { name: "Focus Mode", url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" }
+    ];
+
+    let currentTrackIndex = 0;
+    let bgMusic = new Audio(playlist[0].url);
+    bgMusic.loop = true;
+    bgMusic.volume = 0.5;
+
+    // --- PLAY BUTTON CLICK (WITH PRO LOCK) ---
+    playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        // 🔥 STEP 1: CHECK PRO STATUS
+        // যদি canUse ফাংশন থাকে এবং ইউজার PRO না হয়
+        if (typeof window.canUse === 'function' && !window.canUse('music')) {
+            
+            // তোর ইনবাইল্ড লক ওভারলে ওপেন করা
+            const lockOverlay = document.getElementById('proLockOverlay');
+            const lockMsg = document.getElementById('lockMsg');
+            
+            if (lockOverlay) {
+                // মেসেজ কাস্টমাইজ করা (অপশনাল)
+                if(lockMsg) lockMsg.innerHTML = "Lofi Music Player is a <br> <span style='color:#facc15'>Premium Feature</span>.";
+                
+                // লক দেখানো
+                lockOverlay.classList.remove('hidden');
+            } else {
+                alert("Upgrade to PRO to listen to music!");
+            }
+            
+            return; // কোড এখানেই থামবে, গান বাজবে না
+        }
+
+        // 🔥 STEP 2: NORMAL PLAY/PAUSE (If PRO)
+        if (bgMusic.paused) {
+            bgMusic.play().catch(e => console.log(e));
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            if(trackNameDisplay) trackNameDisplay.innerText = playlist[currentTrackIndex].name;
+            // playerContainer.classList.add('active'); // Optional glow effect
+        } else {
+            bgMusic.pause();
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            // playerContainer.classList.remove('active');
+        }
+    });
+
+    // --- VOLUME CONTROL (ALSO LOCKED) ---
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => {
+            // ভলিউম চেঞ্জ করতে গেলেও লক দেখাবে
+            if (typeof window.canUse === 'function' && !window.canUse('music')) {
+                e.preventDefault();
+                e.target.value = 50; // রিসেট
+                const lockOverlay = document.getElementById('proLockOverlay');
+                if (lockOverlay) lockOverlay.classList.remove('hidden');
+                return;
+            }
+            
+            bgMusic.volume = e.target.value / 100;
+        });
+    }
+});

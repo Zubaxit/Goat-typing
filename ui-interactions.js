@@ -1,4 +1,4 @@
-// ui-interactions.js - UI, Charts & Visuals (REALTIME CLOCK & TOGGLE)
+// ui-interactions.js - UI, Charts & Visuals (FIXED CONFLICTS)
 
 // Sidebar References
 const sb = {
@@ -16,13 +16,11 @@ const sb = {
 let limitTimerInterval = null;
 
 function initFloatingTimer() {
-    // ১. যদি বার না থাকে, তৈরি করো
     let floatBar = document.getElementById('limitFloatingBar');
     if (!floatBar) {
         floatBar = document.createElement('div');
         floatBar.id = 'limitFloatingBar';
         
-        // HTML Structure (Wrapper + Toggle Button)
         floatBar.innerHTML = `
             <div class="limit-content-wrapper" id="limitContent">
                 </div>
@@ -32,12 +30,10 @@ function initFloatingTimer() {
         `;
         document.body.appendChild(floatBar);
 
-        // ২. টগল বাটনের ইভেন্ট লিসেনার
         const toggleBtn = document.getElementById('limitToggleBtn');
         toggleBtn.onclick = () => {
             floatBar.classList.toggle('minimized');
             const icon = toggleBtn.querySelector('i');
-            // আইকন পরিবর্তন (Up/Down)
             if (floatBar.classList.contains('minimized')) {
                 icon.classList.remove('fa-chevron-up');
                 icon.classList.add('fa-chevron-down');
@@ -50,15 +46,12 @@ function initFloatingTimer() {
         };
     }
 
-    // ৩. টাইমার লুপ শুরু করো (যদি অলরেডি না চলে)
     if (!limitTimerInterval) {
         limitTimerInterval = setInterval(updateLimitTimeUI, 1000);
     }
-    // প্রথমবার কল করে দাও যাতে ১ সেকেন্ড দেরি না হয়
     updateLimitTimeUI();
 }
 
-// প্রতি সেকেন্ডে এই ফাংশনটা কল হবে
 function updateLimitTimeUI() {
     const floatBar = document.getElementById('limitFloatingBar');
     const contentDiv = document.getElementById('limitContent');
@@ -70,7 +63,6 @@ function updateLimitTimeUI() {
     let hasActiveLock = false;
     let html = '';
 
-    // --- A. ইংরেজি/কাস্টম লক টাইমার ---
     if (locks.englishUntil > now) {
         hasActiveLock = true;
         const diff = locks.englishUntil - now;
@@ -82,12 +74,10 @@ function updateLimitTimeUI() {
         `;
     }
 
-    // --- B. ডিভাইডার (যদি দুটোই থাকে) ---
     if (locks.englishUntil > now && locks.banglaUntil > now) {
         html += `<div class="limit-divider"></div>`;
     }
 
-    // --- C. বাংলা লক টাইমার ---
     if (locks.banglaUntil > now) {
         hasActiveLock = true;
         const diff = locks.banglaUntil - now;
@@ -99,17 +89,14 @@ function updateLimitTimeUI() {
         `;
     }
 
-    // --- D. ভিজিবিলিটি কন্ট্রোল ---
     if (hasActiveLock) {
-        contentDiv.innerHTML = html; // শুধু ভেতরের লেখা আপডেট হবে
+        contentDiv.innerHTML = html;
         floatBar.classList.add('visible');
     } else {
         floatBar.classList.remove('visible');
-        // লক শেষ হয়ে গেলে টাইমার থামানোর দরকার নেই, কারণ আবার লক হতে পারে
     }
 }
 
-// মিলিসেকেন্ড থেকে সময় ফরম্যাট (HH:MM:SS)
 function msToTime(duration) {
     let seconds = Math.floor((duration / 1000) % 60);
     let minutes = Math.floor((duration / (1000 * 60)) % 60);
@@ -125,13 +112,11 @@ function msToTime(duration) {
 
 // --- TAB SWITCHING (With Confirm Box for PRO) ---
 function switchTab(mode) {
-    // 🔥 ১. লকিং লজিক চেক (Free User)
     if (window.USER_ROLE === 'free') {
         const usage = window.USER_USAGE || { banglaWords: 0, englishWords: 0 };
         const locks = window.USER_LOCKS || { banglaUntil: 0, englishUntil: 0 };
         const now = Date.now();
         
-        // বাংলা লকিং চেক (Usage OR Time Lock)
         if (mode === 'bengali') {
             if (locks.banglaUntil > now) {
                 alert("⚠️ বাংলা লিমিট লকড!\n\nখুলবে: " + msToTime(locks.banglaUntil - now));
@@ -144,7 +129,6 @@ function switchTab(mode) {
             }
         }
 
-        // কাস্টম লকিং চেক (Usage OR Time Lock)
         if (mode === 'custom') {
             if (locks.englishUntil > now) {
                 alert("⚠️ কাস্টম মোড লকড!\n\nখুলবে: " + msToTime(locks.englishUntil - now));
@@ -158,7 +142,6 @@ function switchTab(mode) {
         }
     }
 
-    // --- ২. মেইন সুইচিং লজিক ---
     if (typeof stopGhost === 'function') stopGhost();
     currentMode = mode;
     currentText = ""; 
@@ -196,7 +179,6 @@ function switchTab(mode) {
         resetTest(true); 
     }
 
-    // UI আপডেট কল করা
     if(typeof window.updateSidebarAccess === 'function') {
         window.updateSidebarAccess();
     }
@@ -311,11 +293,8 @@ function updateFingerGuide(keyCode, shift, isActive = true) {
     guideText.innerHTML = `চাপুন: <b style="color: #e84118; font-size: 1.4rem;">${instruction}</b>`;
 }
 
-function toggleTheme() {
-    const body = document.body;
-    if(body.getAttribute('data-theme') === 'dark') body.removeAttribute('data-theme');
-    else body.setAttribute('data-theme', 'dark');
-}
+// 🔥 FIX: REMOVED CONFLICTING toggleTheme() FUNCTION FROM HERE
+// The toggleTheme() function in settings-manager.js will now be used automatically.
 
 function updateKeyboardLabels(mode) {
     const keys = document.querySelectorAll('.key');
@@ -539,13 +518,11 @@ window.updateSidebarAccess = function () {
     const lockMsg = document.getElementById('lockMessage');
     const lockBtn = document.getElementById('lockActionBtn');
 
-    // বাটনগুলো
     const banglaTab = document.querySelector("button[onclick*='bengali']");
     const customTab = document.querySelector("button[onclick*='custom']");
 
     if (!sidebar || !lockOverlay) return;
 
-    // Helper: AI Bar Blur
     const blurAI = (shouldBlur) => {
         if (aiBar) {
             aiBar.style.filter = shouldBlur ? "blur(2.5px)" : "none";
@@ -554,13 +531,11 @@ window.updateSidebarAccess = function () {
         }
     };
 
-    // স্টার্ট টাইমার (যদি আগে না শুরু হয়ে থাকে)
     initFloatingTimer(); 
 
     const locks = window.USER_LOCKS || { banglaUntil: 0, englishUntil: 0 };
     const now = Date.now();
 
-    // ১. Guest Check (সব লক + ক্লিক ব্লক)
     if (window.USER_ROLE === 'guest') {
         sidebar.classList.add('locked');
         blurAI(true); 
@@ -572,13 +547,11 @@ window.updateSidebarAccess = function () {
             lockBtn.onclick = () => document.getElementById('login-btn')?.click();
         }
         
-        // গেস্টদের জন্য ট্যাবগুলো ঝাপসা করে দাও
         if(banglaTab) { banglaTab.style.opacity = "0.5"; banglaTab.style.cursor = "not-allowed"; }
         if(customTab) { customTab.style.opacity = "0.5"; customTab.style.cursor = "not-allowed"; }
         return;
     }
 
-    // ২. Pro Check (সব খোলা)
     if (window.USER_ROLE === 'pro') {
         sidebar.classList.remove('locked');
         blurAI(false);
@@ -588,21 +561,17 @@ window.updateSidebarAccess = function () {
         return;
     }
 
-    // ৩. Free User Logic (Time Based Lock)
     if (window.USER_ROLE === 'free') {
         const isEngLocked = locks.englishUntil > now;
         const isBanLocked = locks.banglaUntil > now;
 
-        // ডিফল্ট: সব খোলা
         sidebar.classList.remove('locked');
         blurAI(false);
         lockOverlay.classList.add('hidden');
         if(banglaTab) { banglaTab.style.opacity = "1"; banglaTab.style.cursor = "pointer"; }
         if(customTab) { customTab.style.opacity = "1"; customTab.style.cursor = "pointer"; }
 
-        // --- A. ইংরেজি লক (24h) ---
         if (isEngLocked) {
-            // সাইডবার লক
             sidebar.classList.add('locked');
             blurAI(true);
             lockOverlay.classList.remove('hidden');
@@ -615,21 +584,18 @@ window.updateSidebarAccess = function () {
                 lockBtn.onclick = () => window.open('pro.html', '_blank');
             }
 
-            // কাস্টম ট্যাব ঝাপসা
             if(customTab) { 
                 customTab.style.opacity = "0.5"; 
                 customTab.style.cursor = "not-allowed";
             }
         }
 
-        // --- B. বাংলা লক (24h) ---
         if (isBanLocked) {
             if(banglaTab) { 
                 banglaTab.style.opacity = "0.5"; 
                 banglaTab.style.cursor = "not-allowed";
             }
 
-            // যদি ইউজার বাংলা মোডে থাকে, তাকে বের করে দাও
             if (currentMode === 'bengali') {
                 switchTab('normal');
                 const goPro = confirm("⚠️ বাংলা ডেইলি লিমিট শেষ।\nআগামীকাল পর্যন্ত অপেক্ষা করুন বা PRO কিনুন।\n\nPRO পেজে যেতে চান?");

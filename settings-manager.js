@@ -1,13 +1,14 @@
-// settings-manager.js - Ultimate Theme & Pro Features Controller (Fixed BG, Restored Animations & New Guard System)
+// settings-manager.js - Ultimate Theme & Pro Features Controller (Fixed Dark Mode Toggle)
 
 /* ==============================
    🔰 SAFETY POLYFILL: canUse Helper
-   (যদি main.js এ canUse ডিফাইন না থাকে, তবে এটি IS_PRO_USER চেক করবে)
    ============================== */
 if (typeof window.canUse === 'undefined') {
     window.canUse = function(feature) {
-        // Fallback to legacy check if granular permission system is missing
-        return window.IS_PRO_USER === true;
+        // 🔥 TESTING FIX: Uncomment below to force enable PRO for testing
+        // return true; 
+        
+        return window.IS_PRO_USER === true || window.IS_ADMIN === true;
     };
 }
 
@@ -41,45 +42,138 @@ const audioCtxSettings = new (window.AudioContext || window.webkitAudioContext)(
 let canvas, ctx, particles = [];
 let animInterval = null; 
 
+// Helper for Toggle Logic
+function capitalize(s) {
+    if (typeof s !== 'string') return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 /* ==============================
-   1. PRESETS SYSTEM
+   🔥 SMART THEME & CONTRAST SYSTEM (FIXED)
    ============================== */
-const presets = {
-    default: { 
-        bgType: 'solid', bgValue: '#f0f2f5', 
-        text: '#333333', main: '#4361ee', card: '#ffffff',
-        animType: 'leaves'
-    },
-    dark: { 
-        bgType: 'solid', 
-        bgValue: '#121212', 
-        text: '#e0e0e0', 
-        main: '#bb86fc', 
-        card: '#1e1e1e',
-        animType: 'snow'
-    },
-    midnight: { 
-        bgType: 'solid', bgValue: '#0f0c29', 
-        text: '#e0e0e0', main: '#764ba2', card: '#24243e',
-        correct: '#00ff9d', error: '#ff3f34'
-    },
-    hacker: { 
-        bgType: 'solid', bgValue: '#000000', 
-        text: '#00ff00', main: '#00cc00', card: '#111111',
-        correct: '#ffffff', error: '#ff0000'
-    },
-    forest: { 
-        bgType: 'gradient', bgValue: 'linear-gradient(135deg, #134e5e, #71b280)', 
-        text: '#e8f5e9', main: '#66bb6a', card: '#1b5e20',
-        correct: '#81ecec', error: '#fab1a0'
-    },
-    sunset: { 
-        bgType: 'gradient', bgValue: 'linear-gradient(135deg, #ff512f, #dd2476)', 
-        text: '#fff0f5', main: '#ff9a9e', card: '#800000',
-        correct: '#55efc4', error: '#ffeaa7'
+
+// 1. Theme Mode Updater (Auto-Detects Dark/Light)
+function updateThemeMode(colorOrType) {
+    const root = document.documentElement;
+    let isDark = false;
+
+    // A. Check Preset Names
+    const darkPresets = ['dark', 'midnight', 'hacker', 'space', 'rgb-gamer', 'fire'];
+    if (darkPresets.includes(colorOrType)) {
+        isDark = true;
+    } 
+    // B. Check Hex Color Brightness
+    else if (colorOrType.startsWith('#')) {
+        const rgb = hexToRgb(colorOrType);
+        if (rgb) {
+            // Brightness formula (standard)
+            const brightness = Math.round(((parseInt(rgb.r) * 299) + (parseInt(rgb.g) * 587) + (parseInt(rgb.b) * 114)) / 1000);
+            if (brightness < 125) isDark = true;
+        }
+    }
+    // C. Check Text Color (Fallback)
+    else if (settingsState.theme.textColor.toLowerCase() === '#ffffff' || settingsState.theme.textColor.toLowerCase() === '#e0e0e0') {
+         isDark = true;
+    }
+
+    // 🔥 Force Apply Theme Attribute to HTML tag (Better than body)
+    root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    
+    // Update Toggle Icon if exists
+    const themeIcon = document.querySelector('.theme-btn i');
+    if(themeIcon) {
+        themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+}
+
+// 2. Toggle Theme Manually
+window.toggleTheme = function() {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme');
+    
+    // যদি বর্তমানে ডার্ক থাকে, তবে লাইট (ডিফল্ট) করো
+    if (currentTheme === 'dark') {
+        applyPreset('default'); 
+    } 
+    // অন্যথায় ডার্ক করো
+    else {
+        applyPreset('dark'); 
     }
 };
 
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+/* ==============================
+   1. PRESETS SYSTEM
+   ============================== */
+/* ==============================
+   1. UNIQUE PRESETS SYSTEM (UPDATED)
+   ============================== */
+const presets = {
+    // 1. Classic Light
+    default: { 
+        id: 'default',
+        bgType: 'solid', bgValue: '#f3f4f6', 
+        text: '#1f2937', main: '#3b82f6', card: '#ffffff',
+        animType: 'leaves',
+        correct: '#10b981', error: '#ef4444'
+    },
+    // 2. Deep Dark (Improved)
+    dark: { 
+        id: 'dark',
+        bgType: 'solid', bgValue: '#121212', 
+        text: '#e5e7eb', main: '#8b5cf6', card: '#1f2937',
+        animType: 'snow',
+        correct: '#34d399', error: '#f87171'
+    },
+    // 3. Midnight Blue (Professional)
+    midnight: { 
+        id: 'midnight',
+        bgType: 'gradient', bgValue: 'linear-gradient(to right, #0f2027, #203a43, #2c5364)', 
+        text: '#f1f5f9', main: '#00d4ff', card: '#1e293b',
+        animType: 'rain',
+        correct: '#22d3ee', error: '#ff4757'
+    },
+    // 4. Dracula (Coding Favorite)
+    dracula: { 
+        id: 'dracula',
+        bgType: 'solid', bgValue: '#282a36', 
+        text: '#f8f8f2', main: '#bd93f9', card: '#44475a',
+        animType: 'fireflies',
+        correct: '#50fa7b', error: '#ff5555'
+    },
+    // 5. Cyberpunk (High Contrast)
+    cyberpunk: { 
+        id: 'cyberpunk',
+        bgType: 'solid', bgValue: '#000000', 
+        text: '#fcee0a', main: '#00ff00', card: '#111111',
+        animType: 'rain',
+        correct: '#00ff00', error: '#ff0099'
+    },
+    // 6. Cherry Blossom (Soft & Unique)
+    cherry: { 
+        id: 'cherry',
+        bgType: 'gradient', bgValue: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)', 
+        text: '#5e2a2a', main: '#ff6b81', card: '#fff0f5',
+        animType: 'leaves',
+        correct: '#2ecc71', error: '#ff4757'
+    },
+    // 7. Forest (Calm Green)
+    forest: { 
+        id: 'forest',
+        bgType: 'gradient', bgValue: 'linear-gradient(135deg, #134e5e, #71b280)', 
+        text: '#e0f2f1', main: '#4db6ac', card: '#004d40',
+        animType: 'fireflies',
+        correct: '#a7ffeb', error: '#ffab91'
+    }
+};
 window.applyPreset = function(name) {
     const p = presets[name];
     if(!p) return;
@@ -90,11 +184,13 @@ window.applyPreset = function(name) {
     settingsState.theme.mainColor = p.main;
     settingsState.theme.cardColor = p.card;
 
+    // Update Selectors
     const bgSel = document.getElementById('bgTypeSelector');
     if(bgSel) bgSel.value = p.bgType;
     
     toggleBgControls(p.bgType, false);
     
+    // Update Custom Inputs
     const custText = document.getElementById('customText');
     const custMain = document.getElementById('customMain');
     const custCard = document.getElementById('customCard');
@@ -103,20 +199,25 @@ window.applyPreset = function(name) {
     if(custMain) custMain.value = p.main;
     if(custCard) custCard.value = p.card;
 
+    // Update CSS Vars
     const root = document.documentElement;
     root.style.setProperty('--correct-color', p.correct || '#00b894');
     root.style.setProperty('--error-color', p.error || '#ff7675');
 
     updateCustomColors();
     
+    // 🔥 Apply Background & Theme Mode
     if(p.bgType === 'solid') {
         const solidPicker = document.getElementById('bgSolidColor');
         if(solidPicker) solidPicker.value = p.bgValue;
         document.body.style.background = p.bgValue;
+        updateThemeMode(p.bgValue); // Auto-set Dark/Light
     } else if (p.bgType === 'gradient') {
         document.body.style.background = p.bgValue;
         stopBackgroundAnimation();
+        updateThemeMode(name); // Preset name based check
     }
+    
     saveSettings();
 };
 
@@ -143,7 +244,6 @@ window.toggleBgControls = function(type, apply = true) {
 
 window.applyBackground = function(type) {
     const root = document.body;
-    // Don't stop animation immediately if switching TO animated
     if (type !== 'animated') stopBackgroundAnimation(); 
     
     if (type === 'solid') {
@@ -151,6 +251,7 @@ window.applyBackground = function(type) {
         const col = colEl ? colEl.value : '#ffffff';
         root.style.background = col;
         settingsState.theme.bgValue = col;
+        updateThemeMode(col); // 🔥 Auto Dark
         
     } else if (type === 'gradient') {
         const c1 = document.getElementById('bgGrad1')?.value || '#ffffff';
@@ -159,11 +260,11 @@ window.applyBackground = function(type) {
         const val = `linear-gradient(${deg}deg, ${c1}, ${c2})`;
         root.style.background = val;
         settingsState.theme.bgValue = val;
+        updateThemeMode(c1); // Check first color brightness
         
     } else if (type === 'animated') {
         const animSel = document.getElementById('animTypeSelector');
         const animType = animSel ? animSel.value : 'leaves';
-        
         startBackgroundAnimation(animType);
         settingsState.theme.animType = animType;
     }
@@ -179,6 +280,9 @@ window.handleImageUpload = function(input) {
             settingsState.theme.bgValue = 'image-uploaded'; 
             settingsState.theme.bgType = 'image';
             try { localStorage.setItem('customBgImage', e.target.result); } catch(err) {}
+            
+            // Assume Dark Mode for Images for better contrast
+            document.documentElement.setAttribute('data-theme', 'dark'); 
             saveSettings();
         }
         reader.readAsDataURL(input.files[0]);
@@ -226,6 +330,9 @@ function startBackgroundAnimation(type) {
     
     // 2. MATRIX RAIN
     else if (type === 'rain') {
+         document.body.style.background = '#000'; 
+         updateThemeMode('#000000'); // Force Dark
+
          animInterval = setInterval(() => {
             const drop = document.createElement('div');
             drop.style.position = 'absolute';
@@ -249,6 +356,11 @@ function startBackgroundAnimation(type) {
     
     // 3. SNOW STORM
     else if (type === 'snow') {
+        if(settingsState.theme.bgType === 'animated') {
+             document.body.style.background = '#1e293b';
+             updateThemeMode('#1e293b');
+        }
+
         animInterval = setInterval(() => {
             const flake = document.createElement('div');
             flake.style.position = 'absolute';
@@ -327,6 +439,9 @@ function startBackgroundAnimation(type) {
     
     // 6. BURNING EMBERS
     else if (type === 'embers') {
+        document.body.style.background = '#1a0500';
+        updateThemeMode('#000000'); // Force Dark
+        
         animInterval = setInterval(() => {
             const ember = document.createElement('div');
             ember.style.position = 'absolute';
@@ -369,7 +484,8 @@ window.updateCustomColors = function() {
     root.style.setProperty('--text-color', text);
     root.style.setProperty('--active-tab-bg', main);
     root.style.setProperty('--card-bg', card);
-    
+    root.style.setProperty('--modal-bg', card);
+
     const darkerMain = adjustColor(main, -40);
     root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${main}, ${darkerMain})`);
     
@@ -393,8 +509,6 @@ function adjustColor(col, amt) {
 /* ==============================
    🔥 5. KEYBOARD LAYOUT STYLE SYSTEM (GUARDED)
    ============================== */
-
-// A. Theme Configuration
 const keyboardThemes = [
     { 
         id: 'default', name: 'Default', pro: false, 
@@ -442,14 +556,11 @@ const keyboardThemes = [
     }
 ];
 
-// B. Apply Logic
 function setKeyboardStyle(styleId) {
     const theme = keyboardThemes.find(t => t.id === styleId);
     if (!theme) return;
 
-    // ✅ STEP 3: Guard with canUse
     if (theme.pro && !canUse('proKeyboard')) {
-        // Silent return if accessed illegally (optional alert here if needed)
         return;
     }
 
@@ -458,8 +569,6 @@ function setKeyboardStyle(styleId) {
     saveSettings();
 }
 
-
-// C. Render UI Grid
 function initKeyboardStyles() {
     const grid = document.getElementById('kbStyleGrid');
     if (!grid) return;
@@ -473,7 +582,6 @@ function initKeyboardStyles() {
             card.classList.add('active');
         }
 
-        // ✅ STEP 4: UI Lock / Badge Logic
         const isLocked = theme.pro && !canUse('proKeyboard');
 
         let html = `
@@ -488,16 +596,12 @@ function initKeyboardStyles() {
         card.innerHTML = html;
 
         card.onclick = () => {
-            // ✅ STEP 3: Guard on Click
             if (theme.pro && !canUse('proKeyboard')) {
                 if(window.openProSettings) window.openProSettings(); 
                 else alert("Upgrade to PRO to unlock this theme!");
                 return;
             }
-            
             setKeyboardStyle(theme.id);
-            
-            // UI Update
             document.querySelectorAll('.kb-theme-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
         };
@@ -506,7 +610,6 @@ function initKeyboardStyles() {
     });
 }
 
-// Global Export
 window.setKeyboardStyle = setKeyboardStyle;
 window.initKeyboardStyles = initKeyboardStyles;
 
@@ -537,14 +640,12 @@ function loadSettings() {
     if (saved) {
         const data = JSON.parse(saved);
         
-        // Sound
         if(data.sound && data.sound.profile) {
             settingsState.sound.profile = data.sound.profile;
             const sel = document.getElementById('soundSelect');
             if(sel) sel.value = data.sound.profile;
         }
 
-        // Theme
         if(data.theme) {
             Object.assign(settingsState.theme, data.theme);
             const tEl = document.getElementById('customText'); if(tEl) tEl.value = data.theme.textColor;
@@ -558,26 +659,28 @@ function loadSettings() {
             
             toggleBgControls(data.theme.bgType, false);
             
-            // Restore BG Color
+            // Restore BG Color & Ensure Theme Mode is Correct
             if(data.theme.bgValue && !data.theme.bgValue.includes('rain') && !data.theme.bgValue.includes('leaves')) {
                  if (data.theme.bgType === 'solid' || data.theme.bgType === 'animated') {
                       document.body.style.background = data.theme.bgValue;
                       const bsEl = document.getElementById('bgSolidColor'); 
                       if(bsEl) bsEl.value = data.theme.bgValue;
+                      updateThemeMode(data.theme.bgValue); // 🔥 Restore Dark/Light mode
                  } else if (data.theme.bgType === 'gradient') {
                       document.body.style.background = data.theme.bgValue;
+                      updateThemeMode('gradient');
                  }
             } else {
                  document.body.style.background = '#f0f2f5'; 
+                 updateThemeMode('light');
             }
 
-            // Restore Image
             if (data.theme.bgType === 'image' && savedImg) {
                 document.body.style.background = `url(${savedImg}) no-repeat center center fixed`;
                 document.body.style.backgroundSize = 'cover';
+                updateThemeMode('image');
             }
 
-            // Restore Animation
             if (data.theme.bgType === 'animated') {
                 const animSel = document.getElementById('animTypeSelector');
                 const animType = data.theme.animType || 'leaves'; 
@@ -585,13 +688,9 @@ function loadSettings() {
                 startBackgroundAnimation(animType);
             }
             
-            // Restore Keyboard (Safe Load)
             if (data.theme.kbStyle) {
                 const theme = keyboardThemes.find(t => t.id === data.theme.kbStyle);
-
-                if (typeof window.IS_PRO_USER === 'undefined') {
-                    // Wait for poller
-                }
+                if (typeof window.IS_PRO_USER === 'undefined') { }
                 else if (!theme || !theme.pro || canUse('proKeyboard')) {
                     setKeyboardStyle(data.theme.kbStyle);
                 } else {
@@ -600,11 +699,9 @@ function loadSettings() {
             }
         }
         
-        // Features & Ghost
         if(data.visualParticles) { settingsState.visual.particles = true; setChecked('toggleParticles', true); }
         if(data.visualCombo) { settingsState.visual.combo = true; setChecked('toggleCombo', true); }
         
-        // These will be re-validated by toggleProFeature/init
         if(data.proHeatmap) { settingsState.pro.heatmap = true; setChecked('toggleHeatmap', true); }
         if(data.proSpotlight) { 
             settingsState.pro.spotlight = true; 
@@ -634,13 +731,6 @@ function loadSettings() {
     }
     
     initKeyboardStyles();
-
-    // Init Logic for Pro State
-    if (window.IS_PRO_USER === true) {
-        settingsState.pro.heatmap = true;
-        settingsState.pro.spotlight = true;
-        settingsState.pro.suddenDeath = true;
-    }
 }
 
 function setChecked(id, val) {
@@ -775,6 +865,8 @@ window.toggleGhostMode = function(mode) {
 
 function startGhost() {
     stopGhost();
+    if(!settingsState.ghost.active) return;
+
     const container = document.getElementById('typingSection');
     if(!container) return;
 
@@ -860,29 +952,34 @@ function stopGhost() {
 /* ==============================
    10. PRO FEATURES (GUARDED)
    ============================== */
-window.toggleProFeature = function(feat) {
-    // ✅ STEP 3: Guard All Pro Features
-    if (!canUse(feat) && !canUse('proFeatures')) {
-        // Reset the checkbox immediately
-        const el = document.getElementById('toggle' + feat.charAt(0).toUpperCase() + feat.slice(1));
-        if (el) el.checked = false;
+window.toggleProFeature = function(feature) {
+    const checkbox = document.getElementById('toggle' + capitalize(feature));
+    const isChecked = checkbox.checked;
 
-        if(window.openProSettings) window.openProSettings();
-        else alert("Upgrade to PRO to unlock " + feat);
-        return;
-    }
-
-    const el = document.getElementById('toggle' + feat.charAt(0).toUpperCase() + feat.slice(1));
-    const isChecked = el ? el.checked : false;
-    settingsState.pro[feat] = isChecked;
-    
-    if(feat === 'spotlight') {
-        if(isChecked) document.body.classList.add('pro-spotlight');
-        else document.body.classList.remove('pro-spotlight');
-    }
+    if (!settingsState.pro) settingsState.pro = {};
+    settingsState.pro[feature] = isChecked;
     saveSettings();
-};
 
+    if (feature === 'spotlight') {
+        if (isChecked) {
+            document.body.classList.add('spotlight-mode');
+        } else {
+            document.body.classList.remove('spotlight-mode');
+        }
+    } 
+    else if (feature === 'heatmap') {
+        if (isChecked) {
+            renderHeatmap();
+        } else {
+            if(typeof clearHeatmap === 'function') clearHeatmap();
+            document.querySelectorAll('.key').forEach(k => k.classList.remove('heat-hot', 'heat-cold'));
+        }
+    }
+    else if (feature === 'suddenDeath') {
+        console.log("💀 Sudden Death Mode:", isChecked ? "ON" : "OFF");
+        if(isChecked) alert("💀 Sudden Death ON: One mistake and game over!");
+    }
+}
 function triggerSuddenDeath() {
     const input = document.getElementById('inputField');
     input.disabled = true;
@@ -906,21 +1003,22 @@ function triggerSuddenDeath() {
 
 // Global Effect Trigger
 window.triggerGlobalEffects = function(isCorrect) {
-    playKeySound();
+    if(typeof playKeySound === 'function') playKeySound();
     
     if(settingsState.ghost.active && !settingsState.ghost.interval) {
          startGhost();
     }
 
+    if(settingsState.pro.suddenDeath && !isCorrect) {
+        triggerSuddenDeath();
+        return; 
+    }
+
     const spans = document.querySelectorAll('#quoteDisplay span');
     let idx;
-    if (typeof currentMode !== 'undefined' && currentMode === 'bengali') {
-        idx = (typeof sequenceIndex !== 'undefined') ? sequenceIndex - 1 : -1;
-    } else {
-        const val = document.getElementById('inputField').value;
-        idx = val.length - 1;
-    }
-    
+    const val = document.getElementById('inputField').value;
+    idx = val.length - 1;
+
     if(idx >= 0 && spans[idx]) {
         const span = spans[idx];
         
@@ -928,7 +1026,9 @@ window.triggerGlobalEffects = function(isCorrect) {
             const rect = span.getBoundingClientRect();
             const x = rect.left + (rect.width / 2);
             const y = rect.top + (rect.height / 2);
-            spawnParticles(x, y);
+            
+            spawnParticles(x, y); 
+            
             settingsState.visual.comboCount++;
             showComboPopup(x, y, settingsState.visual.comboCount);
         } else {
@@ -937,19 +1037,15 @@ window.triggerGlobalEffects = function(isCorrect) {
         
         if(settingsState.pro.heatmap) {
             const char = span.innerText; 
-            const code = getKeyFromCharSimple(char);
+            const code = getKeyFromCharSimple(char); 
             if(code) {
                 const keyEl = document.querySelector(`.key[data-key="${code}"]`);
                 if(keyEl) {
-                    const colorClass = isCorrect ? 'heat-cold' : 'heat-hot';
+                    const colorClass = isCorrect ? 'heat-cold' : 'heat-hot'; 
                     keyEl.classList.add(colorClass);
-                    setTimeout(() => keyEl.classList.remove(colorClass), 300);
+                    setTimeout(() => keyEl.classList.remove(colorClass), 400);
                 }
             }
-        }
-        
-        if(settingsState.pro.suddenDeath && !isCorrect) {
-            triggerSuddenDeath();
         }
     }
 };
@@ -961,7 +1057,6 @@ function getKeyFromCharSimple(char) {
     if(/[a-zA-Z]/.test(char)) return 'Key'+char.toUpperCase();
     return null; 
 }
-
 /* ==============================
    11. NEW UI & EVENTS
    ============================== */
@@ -994,12 +1089,10 @@ document.addEventListener("visibilitychange", function() {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1️⃣ Basic non-pro settings load
     loadSettings();
     initCanvas();
     switchSettingsTab('gameplay');
 
-    // 2️⃣ Resize handler
     window.addEventListener('resize', () => { 
         if (canvas) { 
             canvas.width = window.innerWidth; 
@@ -1007,24 +1100,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3️⃣ 🔥 WAIT for auth → then re-init pro-dependent UI
+    // 🔥 FIX: Remove duplicate event listener for .theme-btn
+    // The button already has onclick="toggleTheme()" in HTML.
+    
     const waitForPro = setInterval(() => {
         if (typeof window.IS_PRO_USER !== 'undefined') {
             clearInterval(waitForPro);
-
-            // 🔥 Auth Ready -> Activate Features internally if PRO
-            if (window.IS_PRO_USER === true) {
-                settingsState.pro.heatmap = true;
-                settingsState.pro.spotlight = true;
-                settingsState.pro.suddenDeath = true;
-            }
-
-            // ✅ Re-render keyboard grid (Badges will update now)
             if (typeof initKeyboardStyles === 'function') {
                 initKeyboardStyles();
             }
-
-            // ✅ Restore saved keyboard safely (using new canUse Guard)
             if (settingsState?.theme?.kbStyle) {
                 const theme = keyboardThemes.find(t => t.id === settingsState.theme.kbStyle);
                 if (!theme || !theme.pro || canUse('proKeyboard')) {

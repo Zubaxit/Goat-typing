@@ -136,7 +136,7 @@ let isMyMatchActive = false;
 let mpStartTime = null;
 let mpTotalErrors = 0;
 
-// বাংলা টাইপিং ভেরিয়েবল
+// বাংলা টাইপিং ভেরিয়েবল
 let banglaSequence = [];
 let banglaIndex = 0;
 let originalGuideParent = null;
@@ -212,7 +212,7 @@ function enterGameRoom(matchData) {
         guideContainer = document.createElement('div');
         guideContainer.id = 'mpGuideContainer';
         
-        // ১. আরো নিচে নামানো হয়েছে (60px)
+        // ১. আরো নিচে নামানো হয়েছে (60px)
         guideContainer.style.marginTop = '60px'; 
         
         guideContainer.style.display = 'flex';
@@ -227,8 +227,8 @@ function enterGameRoom(matchData) {
         guide.style.display = 'flex';
         
         // ২. ব্যাকগ্রাউন্ড কালার এবং স্টাইল পরিবর্তন
-        guide.style.backgroundColor = '#090e19'; // গাঢ় নীল ব্যাকগ্রাউন্ড
-        guide.style.padding = '15px 30px';       // একটু জায়গা দেওয়া হলো
+        guide.style.backgroundColor = '#090e19'; // গাঢ় নীল ব্যাকগ্রাউন্ড
+        guide.style.padding = '15px 30px';       // একটু জায়গা দেওয়া হলো
         guide.style.borderRadius = '12px';       // কোণাগুলো গোল করা হলো
         guide.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)'; // সুন্দর শ্যাডো
         guide.style.border = '1px solid rgba(255, 255, 255, 0.1)'; // হালকা বর্ডার
@@ -645,10 +645,10 @@ window.updateWeeklyStats = async function(totalChars, wpm, errors) {
 
         // স্কোরিং ফর্মুলা (Words + Avg WPM - Errors)
         const avgWPM = Math.round(weeklyData.totalWPM / weeklyData.gamesPlayed);
-        // ভুল করলে পয়েন্ট কাটা যাবে (Error * 5)
+        // ভুল করলে পয়েন্ট কাটা যাবে (Error * 5)
         weeklyData.score = Math.max(0, weeklyData.totalWords + (avgWPM * 10) - (weeklyData.errors * 5));
 
-        // ফায়ারবেসে সেভ
+        // ফায়ারবেসে সেভ
         await updateDoc(userRef, {
             weeklyStats: weeklyData,
             currentWeeklyScore: weeklyData.score // সার্চের জন্য আলাদা ফিল্ড
@@ -663,7 +663,6 @@ window.updateWeeklyStats = async function(totalChars, wpm, errors) {
 };
 
 // ৩. লিডারবোর্ড লোড করা
-// ৩. লিডারবোর্ড লোড করা (আপডেটেড)
 async function loadLeaderboard() {
     const list = document.getElementById('weeklyLeaderboardList');
     const loading = document.getElementById('lbLoading');
@@ -684,7 +683,7 @@ async function loadLeaderboard() {
             let rankClass = rank === 1 ? 'top-1' : (rank === 2 ? 'top-2' : (rank === 3 ? 'top-3' : ''));
             let rankIcon = rank === 1 ? '👑' : `#${rank}`;
 
-            // 🔥 আপডেটেড: onclick ইভেন্ট যোগ করা হয়েছে
+            // 🔥 আপডেটেড: onclick ইভেন্ট যোগ করা হয়েছে
             html += `
                 <li class="lb-item" onclick="openPublicProfile('${doc.id}', ${rank})">
                     <span class="lb-rank ${rankClass}">${rankIcon}</span>
@@ -715,6 +714,10 @@ window.openPublicProfile = async function(uid, rank) {
     const modal = document.getElementById('publicProfileModal');
     if(!modal) return;
 
+    // আগের প্রো ক্লাস রিসেট করা (যাতে ফ্লিকার না করে)
+    const contentBox = modal.querySelector('.modal-content');
+    if(contentBox) contentBox.classList.remove('pro-mode-active');
+
     // লোডিং দেখানোর জন্য
     document.getElementById('pubName').innerText = "Loading...";
     modal.classList.remove('hidden');
@@ -728,8 +731,23 @@ window.openPublicProfile = async function(uid, rank) {
 
             // ডাটা সেট করা
             document.getElementById('pubPic').src = data.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-            document.getElementById('pubName').innerText = data.displayName || "Unknown";
-           // 🔥 FIX: ডবল '@' সমস্যা সমাধান
+            
+            // 🔥🔥 PRO VIBE & NAME LOGIC 🔥🔥
+            const nameEl = document.getElementById('pubName');
+            
+            if (data.isPro === true) {
+                // প্রো হলে গোল্ডেন ভাইব ক্লাস এড করা
+                if(contentBox) contentBox.classList.add('pro-mode-active');
+                
+                // নামের সাথে ক্রাউন আইকন
+                nameEl.innerHTML = `${data.displayName || "Unknown"} <i class="fas fa-crown pro-badge-crown"></i>`;
+            } else {
+                // ফ্রি ইউজার হলে নরমাল টেক্সট
+                if(contentBox) contentBox.classList.remove('pro-mode-active');
+                nameEl.innerText = data.displayName || "Unknown";
+            }
+
+            // 🔥 FIX: ডবল '@' সমস্যা সমাধান
             let handle = data.username || "user";
             // যদি নামের শুরুতে ইতিমধ্যে '@' থাকে, তাহলে আর বসাবো না
             if (!handle.startsWith('@')) {
@@ -758,14 +776,14 @@ window.openPublicProfile = async function(uid, rank) {
                 challengeBtn.style.display = 'none';
             } else {
                 challengeBtn.style.display = 'flex';
-                // বাটন ক্লিক করলে সরাসরি চ্যালেঞ্জ মডাল খুলবে এবং ইউজার সার্চ হয়ে যাবে
+                // বাটন ক্লিক করলে সরাসরি চ্যালেঞ্জ মডাল খুলবে এবং ইউজার সার্চ হয়ে যাবে
                 challengeBtn.onclick = function() {
                     closePublicProfile();
                     openMultiplayerModal();
-                    // সার্চ বক্সে নাম বসিয়ে সার্চ ট্রিগার করা
+                    // সার্চ বক্সে নাম বসিয়ে সার্চ ট্রিগার করা
                     const searchInput = document.getElementById('opponentUidInput');
                     if (searchInput && data.username) {
-                        searchInput.value = data.username; // ইউজারনেম দিয়ে সার্চ
+                        searchInput.value = data.username; // ইউজারনেম দিয়ে সার্চ
                         searchOpponent(); // অটো সার্চ
                     }
                 };

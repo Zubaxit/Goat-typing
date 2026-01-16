@@ -239,6 +239,7 @@ body.coding-mode {
     position: relative;
     border: 2px solid transparent;
     transition: border 0.3s;
+    margin-top: 10px;
     
     /* Layout Fix for Start from Top-Left */
     display: flex;
@@ -367,6 +368,7 @@ body.focus-mode .text-display {
     padding: 20px; 
     border-radius: 20px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+  
 }
 .keyboard { display: flex; flex-direction: column; gap: 8px; user-select: none; }
 .row { display: flex; justify-content: center; gap: 6px; }
@@ -531,7 +533,7 @@ body.focus-mode .text-display {
     position: relative; /* হাতগুলোকে পজিশন করার জন্য */
     
     padding: 15px 30px;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     min-height: 70px; /* হাইট ফিক্সড যাতে লাফালাফি না করে */
     
     transition: all 0.3s ease;
@@ -2648,6 +2650,9 @@ body.focus-mode .exit-fs-btn {
 [data-theme="dark"] .gt-card strong {
     color: #fff !important;
 }
+[data-theme="dark"] .gt-info-row{
+    color: #ef1515 !important;
+}
 
 /* 4. AI ANALYSIS BOX (নিচের বক্সগুলো) */
 [data-theme="dark"] .insight-box,
@@ -3420,7 +3425,7 @@ body.focus-mode .exit-fs-btn {
    LOCKED STATE (BLUR ONLY CONTENT)
 ========================= */
 .gt-sidebar.locked .sidebar-inner {
-  filter: blur(2.5px);
+  filter: blur(5px);
   opacity: 0.45;
   pointer-events: none;
 }
@@ -3432,10 +3437,11 @@ body.focus-mode .exit-fs-btn {
   position: absolute;
   inset: 0;
   z-index: 9999;
-  background: rgba(0,0,0,0.7);
+  
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 1;
 }
 
 .sidebar-lock.hidden {
@@ -5045,7 +5051,7 @@ body.pro-active #proMusicPlayer {
 
 /* --- 🎵 MUSIC PLAYER DESIGN --- */
 .music-player-box {
-    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    background: White;
     border-radius: 16px;
     padding: 20px;
     border: 1px solid rgba(255,255,255,0.1);
@@ -5412,3 +5418,683 @@ body.pro-active #proMusicPlayer {
 
 @keyframes fadeInLock { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popUpLock { to { transform: scale(1); } }
+/* =========================================
+   🎨 PRO FEATURES & ANIMATIONS (MISSING STYLES)
+   ========================================= */
+
+/* 🔦 SPOTLIGHT FOCUS MODE */
+/* স্পটলাইট অন করলে সব ঝাপসা হয়ে যাবে, শুধু টাইপিং এরিয়া ছাড়া */
+body.spotlight-mode .app-container > *:not(.main-game-area),
+body.spotlight-mode header, 
+body.spotlight-mode .nav-tabs,
+body.spotlight-mode .gt-sidebar,
+body.spotlight-mode .instruction-panel {
+    opacity: 0.05; 
+    filter: blur(3px); 
+    transition: 0.5s;
+}
+
+body.spotlight-mode .typing-section {
+    opacity: 1 !important; 
+    filter: none !important;
+    box-shadow: 0 0 100px rgba(255, 255, 255, 0.1);
+}
+
+/* 🔥 HEATMAP KEYS */
+/* হিটম্যাপ অন করলে ভুলের ওপর ভিত্তি করে কিবোর্ড রঙিন হবে */
+.key.heat-low { background: #facc15 !important; color: black !important; box-shadow: 0 0 10px #facc15; }
+.key.heat-med { background: #f97316 !important; color: black !important; box-shadow: 0 0 15px #f97316; }
+.key.heat-high { background: #ef4444 !important; color: white !important; box-shadow: 0 0 20px #ef4444; }
+
+/* ❄️ ANIMATION ELEMENTS */
+/* অ্যানিমেশনগুলো যাতে সুন্দরভাবে নড়াচড়া করে */
+.snowflake {
+    position: absolute; top: -10px; background: white;
+    border-radius: 50%; opacity: 0.8;
+    animation: fall linear infinite;
+}
+@keyframes fall { to { transform: translateY(100vh); } }
+
+.leaf {
+    position: absolute; width: 15px; height: 15px; background: #4ade80;
+    border-radius: 0 50% 0 50%; animation: fallLeaf linear infinite;
+}
+@keyframes fallLeaf { 
+    to { transform: translateY(100vh) rotate(360deg); } 
+}
+
+.matrix-col {
+    position: absolute; top: -100px; color: #0f0;
+    font-family: monospace; font-size: 1.2rem;
+    writing-mode: vertical-rl; text-orientation: upright;
+    opacity: 0.7; animation: matrixFall linear infinite;
+}
+@keyframes matrixFall { to { transform: translateY(110vh); } }
+
+.firefly {
+    position: absolute; width: 4px; height: 4px; background: #facc15;
+    border-radius: 50%; box-shadow: 0 0 10px #facc15;
+    animation: fly 5s ease-in-out infinite alternate;
+}
+@keyframes fly { 
+    0% { transform: translate(0, 0); opacity: 0.5; }
+    100% { transform: translate(50px, -50px); opacity: 1; }
+}
+/* =========================================
+   🔥 ULTIMATE DARK MODE FIX (FORCE OVERRIDE)
+   Paste this at the VERY BOTTOM of style.css
+   ========================================= */
+
+/* 1. Global Background Force */
+html[data-theme="dark"] body {
+    background: #121212 !important; /* background-color নয়, সরাসরি background */
+    color: #e0e0e0 !important;
+}
+
+/* 2. Remove White Patches (Container Fix) */
+html[data-theme="dark"] .app-container,
+html[data-theme="dark"] .main-game-area {
+    background: transparent !important;
+}
+
+/* 3. Cards & Boxes (Dark Grey) */
+html[data-theme="dark"] .card, 
+html[data-theme="dark"] .typing-section, 
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .stats-container,
+html[data-theme="dark"] .leaderboard-box, /* Right Sidebar Fix */
+html[data-theme="dark"] .ad-box {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    border-color: #333 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+}
+
+/* 4. Input Fields (Dark Input) */
+html[data-theme="dark"] input, 
+html[data-theme="dark"] select, 
+html[data-theme="dark"] textarea {
+    background-color: #2c2c2c !important;
+    color: #ffffff !important;
+    border: 1px solid #444 !important;
+}
+
+/* 5. Key Colors (Dark Keyboard) */
+html[data-theme="dark"] .key {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #444 !important;
+    box-shadow: 0 3px 0 #000 !important;
+}
+
+/* Active Key Highlight */
+html[data-theme="dark"] .key.active,
+html[data-theme="dark"] .key.current {
+    background-color: #4361ee !important;
+    color: #fff !important;
+    border-color: #4361ee !important;
+}
+
+/* 6. Text Visibility Fix */
+html[data-theme="dark"] h1, 
+html[data-theme="dark"] h2, 
+html[data-theme="dark"] h3, 
+html[data-theme="dark"] p, 
+html[data-theme="dark"] span:not(.correct):not(.incorrect):not(.current) {
+    color: #e0e0e0 !important;
+}
+/* =========================================
+   🔥 DARK MODE FIXES (Sidebar, AI & Analysis)
+   Paste at the bottom of style.css
+   ========================================= */
+
+/* 1. Sidebar & Mistake Pattern Fix */
+[data-theme="dark"] .gt-sidebar,
+[data-theme="dark"] .sidebar-inner {
+    background-color: #1a1a1a !important;
+    border-right: 1px solid #333 !important;
+}
+
+[data-theme="dark"] .gt-section h3 {
+    color: #a0a0a0 !important;
+    border-bottom: 1px solid #333 !important;
+}
+
+[data-theme="dark"] .gt-card {
+    background: #252525 !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #333 !important;
+    box-shadow: none !important;
+}
+
+/* 2. Key Pills (Mistake Keys) */
+[data-theme="dark"] .gt-pill {
+    background: #333 !important;
+    color: #fff !important;
+    border: 1px solid #555 !important;
+}
+
+/* 3. AI Insight Panel (Top Bar) */
+[data-theme="dark"] #insightPanel,
+[data-theme="dark"] #profilePanel {
+    background: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #333 !important;
+}
+
+[data-theme="dark"] #typingSummary {
+    color: #bbb !important;
+}
+
+/* 4. Text Coloring Fix inside Cards */
+[data-theme="dark"] .gt-card span {
+    color: #888 !important;
+}
+[data-theme="dark"] .gt-card strong {
+    color: #fff !important;
+}
+
+/* Special Colors for Stats */
+[data-theme="dark"] .gt-card strong.red { color: #ff5252 !important; }
+[data-theme="dark"] .gt-card strong.orange { color: #ffb142 !important; }
+/* =========================================
+   🔥 DYNAMIC THEME FIX (No More Hardcoded Black)
+   Paste this at the VERY BOTTOM of style.css
+   ========================================= */
+
+/* 1. All Containers will now use the THEME Color */
+.gt-sidebar, 
+.right-sidebar, 
+.sidebar-inner, 
+#insightPanel, 
+#profilePanel, 
+.instruction-panel, 
+.ad-box, 
+.leaderboard-box, 
+.music-player-box,
+.gt-card,
+.gt-section {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: rgba(128, 128, 128, 0.2) !important; /* হালকা বর্ডার */
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* 2. Text Visibility Fix */
+/* সব টেক্সট এখন থিমের টেক্সট কালার নেবে */
+.gt-sidebar h3, 
+.right-sidebar h3, 
+.gt-card span, 
+.guide-text, 
+.ad-label,
+#typingSummary,
+.gt-section h3 {
+    color: var(black) !important;
+    opacity: 0.9;
+}
+
+/* 3. Mistake & Stats Pills */
+/* এগুলোও থিমের ব্যাকগ্রাউন্ডের সাথে ম্যাচ করবে */
+.gt-pill {
+    background: var(--bg-color) !important; /* বডির কালার নেবে */
+    color: var(--text-color) !important;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+/* 4. Strong Text (Values) */
+.gt-card strong {
+    filter: brightness(1.2); /* একটু উজ্জ্বল দেখাবে */
+}
+
+/* 5. Hand Guide SVG Fix */
+/* হাতের কালার থিম অনুযায়ী অ্যাডজাস্ট হবে */
+.mini-finger {
+    stroke: var(--text-color) !important;
+    opacity: 0.3;
+}
+.active-finger-svg {
+    opacity: 1 !important;
+    fill: var(--active-tab-bg) !important; /* মেইন কালার নেবে */
+}
+
+
+.right-sidebar, 
+.sidebar-inner, 
+#insightPanel, 
+#profilePanel, 
+.instruction-panel, 
+.ad-box, 
+.leaderboard-box, 
+.music-player-box, 
+.gt-card, 
+.gt-section {
+    border-radius: 12px !important;
+}
+/* =========================================
+   🔥 OFFLINE OVERLAY FIX (Force Full Screen)
+   ========================================= */
+#offlineOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000; /* একদম কালো ব্যাকগ্রাউন্ড */
+    color: #ff4757;
+    z-index: 999999 !important; /* সবার উপরে থাকার জন্য */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#offlineOverlay.hidden {
+    display: none !important;
+}
+
+#offlineOverlay h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    font-family: sans-serif;
+}
+
+#offlineOverlay p {
+    color: #ccc;
+    font-size: 1.2rem;
+}
+/* =======================================================
+   🔥 FINAL & POWERFUL DARK MODE FIX (FORCE OVERRIDE)
+   Paste this at the VERY BOTTOM of style.css
+   ======================================================= */
+
+/* ১. AI Analysis Bar & Cards (সাদা ভাব দূর করবে) */
+html[data-theme="dark"] #profilePanel, 
+html[data-theme="dark"] #insightPanel,
+html[data-theme="dark"] .gt-section,
+html[data-theme="dark"] .gt-card,
+html[data-theme="dark"] .leaderboard-box,
+html[data-theme="dark"] .ad-box {
+    background-color: #1e1e2e !important; /* Deep Blue-Grey */
+    color: #e0e0e0 !important;            /* Text White */
+    border: 1px solid #333 !important;    /* Dark Border */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}
+
+/* ২. টাইপিং সামারি টেক্সট */
+html[data-theme="dark"] #typingSummary {
+    color: #b0b0b0 !important;
+    background: transparent !important;
+}
+
+/* ৩. মিসটেক পিলস (Mistake Keys) */
+html[data-theme="dark"] .gt-pill {
+    background-color: #2d2d2d !important;
+    color: #ff7675 !important; /* Redish Text */
+    border: 1px solid #444 !important;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5) !important;
+}
+
+/* ৪. সাইডবার এবং হেডার */
+html[data-theme="dark"] .gt-sidebar,
+html[data-theme="dark"] .right-sidebar {
+    background-color: #15151a !important; /* Almost Black */
+    border-color: #2a2a2a !important;
+}
+
+html[data-theme="dark"] .gt-sidebar h3, 
+html[data-theme="dark"] .gt-section h3 {
+    color: #818cf8 !important; /* Soft Indigo Title */
+}
+
+/* ৫. হ্যান্ড গাইড */
+html[data-theme="dark"] .instruction-panel {
+    background-color: #1e1e2e !important;
+    border-color: #333 !important;
+}
+html[data-theme="dark"] .guide-text {
+    color: #fff !important;
+}
+/* =========================================
+   🔥 MISTAKE PATTERN BAR FIX (NO MORE WHITE)
+   Paste at the very bottom of style.css
+   ========================================= */
+
+/* ১. মেইন বার (যেটা সাদা হয়ে আছে) */
+html[data-theme="dark"] .gt-info-row {
+    background-color: #252525 !important; /* ডার্ক কার্ড কালার */
+    border: 1px solid #333 !important;    /* হালকা বর্ডার */
+    color: #e0e0e0 !important;            /* টেক্সট সাদা */
+    box-shadow: none !important;
+}
+
+/* ২. বাম পাশের লেখা (Wrong Key / Weak Finger) */
+html[data-theme="dark"] .gt-info-row span:first-child {
+    color: #aaa !important; /* হালকা ধূসর */
+    font-weight: 600;
+}
+
+/* ৩. ডান পাশের রেজাল্ট পিল (যেখানে ভুল কি দেখায়) */
+html[data-theme="dark"] .gt-pill {
+    background-color: #1a1a1a !important; /* আরো গাঢ় কালো */
+    color: #ff4757 !important;            /* উজ্জ্বল লাল */
+    border: 1px solid #444 !important;
+    font-weight: bold;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5) !important;
+}
+
+/* ৪. সেকশন টাইটেল (যদি থাকে) */
+html[data-theme="dark"] .gt-section h3 {
+    color: #818cf8 !important; /* সুন্দর নীলচে কালার */
+    border-bottom: 1px solid #333 !important;
+}/* Color Input Styling */
+input[type="color"] {
+    -webkit-appearance: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* গোল কালার বাটন */
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+input[type="color"]:hover {
+    transform: scale(1.1);
+}
+/* =========================================
+   🔥 RANK BADGES DARK MODE FIX (Colorful & Glowy)
+   Paste at the VERY BOTTOM of style.css
+   ========================================= */
+
+/* ১. বেসিক ব্যাজ স্টাইল (ডার্ক মোডে) */
+html[data-theme="dark"] .rank-badge {
+    background-color: #262626 !important; /* ডিফল্ট ডার্ক */
+    color: #e0e0e0 !important;            /* টেক্সট সাদা */
+    border: 1px solid #404040 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* ২. Rank: Beginner (Snail/Turtle) - ধূসর/নীলচে */
+html[data-theme="dark"] .rank-beginner {
+    background-color: #1f2937 !important;
+    color: #9ca3af !important;
+    border-color: #374151 !important;
+}
+
+/* ৩. Rank: Rookie (Steady/Runner) - গাঢ় সবুজ */
+html[data-theme="dark"] .rank-rookie {
+    background-color: #064e3b !important; /* Dark Green */
+    color: #34d399 !important;            /* Light Neon Green Text */
+    border-color: #059669 !important;
+}
+
+/* ৪. Rank: Pro (Racer/Speedster) - গাঢ় নীল */
+html[data-theme="dark"] .rank-pro {
+    background-color: #1e3a8a !important; /* Dark Blue */
+    color: #60a5fa !important;            /* Neon Blue Text */
+    border-color: #2563eb !important;
+}
+
+/* ৫. Rank: Master (Ninja/Storm) - গাঢ় পার্পল */
+html[data-theme="dark"] .rank-master {
+    background-color: #4c1d95 !important; /* Dark Purple */
+    color: #c084fc !important;            /* Neon Purple Text */
+    border-color: #7c3aed !important;
+}
+
+/* ৬. Rank: God/Alien (Rocket/Machine) - গাঢ় লাল/অরেঞ্জ */
+html[data-theme="dark"] .rank-god {
+    background-color: #7f1d1d !important; /* Dark Red */
+    color: #fca5a5 !important;            /* Neon Red Text */
+    border-color: #b91c1c !important;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4) !important; /* Glow Effect */
+}
+
+/* ৭. Rank: Gold/Flawless - গোল্ডেন */
+html[data-theme="dark"] .rank-gold {
+    background-color: #422006 !important; /* Dark Gold/Brown */
+    color: #facc15 !important;            /* Bright Gold Text */
+    border-color: #ca8a04 !important;
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.4) !important;
+}
+
+/* ৮. Neutral (Analysis Ready) */
+html[data-theme="dark"] .rank-neutral {
+    background-color: #171717 !important;
+    color: #737373 !important;
+    border: 1px dashed #404040 !important;
+}
+/* =========================================
+   🐐 GOAT PRO ATTRACTIVE AD IMAGE STYLES
+========================================= */
+
+/* The container link */
+.goat-ad-link {
+    display: block;
+    width: 300px;
+    height: 250px;
+    position: relative;
+    border-radius: 12px; /* Themes er sathe match rekhe */
+    overflow: hidden;
+    border: 2px solid rgba(250, 204, 21, 0.3); /* Subtle gold border */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    /* Continuous pulsing animation */
+    animation: goatAdPulse 2.5s infinite ease-in-out;
+    cursor: pointer;
+}
+
+/* The image itself */
+.goat-ad-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    filter: brightness(1);
+}
+
+/* Continuous Pulsing Animation Keyframes */
+@keyframes goatAdPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+        border-color: rgba(250, 204, 21, 0.3);
+    }
+    50% {
+        transform: scale(1.03); /* Ektu boro hobe */
+        box-shadow: 0 0 50px rgba(250, 204, 21, 0.8), 0 0 20px rgba(255, 255, 255, 0.2); /* Kora golden glow */
+        border-color: rgba(250, 204, 21, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+        border-color: rgba(250, 204, 21, 0.3);
+    }
+}
+
+/* 🔥 POWERFUL HOVER EFFECT 🔥 */
+.goat-ad-link:hover {
+    animation: none; /* Stop pulse on hover */
+    transform: translateY(-5px) scale(1.05); /* Up and big */
+    box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.6), /* Depth shadow */
+        0 0 80px rgba(250, 204, 21, 1),   /* Massive Gold Glow */
+        0 0 30px rgba(255, 255, 255, 0.6); /* White inner glow */
+    border-color: #fff; /* White border on hover */
+}
+
+.goat-ad-link:hover .goat-ad-img {
+    transform: scale(1.1) rotate(-2deg); /* Image zoom and slight tilt */
+    filter: brightness(1.2) contrast(1.1) saturate(1.2); /* More vibrant */
+}
+
+/* Optional Shine Effect on Hover */
+.ad-shine {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+    transform: skewX(-25deg);
+    transition: 0.7s;
+}
+.goat-ad-link:hover .ad-shine {
+    left: 150%; /* Move shine across */
+}
+/* =========================================
+   👑 PRO USER PROFILE DESIGN (DREAMY & FIXED)
+   ========================================= */
+
+/* ১. মডাল কন্টেইনার (লেআউট ফিক্স + ড্রিম ইফেক্ট) */
+.modal-content.pro-mode-active {
+    /* লেআউট ফিক্স: সবকিছু নিচে নিচে আসবে */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+
+    /* ড্রিম ভাইব ব্যাকগ্রাউন্ড */
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460) !important;
+    border: 1px solid rgba(250, 204, 21, 0.5) !important;
+    color: #fff !important;
+    
+    /* ড্রিম গ্লোয়িং এনিমেশন */
+    animation: dreamGlow 4s infinite alternate;
+    overflow: visible !important; /* টুলটিপ যাতে কেটে না যায় */
+}
+
+/* স্বপ্নের মতো গ্লো ইফেক্ট */
+@keyframes dreamGlow {
+    0% {
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.2), 
+                    0 0 40px rgba(123, 31, 162, 0.2);
+        border-color: rgba(250, 204, 21, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 40px rgba(250, 204, 21, 0.5), 
+                    0 0 80px rgba(76, 201, 240, 0.3);
+        border-color: rgba(250, 204, 21, 1);
+    }
+}
+
+/* ২. প্রোফাইল পিকচার (মাঝখানে এবং গোল্ডেন রিং) */
+.modal-content.pro-mode-active #pubProfilePic {
+    width: 120px !important;  /* সাইজ ফিক্স */
+    height: 120px !important;
+    border-radius: 50%;
+    margin: 20px auto 10px auto !important; /* উপরে নিচে গ্যাপ */
+    border: 3px solid #facc15 !important;
+    box-shadow: 0 0 25px rgba(250, 204, 21, 0.6) !important;
+    animation: picFloat 3s ease-in-out infinite;
+    display: block !important;
+}
+
+@keyframes picFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ৩. নাম এবং ইউজারনেম কন্টেইনার */
+.modal-content.pro-mode-active h2, 
+.modal-content.pro-mode-active #pubName {
+    width: 100%;
+    display: block !important;
+    text-align: center !important;
+    margin-top: 10px !important;
+}
+
+/* নামের স্টাইল (গোল্ডেন গ্রেডিয়েন্ট) */
+.modal-content.pro-mode-active #pubName {
+    font-size: 1.8rem;
+    background: linear-gradient(to right, #facc15, #fff, #facc15);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+    margin-bottom: 5px !important;
+}
+
+/* ৪. ক্রাউন ব্যাজ + টুলটিপ (Hover Effect) */
+.pro-badge-crown {
+    display: inline-block;
+    color: #facc15;
+    font-size: 1.4rem;
+    margin-left: 10px;
+    vertical-align: middle;
+    filter: drop-shadow(0 0 5px gold);
+    cursor: pointer;
+    position: relative; /* টুলটিপ পজিশনের জন্য */
+}
+
+/* হোভার করলে টুলটিপ দেখাবে */
+.pro-badge-crown:hover::after {
+    content: "PRO USER";
+    position: absolute;
+    bottom: 130%; /* ক্রাউনের উপরে */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    background: #facc15;
+    color: #000;
+    font-weight: bold;
+    font-size: 0.8rem;
+    font-family: sans-serif;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    z-index: 100;
+    
+    /* ছোট ত্রিভুজ */
+    border-bottom: 5px solid transparent;
+}
+
+/* ৫. স্ট্যাটাস বক্সগুলো (এক লাইনে আনার জন্য) */
+.modal-content.pro-mode-active .profile-stats-grid {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.modal-content.pro-mode-active .stat-box {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(250, 204, 21, 0.2) !important;
+    border-radius: 10px;
+    padding: 10px 15px;
+    min-width: 80px;
+}
+
+.modal-content.pro-mode-active .stat-box h3 {
+    color: #facc15 !important;
+    margin: 0 !important;
+    font-size: 1.2rem;
+}
+.modal-content.pro-mode-active .stat-box p {
+    color: #ccc !important;
+    font-size: 0.8rem;
+    margin: 0 !important;
+}
+
+/* ৬. ক্লোজ বাটন ফিক্স (যাতে ফ্লেক্সের কারণে সরে না যায়) */
+.modal-content.pro-mode-active .close-btn {
+    position: absolute !important;
+    top: 15px !important;
+    right: 20px !important;
+    font-size: 1.5rem;
+    color: #facc15 !important;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}

@@ -7,10 +7,87 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+
+
+
+    <style>
+    /* 1. ANIMATION LAYER FIX */
+    #bgAnimationLayer {
+        position: fixed;
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        z-index: 0; /* Background এর উপরে কিন্তু Content এর নিচে */
+        pointer-events: none; 
+        overflow: hidden;
+    }
+    .app-container {
+        position: relative; 
+        z-index: 1; /* Content উপরে থাকবে */
+    }
+
+    /* 2. ANIMATION KEYFRAMES (Snow, Leaf, Matrix) */
+    .snowflake {
+        position: absolute; top: -20px; background: white;
+        border-radius: 50%; opacity: 0.8;
+        animation: fall linear infinite;
+    }
+    @keyframes fall { to { transform: translateY(110vh); } }
+
+    .leaf {
+        position: absolute; width: 20px; height: 20px; background: #4ade80;
+        border-radius: 0 50% 0 50%; 
+        animation: fallLeaf linear infinite;
+    }
+    @keyframes fallLeaf { to { transform: translateY(110vh) rotate(360deg); } }
+
+    .matrix-col {
+        position: absolute; top: -100px; color: #0f0;
+        font-family: monospace; font-size: 1.5rem;
+        writing-mode: vertical-rl; text-orientation: upright;
+        opacity: 0.8; text-shadow: 0 0 5px #0f0;
+        animation: matrixFall linear infinite;
+    }
+    @keyframes matrixFall { to { transform: translateY(120vh); } }
+
+    .firefly {
+        position: absolute; width: 6px; height: 6px; background: #facc15;
+        border-radius: 50%; box-shadow: 0 0 15px #facc15;
+        animation: fly 6s ease-in-out infinite alternate;
+    }
+    @keyframes fly { 
+        0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+        100% { transform: translate(100px, -100px) scale(1.2); opacity: 1; }
+    }
+
+    /* 3. HEATMAP COLORS (Important দেওয়া হয়েছে যাতে ওভাররাইড হয়) */
+    .key.heat-low { background: #facc15 !important; color: black !important; box-shadow: 0 0 15px #facc15 !important; transition: 0.2s; }
+    .key.heat-med { background: #f97316 !important; color: black !important; box-shadow: 0 0 20px #f97316 !important; transition: 0.2s; }
+    .key.heat-high { background: #ef4444 !important; color: white !important; box-shadow: 0 0 25px #ef4444 !important; transition: 0.2s; }
+
+    /* 4. SPOTLIGHT MODE (সব ঝাপসা হয়ে যাবে) */
+    body.spotlight-mode > *:not(.app-container),
+    body.spotlight-mode .app-container > *:not(.main-game-area) {
+        opacity: 0.1 !important;
+        filter: blur(4px) !important;
+        transition: all 0.5s ease;
+    }
+    body.spotlight-mode .typing-section {
+        opacity: 1 !important;
+        filter: none !important;
+        transform: scale(1.02);
+        z-index: 1000;
+        position: relative;
+    }
+</style>
 </head>
 <body>
+    <div id="bgAnimationLayer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden;"></div>
+<div id="animatedBgContainer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></div>
+<canvas id="effectCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
 
-    
+    <div id="bgAnimationLayer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden;"></div>
 
 <div id="loaderOverlay">
     <div class="loader-wrapper">
@@ -435,10 +512,12 @@
     
     <div class="ad-box top-ad">
         <span class="ad-label">Sponsored</span>
-        <div class="ad-content">
-            <p>🚀 Top Ad Space</p>
-            <small>300 x 250</small>
-        </div>
+       <div class="ad-space top-ad">
+    <a href="pro.html" class="goat-ad-link">
+        <img src="goat_ad.png" alt="Upgrade to GOAT PRO" class="goat-ad-img">
+        <div class="ad-shine"></div>
+    </a>
+</div>
     </div>
 
     <div class="leaderboard-box">
@@ -523,9 +602,11 @@
             
             <div id="tab-gameplay" class="tab-section active">
                 <h2>Gameplay Configuration</h2>
+                
                 <div class="setting-card">
                     <div class="card-header">
                         <i class="fas fa-ghost"></i> Ghost & Pace
+                        <i class="fas fa-lock" style="color: #facc15; font-size: 0.8rem; margin-left: 5px;" title="Pro Feature"></i>
                     </div>
                     <div class="card-body">
                         <div class="control-row">
@@ -534,9 +615,13 @@
                                 <span>Compete against an AI bot</span>
                             </div>
                             <div class="control-action">
-                                <input type="number" id="ghostSpeed" value="40" class="mini-input"> WPM
+                                <input type="number" id="ghostSpeed" value="40" class="mini-input"
+                                       onmousedown="if(!checkProFeature('Ghost Racer')) { event.preventDefault(); this.blur(); return false; }"
+                                       onkeydown="if(!checkProFeature('Ghost Racer')) { event.preventDefault(); return false; }"> WPM
                                 <label class="switch-ios">
-                                    <input type="checkbox" id="toggleGhost" onchange="toggleGhostMode('ghost')">
+                                    <input type="checkbox" id="toggleGhost" 
+                                           onclick="if(!checkProFeature('Ghost Racer')) { event.preventDefault(); return false; }" 
+                                           onchange="toggleGhostMode('ghost')">
                                     <span class="slider-ios"></span>
                                 </label>
                             </div>
@@ -547,9 +632,13 @@
                                 <span>A constant speed visual guide</span>
                             </div>
                             <div class="control-action">
-                                <input type="number" id="paceSpeed" value="60" class="mini-input"> WPM
+                                <input type="number" id="paceSpeed" value="60" class="mini-input"
+                                       onmousedown="if(!checkProFeature('Pace Caret')) { event.preventDefault(); this.blur(); return false; }"
+                                       onkeydown="if(!checkProFeature('Pace Caret')) { event.preventDefault(); return false; }"> WPM
                                 <label class="switch-ios">
-                                    <input type="checkbox" id="togglePace" onchange="toggleGhostMode('pace')">
+                                    <input type="checkbox" id="togglePace" 
+                                           onclick="if(!checkProFeature('Pace Caret')) { event.preventDefault(); return false; }" 
+                                           onchange="toggleGhostMode('pace')">
                                     <span class="slider-ios"></span>
                                 </label>
                             </div>
@@ -560,6 +649,7 @@
                 <div class="setting-card">
                     <div class="card-header">
                         <i class="fas fa-skull"></i> Difficulty
+                        <i class="fas fa-lock" style="color: #facc15; font-size: 0.8rem; margin-left: 5px;" title="Pro Feature"></i>
                     </div>
                     <div class="card-body">
                         <div class="control-row">
@@ -569,7 +659,9 @@
                             </div>
                             <div class="control-action">
                                 <label class="switch-ios">
-                                    <input type="checkbox" id="toggleSuddenDeath" onchange="toggleProFeature('suddenDeath')">
+                                    <input type="checkbox" id="toggleSuddenDeath" 
+                                           onclick="if(!checkProFeature('Sudden Death')) { event.preventDefault(); return false; }"
+                                           onchange="toggleProFeature('suddenDeath')">
                                     <span class="slider-ios"></span>
                                 </label>
                             </div>
@@ -585,23 +677,131 @@
                     <div id="kbStyleGrid" class="kb-style-grid">
                     </div>
                 </div>
+
                 <div class="setting-card">
                     <div class="card-header">
                         <i class="fas fa-swatchbook"></i> Quick Presets
+                        <i class="fas fa-lock" style="color: #facc15; font-size: 0.8rem; margin-left: 5px;" title="Pro Feature"></i>
                     </div>
                     <div class="card-body">
-                        <div class="preset-grid-pro">
-                            <div class="preset-tile" onclick="applyPreset('default')" style="background: linear-gradient(135deg, #f5f7fa, #c3cfe2);">Default</div>
-                            <div class="preset-tile" onclick="applyPreset('midnight')" style="background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white;">Midnight</div>
-                            <div class="preset-tile" onclick="applyPreset('hacker')" style="background: #000; color: #0f0; border: 1px solid #0f0;">Hacker</div>
-                            <div class="preset-tile" onclick="applyPreset('sunset')" style="background: linear-gradient(135deg, #ff512f, #dd2476); color: white;">Sunset</div>
-                        </div>
+                       <div class="preset-grid-pro">
+    <div class="preset-tile" onclick="if(checkProFeature('Quick Themes')) { applyPreset('default'); }" 
+         style="background: #f3f4f6; color: #333;">Default</div>
+    
+    <div class="preset-tile" onclick="if(checkProFeature('Quick Themes')) { applyPreset('dracula'); }" 
+         style="background: #282a36; color: #bd93f9; border: 1px solid #bd93f9;">Dracula</div>
+
+    <div class="preset-tile" onclick="if(checkProFeature('Quick Themes')) { applyPreset('midnight'); }" 
+         style="background: linear-gradient(135deg, #0f2027, #2c5364); color: white;">Midnight</div>
+    
+    <div class="preset-tile" onclick="if(checkProFeature('Quick Themes')) { applyPreset('cyberpunk'); }" 
+         style="background: #000; color: #fcee0a; border: 1px solid #fcee0a;">Cyberpunk</div>
+    
+    <div class="preset-tile" onclick="if(checkProFeature('Quick Themes')) { applyPreset('cherry'); }" 
+         style="background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #5e2a2a;">Cherry</div>
+
+    <div class="preset-tile" onclick="if(checkProFeature('Quick Themes')) { applyPreset('forest'); }" 
+         style="background: linear-gradient(135deg, #134e5e, #71b280); color: white;">Forest</div>
+</div>
+<div class="setting-card" style="margin-top: 20px;">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>🎨 Custom Colors</span>
+        <span class="pro-badge" style="background:#ffd700; color:#000; padding:2px 8px; border-radius:4px; font-size:0.7rem;">
+            <i class="fas fa-lock"></i> PRO
+        </span>
+    </div>
+
+    <div class="card-body">
+        
+        <div class="control-row">
+            <div class="control-info">
+                <label>Background Style</label>
+                <span>Select Solid, Gradient or Animated</span>
+            </div>
+            <div class="control-action">
+                <select id="bgTypeSelector" class="stylish-select" 
+                    onchange="if(checkProFeature('Custom Theme')) { toggleBgControls(this.value); } else { this.value = settingsState.theme.bgType; }">
+                    <option value="solid">Solid Color</option>
+                    <option value="gradient">Gradient</option>
+                    <option value="animated">Live Animation</option>
+                    <option value="image">Upload Image</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="bgControl-solid" class="control-row" style="display:none;">
+            <div class="control-info"><label>Background Color</label></div>
+            <div class="control-action">
+                <input type="color" id="bgSolidColor" class="color-input" 
+                       oninput="if(checkProFeature('Custom Theme')) applyBackground('solid')">
+            </div>
+        </div>
+
+        <div id="bgControl-gradient" class="control-row" style="display:none;">
+            <div class="control-info"><label>Gradient Colors</label></div>
+            <div class="control-action" style="display:flex; gap:5px;">
+                <input type="color" id="bgGrad1" oninput="if(checkProFeature('Custom Theme')) applyBackground('gradient')">
+                <input type="color" id="bgGrad2" oninput="if(checkProFeature('Custom Theme')) applyBackground('gradient')">
+                <input type="number" id="bgGradDeg" value="135" class="mini-input" 
+                       oninput="if(checkProFeature('Custom Theme')) applyBackground('gradient')">
+            </div>
+        </div>
+
+        <div id="bgControl-animated" class="control-row" style="display:none;">
+            <div class="control-info"><label>Animation Type</label></div>
+            <div class="control-action">
+                <select id="animTypeSelector" class="stylish-select" 
+                        onchange="if(checkProFeature('Custom Theme')) applyBackground('animated')">
+                    <option value="leaves">🍃 Falling Leaves</option>
+                    <option value="snow">❄️ Snow Storm</option>
+                    <option value="rain">🌧️ Matrix Rain</option>
+                    <option value="fireflies">✨ Fireflies</option>
+                    <option value="embers">🔥 Burning Embers</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="bgControl-image" class="control-row" style="display:none;">
+            <div class="control-info"><label>Upload Wallpaper</label></div>
+            <div class="control-action">
+                <input type="file" accept="image/*" class="file-input"
+                       onchange="if(checkProFeature('Custom Theme')) { handleImageUpload(this) } else { this.value=''; }">
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-info"><label>Main Accent Color</label><span>Buttons, Highlights</span></div>
+            <div class="control-action">
+                <input type="color" id="customMain" class="color-input" 
+                       oninput="if(checkProFeature('Custom Theme')) updateCustomColors()">
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-info"><label>Text Color</label><span>Body text color</span></div>
+            <div class="control-action">
+                <input type="color" id="customText" class="color-input" 
+                       oninput="if(checkProFeature('Custom Theme')) updateCustomColors()">
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-info"><label>Card Color</label><span>Boxes & sidebar bg</span></div>
+            <div class="control-action">
+                <input type="color" id="customCard" class="color-input" 
+                       oninput="if(checkProFeature('Custom Theme')) updateCustomColors()">
+            </div>
+        </div>
+
+    </div>
+</div>
                     </div>
                 </div>
 
                 <div class="setting-card">
                     <div class="card-header">
                         <i class="fas fa-image"></i> Background
+                        <i class="fas fa-lock" style="color: #facc15; font-size: 0.8rem; margin-left: 5px;" title="Pro Feature"></i>
                     </div>
                     <div class="card-body">
                         <div class="control-row">
@@ -609,7 +809,9 @@
                                 <label>Background Type</label>
                             </div>
                             <div class="control-action">
-                                <select id="bgTypeSelector" class="stylish-select" onchange="toggleBgControls(this.value)">
+                                <select id="bgTypeSelector" class="stylish-select" 
+                                        onmousedown="if(!checkProFeature('Background Customization')) { event.preventDefault(); return false; }"
+                                        onchange="toggleBgControls(this.value)">
                                     <option value="solid">Solid Color</option>
                                     <option value="gradient">Gradient</option>
                                     <option value="image">Custom Image</option>
@@ -621,24 +823,36 @@
                         <div id="bgControl-solid" class="bg-sub-control" style="display:block;">
                             <div class="control-row">
                                 <label>Pick Color:</label>
-                                <input type="color" id="bgSolidColor" class="color-box" oninput="applyBackground('solid')">
+                                <input type="color" id="bgSolidColor" class="color-box" 
+                                       onclick="if(!checkProFeature('Background Customization')) { event.preventDefault(); return false; }"
+                                       oninput="applyBackground('solid')">
                             </div>
                         </div>
 
                         <div id="bgControl-gradient" class="bg-sub-control" style="display:none;">
                             <div class="control-row" style="justify-content: flex-start; gap: 10px;">
-                                <label>Color 1:</label> <input type="color" id="bgGrad1" oninput="applyBackground('gradient')">
-                                <label>Color 2:</label> <input type="color" id="bgGrad2" oninput="applyBackground('gradient')">
+                                <label>Color 1:</label> 
+                                <input type="color" id="bgGrad1" 
+                                       onclick="if(!checkProFeature('Background Customization')) { event.preventDefault(); return false; }"
+                                       oninput="applyBackground('gradient')">
+                                <label>Color 2:</label> 
+                                <input type="color" id="bgGrad2" 
+                                       onclick="if(!checkProFeature('Background Customization')) { event.preventDefault(); return false; }"
+                                       oninput="applyBackground('gradient')">
                             </div>
                             <div class="control-row">
                                 <label>Direction:</label>
-                                <input type="range" id="bgGradDeg" min="0" max="360" value="135" oninput="applyBackground('gradient')" style="flex-grow: 1; margin-left: 10px;">
+                                <input type="range" id="bgGradDeg" min="0" max="360" value="135" 
+                                       onmousedown="if(!checkProFeature('Background Customization')) { event.preventDefault(); return false; }"
+                                       oninput="applyBackground('gradient')" style="flex-grow: 1; margin-left: 10px;">
                             </div>
                         </div>
 
                         <div id="bgControl-image" class="bg-sub-control" style="display:none;">
                             <div class="control-row">
-                                <input type="file" id="bgImageUpload" accept="image/*" onchange="handleImageUpload(this)" class="file-input">
+                                <input type="file" id="bgImageUpload" accept="image/*" 
+                                       onclick="if(!checkProFeature('Background Customization')) { event.preventDefault(); return false; }"
+                                       onchange="handleImageUpload(this)" class="file-input">
                             </div>
                             <p style="font-size: 0.8rem; color: #888;">Note: Large images may not save.</p>
                         </div>
@@ -646,7 +860,9 @@
                         <div id="bgControl-animated" class="bg-sub-control" style="display:none; margin-top:10px;">
                             <div class="control-row">
                                 <label>Effect:</label>
-                                <select id="animTypeSelector" class="stylish-select" onchange="applyBackground('animated')">
+                                <select id="animTypeSelector" class="stylish-select" 
+                                        onmousedown="if(!checkProFeature('Live Animation')) { event.preventDefault(); return false; }"
+                                        onchange="applyBackground('animated')">
                                     <option value="leaves">🍃 Falling Leaves</option>
                                     <option value="rain">💻 Matrix Rain</option>
                                     <option value="snow">❄️ Snow Storm</option>
@@ -698,6 +914,10 @@
             <div id="tab-pro" class="tab-section" style="display: none;">
                 <h2>Professional Tools</h2>
                 <div class="setting-card">
+                    <div class="card-header">
+                        <i class="fas fa-bolt"></i> Professional Tools
+                        <i class="fas fa-lock" style="color: #facc15; font-size: 0.8rem; margin-left: 5px;" title="Pro Feature"></i>
+                    </div>
                     <div class="card-body">
                         <div class="control-row">
                             <div class="control-info">
@@ -706,7 +926,9 @@
                             </div>
                             <div class="control-action">
                                 <label class="switch-ios">
-                                    <input type="checkbox" id="toggleHeatmap" onchange="toggleProFeature('heatmap')">
+                                    <input type="checkbox" id="toggleHeatmap" 
+                                           onclick="if(!checkProFeature('Heatmap Analysis')) { event.preventDefault(); return false; }"
+                                           onchange="toggleProFeature('heatmap')">
                                     <span class="slider-ios"></span>
                                 </label>
                             </div>
@@ -718,7 +940,9 @@
                             </div>
                             <div class="control-action">
                                 <label class="switch-ios">
-                                    <input type="checkbox" id="toggleSpotlight" onchange="toggleProFeature('spotlight')">
+                                    <input type="checkbox" id="toggleSpotlight" 
+                                           onclick="if(!checkProFeature('Spotlight Focus')) { event.preventDefault(); return false; }"
+                                           onchange="toggleProFeature('spotlight')">
                                     <span class="slider-ios"></span>
                                 </label>
                             </div>

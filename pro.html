@@ -28,7 +28,7 @@
                 radial-gradient(circle at 80% 70%, rgba(76, 201, 240, 0.05) 0%, transparent 50%);
         }
 
-        /* 🔥 BACK BUTTON STYLE (FIXED) */
+        /* BACK BUTTON STYLE */
         .back-btn {
             position: fixed;
             top: 20px; left: 20px;
@@ -77,25 +77,23 @@
             margin-bottom: 40px; line-height: 1.6;
         }
 
-        /* 🔥 FLIP CARD GRID (14 CARDS) */
+        /* FLIP CARD GRID */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Responsive */
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
             gap: 25px;
             max-width: 1400px;
             margin: 0 auto 50px auto;
             padding: 0 20px;
         }
 
-        /* CARD CONTAINER */
         .feature-card {
             background: transparent;
-            height: 280px; /* Fixed Height for Flip */
-            perspective: 1000px; /* 3D Effect er jonno emergency */
+            height: 280px; 
+            perspective: 1000px; 
             cursor: pointer;
         }
 
-        /* INNER WRAPPER (This flips) */
         .card-inner {
             position: relative;
             width: 100%; height: 100%;
@@ -104,16 +102,14 @@
             transform-style: preserve-3d;
         }
 
-        /* HOVER EFFECT */
         .feature-card:hover .card-inner {
             transform: rotateY(180deg);
         }
 
-        /* FRONT & BACK COMMON STYLES */
         .card-front, .card-back {
             position: absolute;
             width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; /* Safari */
+            -webkit-backface-visibility: hidden; 
             backface-visibility: hidden;
             border-radius: 20px;
             display: flex; flex-direction: column;
@@ -123,7 +119,6 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* FRONT DESIGN */
         .card-front {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
@@ -135,18 +130,17 @@
         .f-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; color: #fff; }
         .f-desc { color: #aaa; font-size: 0.9rem; line-height: 1.4; }
 
-        /* BACK DESIGN (IMAGE) */
         .card-back {
             background: #111;
             transform: rotateY(180deg);
-            padding: 0; /* Image full howar jonno */
+            padding: 0; 
             overflow: hidden;
         }
         
         .card-back img {
             width: 100%; height: 100%;
             object-fit: cover;
-            opacity: 0.6; /* Ektu dark kora jate text thakle dekha jay */
+            opacity: 0.6; 
             transition: 0.5s;
         }
         
@@ -183,7 +177,18 @@
             box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
             transition: 0.3s; border: none; width: 100%; margin-top: 20px;
         }
-        .glow-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(250, 204, 21, 0.6); }
+        .glow-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 0 40px rgba(250, 204, 21, 0.6); }
+        
+        /* LOCKED BUTTON STYLE */
+        .glow-btn:disabled, .glow-btn.locked-btn {
+            background: #333 !important;
+            color: #aaa !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            transform: none !important;
+            border: 1px solid #444;
+            opacity: 0.7;
+        }
 
         /* Payment Modal */
         .pay-modal {
@@ -204,6 +209,35 @@
             border-radius: 8px; font-family: 'Poppins', sans-serif;
         }
 
+        /* FAQ SECTION STYLES */
+        .faq-section {
+            max-width: 900px; margin: 80px auto; padding: 0 20px;
+        }
+        .faq-title {
+            text-align: center; font-size: 2rem; margin-bottom: 40px;
+            color: #fff; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .faq-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px; border-radius: 10px;
+            overflow: hidden; transition: 0.3s;
+        }
+        .faq-item:hover { border-color: #facc15; }
+        .faq-q {
+            padding: 20px; font-weight: bold; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            color: #e0e0e0; font-family: 'Hind Siliguri', sans-serif; font-size: 1.1rem;
+        }
+        .faq-a {
+            padding: 0 20px 20px 20px; color: #aaa; line-height: 1.6;
+            display: none; border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px; font-family: 'Hind Siliguri', sans-serif;
+        }
+        .faq-item.active .faq-a { display: block; }
+        .faq-item.active .faq-q { color: #facc15; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         @keyframes shineText { 0% { background-position: 0%; } 100% { background-position: 200%; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -223,207 +257,27 @@
             Unlock the ultimate typing experience. No Ads. Exclusive Music. Unlimited Power. <br>
             <span style="color:#facc15">Become a legend today.</span>
         </p>
-        <button onclick="scrollToPricing()" class="glow-btn" style="width: auto;">Get Access Now</button>
+        
+        <button id="mainUpgradeBtn" class="glow-btn" style="width: auto;" disabled>
+            <i class="fas fa-circle-notch fa-spin"></i> Checking Status...
+        </button>
     </section>
 
     <div class="features-grid">
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-list-ol"></i></div>
-                    <div class="f-title">Leaderboard</div>
-                    <div class="f-desc">লিডারবোর্ডের ফুল এক্সেস। টপ ৫ সহ পুরো লিস্ট দেখার সুবিধা।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/facc15?text=Leaderboard+Preview" alt="LB">
-                    <div class="back-overlay-text">Unlimited View</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-keyboard"></i></div>
-                    <div class="f-title">Pro Keyboard</div>
-                    <div class="f-desc">প্রো কিবোর্ড লেআউট এবং কালার কাস্টমাইজেশন ফিচার।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Keyboard+Preview" alt="KB">
-                    <div class="back-overlay-text">Custom Layouts</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-star"></i></div>
-                    <div class="f-title">Special Features</div>
-                    <div class="f-desc">সিক্রেট এবং এক্সক্লুসিভ প্রো ফিচারস শুধুমাত্র মেম্বারদের জন্য।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/ff5555?text=Special+Features" alt="Features">
-                    <div class="back-overlay-text">VIP Only</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-headphones-alt"></i></div>
-                    <div class="f-title">Lofi Music</div>
-                    <div class="f-desc">টাইপিংয়ের সময় ফোকাস বাড়াতে বিল্ট-ইন লোফাই মিউজিক প্লেয়ার।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/facc15?text=Lofi+Player" alt="Music">
-                    <div class="back-overlay-text">Focus Mode</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-palette"></i></div>
-                    <div class="f-title">Themes</div>
-                    <div class="f-desc">ব্যাকগ্রাউন্ড এবং কালার থিম নিজের মতো কাস্টমাইজ করার সুবিধা।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Themes+Preview" alt="Theme">
-                    <div class="back-overlay-text">Animated BG</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-ban"></i></div>
-                    <div class="f-title">Zero Ads</div>
-                    <div class="f-desc">সম্পূর্ণ বিজ্ঞাপন মুক্ত ইন্টারফেস। কোনো ডিস্টার্বেন্স ছাড়া টাইপ করুন।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/ff5555?text=No+Ads" alt="Ads">
-                    <div class="back-overlay-text">100% Clean</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-certificate"></i></div>
-                    <div class="f-title">Golden Badge</div>
-                    <div class="f-desc">প্রোফাইলে এবং লিডারবোর্ডে গোল্ডেন "PRO" ব্যাজ শো করবে।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/facc15?text=Golden+Badge" alt="Badge">
-                    <div class="back-overlay-text">Show Off</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-language"></i></div>
-                    <div class="f-title">Bangla Typing</div>
-                    <div class="f-desc">আনলিমিটেড বাংলা টাইপিং প্র্যাকটিস। কোনো ডেইলি লিমিট নেই।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Bangla+Mode" alt="Bangla">
-                    <div class="back-overlay-text">Unlimited</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-file-alt"></i></div>
-                    <div class="f-title">Custom Text</div>
-                    <div class="f-desc">নিজের পছন্দের টেক্সট বা প্যারাগ্রাফ দিয়ে আনলিমিটেড টাইপিং।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/ff5555?text=Custom+Text" alt="Custom">
-                    <div class="back-overlay-text">Paste & Type</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-robot"></i></div>
-                    <div class="f-title">AI Guide</div>
-                    <div class="f-desc">স্মার্ট AI আপনার টাইপিং মনিটর করবে এবং লাইভ পরামর্শ দিবে।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/facc15?text=AI+Analysis" alt="AI">
-                    <div class="back-overlay-text">Personal Coach</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-chart-line"></i></div>
-                    <div class="f-title">Live Stats</div>
-                    <div class="f-desc">টাইপ করার সময় রিয়েল-টাইম WPM, Accuracy এবং Error গ্রাফ।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Live+Stats" alt="Stats">
-                    <div class="back-overlay-text">Advanced Data</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-chart-area"></i></div>
-                    <div class="f-title">Pace Chart</div>
-                    <div class="f-desc">পুরো সেশনের টাইপিং স্পিডের ওঠানামা দেখার জন্য পেস চার্ট।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/ff5555?text=Pace+Chart" alt="Pace">
-                    <div class="back-overlay-text">Visualize Speed</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-bug"></i></div>
-                    <div class="f-title">Mistake Pattern</div>
-                    <div class="f-desc">আপনার ভুলগুলো কোন আঙুলে বেশি হচ্ছে তা শনাক্ত করা।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/facc15?text=Mistake+Analysis" alt="Pattern">
-                    <div class="back-overlay-text">Fix Weakness</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="feature-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="f-icon"><i class="fas fa-gift"></i></div>
-                    <div class="f-title">More Coming...</div>
-                    <div class="f-desc">ভবিষ্যতে আরও নতুন নতুন সব প্রিমিয়াম ফিচার যুক্ত হতে থাকবে।</div>
-                </div>
-                <div class="card-back">
-                    <img src="https://placehold.co/400x300/111/4cc9f0?text=Future+Updates" alt="Updates">
-                    <div class="back-overlay-text">Stay Tuned</div>
-                </div>
-            </div>
-        </div>
-
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-list-ol"></i></div><div class="f-title">Leaderboard</div><div class="f-desc">লিডারবোর্ডের ফুল এক্সেস। টপ ৫ সহ পুরো লিস্ট দেখার সুবিধা।</div></div><div class="card-back"><img src="img/3.png" alt="LB"><div class="back-overlay-text">Unlimited View</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-keyboard"></i></div><div class="f-title">Pro Keyboard</div><div class="f-desc">প্রো কিবোর্ড লেআউট এবং কালার কাস্টমাইজেশন ফিচার।</div></div><div class="card-back"><img src="img/2.png" alt="KB"><div class="back-overlay-text">Custom Layouts</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-star"></i></div><div class="f-title">Special Features</div><div class="f-desc">সিক্রেট এবং এক্সক্লুসিভ প্রো ফিচারস শুধুমাত্র মেম্বারদের জন্য।</div></div><div class="card-back"><img src="https://placehold.co/400x300/111/ff5555?text=Special+Features" alt="Features"><div class="back-overlay-text">VIP Only</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-headphones-alt"></i></div><div class="f-title">Lofi Music</div><div class="f-desc">টাইপিংয়ের সময় ফোকাস বাড়াতে বিল্ট-ইন লোফাই মিউজিক প্লেয়ার।</div></div><div class="card-back"><img src="img/1.png" alt="Music"><div class="back-overlay-text">Focus Mode</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-palette"></i></div><div class="f-title">Themes</div><div class="f-desc">ব্যাকগ্রাউন্ড এবং কালার থিম নিজের মতো কাস্টমাইজ করার সুবিধা।</div></div><div class="card-back"><img src="img/theme.png" alt="Theme"><div class="back-overlay-text">Animated BG</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-ban"></i></div><div class="f-title">Zero Ads</div><div class="f-desc">সম্পূর্ণ বিজ্ঞাপন মুক্ত ইন্টারফেস। কোনো ডিস্টার্বেন্স ছাড়া টাইপ করুন।</div></div><div class="card-back"><img src="img/noad.png" alt="Ads"><div class="back-overlay-text">100% Clean</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-certificate"></i></div><div class="f-title">Golden Badge</div><div class="f-desc">প্রোফাইলে এবং লিডারবোর্ডে গোল্ডেন "PRO" ব্যাজ শো করবে।</div></div><div class="card-back"><img src="img/badge.png" alt="Badge"><div class="back-overlay-text">Show Off</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-language"></i></div><div class="f-title">Bangla Typing</div><div class="f-desc">আনলিমিটেড বাংলা টাইপিং প্র্যাকটিস। কোনো ডেইলি লিমিট নেই।</div></div><div class="card-back"><img src="img/4.png" alt="Bangla"><div class="back-overlay-text">Unlimited</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-file-alt"></i></div><div class="f-title">Custom Text</div><div class="f-desc">নিজের পছন্দের টেক্সট বা প্যারাগ্রাফ দিয়ে আনলিমিটেড টাইপিং।</div></div><div class="card-back"><img src="img/custom.png" alt="Custom"><div class="back-overlay-text">Paste & Type</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-robot"></i></div><div class="f-title">AI Guide</div><div class="f-desc">স্মার্ট AI আপনার টাইপিং মনিটর করবে এবং লাইভ পরামর্শ দিবে।</div></div><div class="card-back"><img src="img/aibar.png" alt="AI"><div class="back-overlay-text">Personal Coach</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-chart-line"></i></div><div class="f-title">Live Stats</div><div class="f-desc">টাইপ করার সময় রিয়েল-টাইম WPM, Accuracy এবং Error গ্রাফ।</div></div><div class="card-back"><img src="img/stats.png" alt="Stats"><div class="back-overlay-text">Advanced Data</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-chart-area"></i></div><div class="f-title">Pace Chart</div><div class="f-desc">পুরো সেশনের টাইপিং স্পিডের ওঠানামা দেখার জন্য পেস চার্ট।</div></div><div class="card-back"><img src="img/pace.png" alt="Pace"><div class="back-overlay-text">Visualize Speed</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-bug"></i></div><div class="f-title">Mistake Pattern</div><div class="f-desc">আপনার ভুলগুলো কোন আঙুলে বেশি হচ্ছে তা শনাক্ত করা।</div></div><div class="card-back"><img src="img/mistake.png" alt="Pattern"><div class="back-overlay-text">Fix Weakness</div></div></div></div>
+        <div class="feature-card"><div class="card-inner"><div class="card-front"><div class="f-icon"><i class="fas fa-gift"></i></div><div class="f-title">More Coming...</div><div class="f-desc">ভবিষ্যতে আরও নতুন নতুন সব প্রিমিয়াম ফিচার যুক্ত হতে থাকবে।</div></div><div class="card-back"><img src="https://placehold.co/400x300/111/4cc9f0?text=Future+Updates" alt="Updates"><div class="back-overlay-text">Stay Tuned</div></div></div></div>
     </div>
 
     <section id="pricing" class="pricing-section">
@@ -432,25 +286,81 @@
         <p class="price-sub">Cheap as a Cup of Coffee ☕</p>
         
         <br><br>
-        <button onclick="openPaymentModal()" class="glow-btn" style="max-width: 300px;">UPGRADE NOW</button>
+        <button id="footerUpgradeBtn" class="glow-btn" style="max-width: 300px;" disabled>
+            <i class="fas fa-circle-notch fa-spin"></i> Checking...
+        </button>
     </section>
+
+    <section class="faq-section">
+        <h2 class="faq-title">সচরাচর জিজ্ঞাসা (FAQ)</h2>
+        
+        <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('active')">
+                ❓ পেমেন্ট করার কতক্ষণ পর PRO এক্টিভ হবে?
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-a">
+                আমাদের অ্যাডমিন ম্যানুয়ালি পেমেন্ট চেক করেন। সাধারণত <b>১০ থেকে ৩০ মিনিটের</b> মধ্যেই আপনার একাউন্ট আপগ্রেড হয়ে যাবে।
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('active')">
+                ❓ ৩০ মিনিটের বেশি হয়ে গেলে কি করব?
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-a">
+                যদি দেরি হয়, তাহলে নিচের বাটন থেকে আমাদের <b>Facebook Page</b> বা <b>WhatsApp</b>-এ মেসেজ দিন।
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('active')">
+                ❓ সতর্কতা (Must Read)
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-a" style="color: #ff6b6b;">
+                দয়া করে পেমেন্ট ফর্মে <b>সঠিক Transaction ID (TrxID)</b> দিন। ফেইক তথ্য দিলে একাউন্ট ব্যান হতে পারে।
+            </div>
+        </div>
+    </section>
+
+    <div style="text-align: center; margin-bottom: 50px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px dashed #444; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <h3 style="color: #facc15; margin-bottom: 5px;">Need Help?</h3>
+        <p style="color: #ccc; font-size: 0.9rem; margin-bottom: 15px;">Payment issue or technical problem? Contact Admin.</p>
+        
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <a href="https://www.facebook.com/muhammad.emon.738798" target="_blank" style="text-decoration: none;">
+                <button style="background: #1877F2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: sans-serif;">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+            </a>
+            <a href="https://wa.me/8801706916504" target="_blank" style="text-decoration: none;">
+                <button style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: sans-serif;">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div id="paymentStatusBar" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2);">
+        <span id="statusMessage">Checking status...</span>
+    </div>
 
     <div id="paymentModal" class="pay-modal">
         <div class="pay-box">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3>🚀 Confirm Membership</h3>
-                <i class="fas fa-times" onclick="closePaymentModal()" style="cursor:pointer; color:#888;"></i>
+                <i class="fas fa-times" id="closeModalBtn" style="cursor:pointer; color:#888;"></i>
             </div>
             
             <div style="background: rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
                 <p>Send <b>50 BDT</b> to:</p>
-                <h2 style="color:#facc15; margin:5px 0;">017XXXXXXXX</h2>
+                <h2 style="color:#facc15; margin:5px 0;">01706916504</h2>
                 <p><small>(Bkash / Nagad - Send Money)</small></p>
             </div>
 
             <form id="paymentForm">
                 <input type="text" id="payName" class="pay-input" placeholder="Your Name" required>
-                <input type="number" id="payPhone" class="pay-input" placeholder="Sender Phone Number" required>
+                <input type="number" id="payPhone" class="pay-input" placeholder="Sender Phone Number (যেখান থেকে পাঠিয়েছেন)" required>
                 <input type="text" id="payTrx" class="pay-input" placeholder="Transaction ID (TrxID)" required>
                 
                 <select id="payMethod" class="pay-input">
@@ -458,72 +368,206 @@
                     <option value="Nagad">Nagad</option>
                 </select>
 
-                <button type="submit" class="glow-btn">Submit Request</button>
+                <button type="submit" id="confirmPaymentBtn" class="glow-btn">Submit Request</button>
             </form>
         </div>
     </div>
 
     <script type="module">
-        import { auth, db, collection, addDoc, doc, getDoc } from "./firebase-config.js";
+        import { auth, db, doc, getDoc, addDoc, collection, query, where, orderBy, limit, onSnapshot } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Scroll Logic
-        window.scrollToPricing = () => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'});
-        
-        // Modal Logic
-        window.openPaymentModal = async () => {
-            if(!auth.currentUser) {
-                alert("Please login first to upgrade!");
-                window.location.href = "index.html";
+        // DOM Elements
+        const submitBtn = document.getElementById('confirmPaymentBtn'); 
+        const nameInput = document.getElementById('payName');
+        const phoneInput = document.getElementById('payPhone'); 
+        const trxInput = document.getElementById('payTrx');
+        const methodInput = document.getElementById('payMethod');
+        const statusBar = document.getElementById('paymentStatusBar');
+        const statusMsg = document.getElementById('statusMessage');
+
+        // Main Upgrade Buttons
+        const mainUpgradeBtn = document.getElementById('mainUpgradeBtn');
+        const footerUpgradeBtn = document.getElementById('footerUpgradeBtn');
+        const modal = document.getElementById('paymentModal');
+
+        let currentUser = null;
+        let isPaymentPending = false; // Security Flag
+
+        // --- BUTTON LOCKER FUNCTION ---
+        function lockUI(isLocked, msg = "Waiting for Approval...", color = "#444") {
+            const btns = [mainUpgradeBtn, footerUpgradeBtn];
+            
+            btns.forEach(btn => {
+                if(btn) {
+                    if (isLocked) {
+                        // LOCK STATE
+                        btn.innerHTML = `<i class="fas fa-lock"></i> ${msg}`;
+                        btn.style.background = color;
+                        btn.classList.add('locked-btn'); // Add CSS class
+                        btn.disabled = true;
+                        isPaymentPending = true;
+                    } else {
+                        // UNLOCK STATE (Make Active)
+                        btn.innerHTML = msg; // "Get Access Now"
+                        btn.style.background = ""; // Reset
+                        btn.classList.remove('locked-btn');
+                        btn.disabled = false;
+                        btn.style.cursor = "pointer";
+                        isPaymentPending = false;
+                    }
+                }
+            });
+        }
+
+        // --- MODAL CONTROLS ---
+        function openModal() {
+            if (isPaymentPending) {
+                alert("🚫 You already have a pending request. Please wait for Admin approval.");
                 return;
             }
-            document.getElementById('paymentModal').style.display = 'flex';
-        };
+            modal.style.display = 'flex';
+        }
 
-        window.closePaymentModal = () => {
-            document.getElementById('paymentModal').style.display = 'none';
-        };
+        function closeModal() {
+            modal.style.display = 'none';
+        }
 
-        // Payment Submission Logic
+        // Attach Click Events safely
+        if(mainUpgradeBtn) mainUpgradeBtn.addEventListener('click', openModal);
+        if(footerUpgradeBtn) footerUpgradeBtn.addEventListener('click', openModal);
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+        // --- AUTH & CHECKER ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Check if currently PRO
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    if (data.isPro === true || data.isAdmin === true) {
+                        alert("You are active PRO! Redirecting...");
+                        window.location.href = "index.html"; 
+                        return;
+                    }
+                }
+                
+                // If we are here, USER IS FREE.
+                // Now check payment history.
+                checkRealtimeStatus(user.uid);
+
+            } else {
+                alert("Please Login First!");
+                window.location.href = "index.html";
+            }
+        });
+
+        // --- REALTIME LISTENER (FIXED LOGIC) ---
+        function checkRealtimeStatus(uid) {
+            const q = query(
+                collection(db, "payment_requests"),
+                where("uid", "==", uid),
+                orderBy("timestamp", "desc"),
+                limit(1)
+            );
+
+            onSnapshot(q, async (snapshot) => {
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+
+                    if (data.status === 'pending') {
+                        // LOCK IMMEDIATELY
+                        lockUI(true, "Wait for Approval...", "#333");
+                        showBar("⏳ Your payment is under review. Please wait.", "#facc15", "#000");
+                        closeModal(); // Force close if open
+                    } 
+                    else if (data.status === 'rejected') {
+                        // UNLOCK FOR RETRY
+                        lockUI(false, "⚠️ Rejected (Try Again)"); 
+                        mainUpgradeBtn.style.background = "#ef4444";
+                        footerUpgradeBtn.style.background = "#ef4444";
+                        showBar("❌ Request Rejected! Check info or Contact Admin.", "#ef4444", "#fff");
+                    } 
+                    else if (data.status === 'approved') {
+                        // 🔥 CRITICAL FIX:
+                        // পেমেন্ট অ্যাপ্রুভড, কিন্তু ইউজার এখনো ফ্রি (কারণ আমরা উপরে চেক করেছি)
+                        // তার মানে এটা পুরানো/এক্সপায়ার্ড পেমেন্ট।
+                        
+                        // ডাবল কনফার্মেশনের জন্য আবার ইউজার ডাটা চেক করা
+                        const freshUserSnap = await getDoc(doc(db, "users", uid));
+                        if(freshUserSnap.exists() && freshUserSnap.data().isPro === true) {
+                            // আসলেই প্রো হয়েছে (Fresh Approval)
+                            showBar("✅ Payment Approved! Redirecting...", "#22c55e", "#fff");
+                            setTimeout(() => window.location.href = "index.html", 2000);
+                        } else {
+                            // প্রো না, মানে এটা এক্সপায়ার্ড পেমেন্ট -> নতুন করে কিনতে দাও
+                            lockUI(false, "Get Access Now");
+                            if(statusBar) statusBar.style.display = 'none';
+                        }
+                    }
+                } else {
+                    // NO DATA -> UNLOCK
+                    lockUI(false, "Get Access Now");
+                    statusBar.style.display = 'none';
+                }
+            });
+        }
+
+        // --- SUBMIT FUNCTION ---
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = "Sending...";
-            btn.disabled = true;
+            if (!currentUser) return;
 
-            const name = document.getElementById('payName').value;
-            const phone = document.getElementById('payPhone').value;
-            const trx = document.getElementById('payTrx').value;
-            const method = document.getElementById('payMethod').value;
-            const uid = auth.currentUser.uid;
-            const email = auth.currentUser.email;
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const trx = trxInput.value.trim();
+            const method = methodInput.value;
+
+            if (phone.length < 11 || trx.length < 4) {
+                alert("Please provide valid Phone Number & TrxID.");
+                return;
+            }
 
             try {
-                // 1. Save Request to Firebase
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Submitting...";
+
+                // 1. ADD TO DB
                 await addDoc(collection(db, "payment_requests"), {
-                    uid: uid,
-                    email: email,
-                    name: name,
+                    uid: currentUser.uid,
+                    name: name || currentUser.displayName || "Unknown",
+                    email: currentUser.email || "No Email",
                     phone: phone,
                     trxId: trx,
                     method: method,
                     amount: 50,
-                    status: "pending", // Admin will change to 'approved'
+                    status: "pending",
                     timestamp: Date.now()
                 });
 
-                alert("✅ Request Sent! Please wait for admin approval (Max 24h).");
-                closePaymentModal();
-                e.target.reset();
+                // 2. FORCE UI UPDATE
+                alert("Request Submitted!");
+                closeModal();
+                lockUI(true, "Waiting for Approval...", "#333");
+                showBar("⏳ Your payment is under review. Please wait.", "#facc15", "#000");
 
-            } catch (error) {
-                console.error("Error:", error);
-                alert("❌ Failed to send request. Try again.");
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert("Error: " + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Request";
             }
         });
+
+        // --- FLOATING BAR HELPER ---
+        function showBar(msg, bg, color) {
+            statusBar.style.display = 'block';
+            statusBar.style.background = bg;
+            statusBar.style.color = color;
+            statusMsg.innerText = msg;
+        }
     </script>
 </body>
 </html>

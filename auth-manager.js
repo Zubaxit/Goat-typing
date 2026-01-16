@@ -38,9 +38,17 @@ window.USER_ROLE = 'guest'; // Default role
    🛠️ CONFIG & USAGE LOADERS
    ============================== */
 
-// A. Load Site Config (Feature Flags)
+/// auth-manager.js এর loadSiteConfig ফাংশন রিপ্লেস কর:
+
 async function loadSiteConfig() {
     try {
+        // আগে চেক করি নেট আছে কিনা
+        if (!navigator.onLine) {
+            console.warn("⚠️ Offline Mode: Using default config");
+            window.SITE_CONFIG = { features: { proKeyboard: { free: true }, proFeatures: { free: false } } };
+            return;
+        }
+
         const ref = doc(db, "siteConfig", "main");
         const snap = await getDoc(ref);
 
@@ -49,11 +57,12 @@ async function loadSiteConfig() {
             console.log("✅ Site config loaded:", window.SITE_CONFIG);
         } else {
             console.warn("⚠ siteConfig/main not found, using defaults.");
-            // Default Fallback
             window.SITE_CONFIG = { features: { proKeyboard: { free: true }, proFeatures: { free: false } } };
         }
     } catch (err) {
-        console.error("❌ Failed to load site config:", err);
+        console.error("❌ Config Load Error (Ignored to prevent crash):", err);
+        // ক্র্যাশ না করে ডিফল্ট ভ্যালু সেট করে দিলাম
+        window.SITE_CONFIG = { features: { proKeyboard: { free: true }, proFeatures: { free: false } } };
     }
 }
 // Load immediately
